@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-zinc-950 text-zinc-100 antialiased font-sans;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
