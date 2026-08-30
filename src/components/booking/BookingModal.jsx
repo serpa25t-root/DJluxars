@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Button from '../common/Button'
 import Input from '../common/Input'
 import api from '../../services/api'
@@ -14,6 +15,7 @@ const services = [
 
 const BookingModal = ({ isOpen, onClose, photographer }) => {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [form, setForm] = useState({ date: '', service: 'Sesión Studio', location: '', message: '' })
   const [loading, setLoading] = useState(false)
   const [toast, setToast] = useState(null)
@@ -153,16 +155,29 @@ const BookingModal = ({ isOpen, onClose, photographer }) => {
 
           <div className="rounded-xl border border-red-600/20 bg-red-600/10 px-4 py-3 flex items-center justify-between">
             <div>
-              <p className="text-xs tracking-widest text-red-300 font-semibold">TARIFA ESTIMADA</p>
-              <p className="text-sm text-zinc-400">Base ${base.toLocaleString('es-CO')} × {factor} ({form.service})</p>
-              <p className="text-[11px] text-zinc-500">Total final para ti — sin desglose</p>
+              <p className="text-xs tracking-widest text-red-300 font-semibold">TARIFA OFICIAL DEL FOTÓGRAFO</p>
+              <p className="text-sm text-zinc-300 font-medium">${estimated.toLocaleString('es-CO')} COP</p>
+              <p className="text-[11px] text-zinc-500">Base ${base.toLocaleString('es-CO')} × {factor} ({form.service}) • Tarifa fijada por el fotógrafo</p>
             </div>
-            <p className="text-xl font-bold text-white">${estimated.toLocaleString('es-CO')} <span className="text-xs font-normal text-zinc-400">COP</span></p>
+            <span className="hidden sm:inline-flex rounded-full bg-white text-black px-3 py-1 text-xs font-bold">${estimated.toLocaleString('es-CO')}</span>
           </div>
 
-          <Button type="submit" variant="primary" disabled={loading} className="w-full py-3.5 disabled:opacity-60">
-            {loading ? 'Enviando...' : 'Enviar Solicitud'}
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button type="submit" variant="primary" disabled={loading} className="flex-1 py-3.5 disabled:opacity-60 shadow-lg shadow-red-600/20">
+              {loading ? 'Enviando...' : `Solicitar Reserva ($${estimated.toLocaleString('es-CO')} COP)`}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              className="flex-1 py-3.5 border-zinc-800"
+              onClick={() => {
+                onClose()
+                navigate(`/chat?contactId=${photographer.id}&name=${encodeURIComponent(photographer.name)}`)
+              }}
+            >
+              Consultar / Negociar por Chat
+            </Button>
+          </div>
         </form>
 
         {toast && (

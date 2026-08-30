@@ -25,6 +25,7 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/portfolio/', include('portfolio.urls')),
     path('api/works/', include('portfolio.urls')),
+    path('api/bookings/', include('bookings.urls')),
 ]
 
 from django.conf import settings

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Button from '../../components/common/Button'
 import UpgradeModal from '../../components/subscription/UpgradeModal'
-import { getBookings, updateBookingStatus, seedIfEmpty } from '../../services/bookings'
+import { fetchArtistBookings, acceptBooking, rejectBooking, seedIfEmpty } from '../../services/bookings'
 import { useAuth } from '../../context/AuthContext'
 import { checkCanAcceptBooking, getUsage, setUsage, upgradeToPro } from '../../services/subscription'
 
@@ -20,12 +20,21 @@ const ArtistBookings = () => {
   const [showUpgrade, setShowUpgrade] = useState(false)
   const [toast, setToast] = useState(null)
 
-  useEffect(() => {
+  const [loading, setLoading] = useState(true)
+
+  const load = async () => {
+    setLoading(true)
     seedIfEmpty()
-    setBookings(getBookings())
+    const data = await fetchArtistBookings()
+    setBookings(data)
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    load()
   }, [])
 
-  const handle = (id, status) => {
+  const handle = async (id, status) => {
     if (status === 'Confirmada') {
       const check = checkCanAcceptBooking(artistId)
       if (!check.allowed) {
@@ -34,11 +43,21 @@ const ArtistBookings = () => {
         setTimeout(() => setToast(null), 3000)
         return
       }
-      const usage = getUsage(artistId)
-      setUsage(artistId, { ...usage, services: usage.services + 1 })
     }
-    const next = updateBookingStatus(id, status)
-    setBookings([...next])
+    try {
+      if (status === 'Confirmada') {
+        await acceptBooking(id)
+        const usage = getUsage(artistId)
+        setUsage(artistId, { ...usage, services: usage.services + 1 })
+      } else {
+        await rejectBooking(id)
+      }
+      const data = await fetchArtistBookings()
+      setBookings(data)
+    } catch {
+      setToast('No se pudo actualizar el estado.')
+      setTimeout(() => setToast(null), 2500)
+    }
   }
 
   const handleUpgrade = () => {
@@ -57,8 +76,14 @@ const ArtistBookings = () => {
           <p className="mt-2 text-sm text-zinc-400">Gestiona propuestas, acepta o rechaza con un toque.</p>
         </div>
 
-        <div className="mt-6 overflow-x-auto rounded-2xl border border-zinc-900 bg-zinc-950">
-          <table className="w-full text-sm">
+        {loading ? (
+          <div className="mt-10 flex flex-col items-center py-16">
+            <div className="h-8 w-8 rounded-full border-2 border-zinc-800 border-t-red-600 animate-spin" />
+            <p className="mt-3 text-sm text-zinc-500">Cargando solicitudes...</p>
+          </div>
+        ) : (
+          <div className="mt-6 overflow-x-auto rounded-2xl border border-zinc-900 bg-zinc-950">
+            <table className="w-full text-sm">
             <thead className="bg-zinc-900/40 border-b border-zinc-900">
               <tr className="text-xs tracking-widest text-zinc-500">
                 <th className="text-left px-4 py-3">CLIENTE</th>
@@ -124,7 +149,8 @@ const ArtistBookings = () => {
             </tbody>
           </table>
           {bookings.length === 0 && <p className="py-10 text-center text-sm text-zinc-500">Aún no tienes solicitudes.</p>}
-        </div>
+          </div>
+        )}
       </div>
       {toast && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 rounded-full border border-amber-500/30 bg-zinc-900 px-4 py-2 text-sm font-medium text-amber-200 shadow-xl" role="alert">

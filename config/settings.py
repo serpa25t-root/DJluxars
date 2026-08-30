@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'users',
     'portfolio',
+    'bookings',
 ]
 
 MIDDLEWARE = [
