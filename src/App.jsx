@@ -1,8 +1,9 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { AuthProvider } from './context/AuthContext'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider, useAuth } from './context/AuthContext'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import Portfolio from './pages/dashboard/Portfolio'
 
 const Placeholder = ({ title }) => (
   <div className="min-h-[100dvh] flex flex-col bg-black">
@@ -16,21 +17,47 @@ const Placeholder = ({ title }) => (
   </div>
 )
 
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth()
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center bg-black text-zinc-400">
+        Cargando...
+      </div>
+    )
+  }
+  if (!isAuthenticated) return <Navigate to="/login" replace />
+  return children
+}
+
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route
+        path="/dashboard/portfolio"
+        element={
+          <ProtectedRoute>
+            <Portfolio />
+          </ProtectedRoute>
+        }
+      />
+      {/* Otras rutas por rol — placeholder */}
+      <Route path="/dashboard/services" element={<Placeholder title="Mis Servicios" />} />
+      <Route path="/dashboard/bookings" element={<Placeholder title="Solicitudes" />} />
+      <Route path="/my-bookings" element={<Placeholder title="Mis Reservas" />} />
+      <Route path="/chat" element={<Placeholder title="Chat" />} />
+    </Routes>
+  )
+}
+
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          {/* Rutas dinámicas por rol — placeholder para validar navegación SPA */}
-          <Route path="/dashboard/portfolio" element={<Placeholder title="Mi Portafolio" />} />
-          <Route path="/dashboard/services" element={<Placeholder title="Mis Servicios" />} />
-          <Route path="/dashboard/bookings" element={<Placeholder title="Solicitudes" />} />
-          <Route path="/my-bookings" element={<Placeholder title="Mis Reservas" />} />
-          <Route path="/chat" element={<Placeholder title="Chat" />} />
-        </Routes>
+        <AppRoutes />
       </BrowserRouter>
     </AuthProvider>
   )
