@@ -36,7 +36,7 @@ const extractErrorMsg = (error, fallback) => {
 
 const spanishErrorMap = (msg) => {
   const low = msg.toLowerCase()
-  if (low.includes('already exists') || low.includes('ya existe') || (low.includes('email') && low.includes('exists'))) return 'El correo ya está registrado.'
+  if (low.includes('already exists') || low.includes('ya existe') || (low.includes('email') && low.includes('exists'))) return 'Este correo electrónico ya se encuentra registrado. Inicia sesión o utiliza otro.'
   if (low.includes('invalid') || low.includes('incorrect') || low.includes('no active') || low.includes('unable to log')) return 'Credenciales incorrectas.'
   if (low.includes('password')) return 'Contraseña no válida.'
   return msg
@@ -47,26 +47,45 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const storedToken = localStorage.getItem('token') || localStorage.getItem('access')
-    const storedUser = localStorage.getItem('user')
-    if (storedToken) setToken(storedToken)
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser))
-      } catch {
-        setUser({ email: storedUser })
-      }
+  const fetchUserProfile = useCallback(async () => {
+    try {
+      const res = await api.get('users/me/')
+      const profile = res.data
+      setUser(profile)
+      localStorage.setItem('user', JSON.stringify(profile))
+      return profile
+    } catch {
+      return null
     }
-    setLoading(false)
   }, [])
 
-  const persistSession = useCallback((newToken, newUser) => {
-    if (newToken) {
-      localStorage.setItem('token', newToken)
-      localStorage.setItem('access', newToken)
-      setToken(newToken)
+  useEffect(() => {
+    const init = async () => {
+      const storedToken = localStorage.getItem('access') || localStorage.getItem('token')
+      const storedUser = localStorage.getItem('user')
+      if (storedToken) setToken(storedToken)
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser))
+        } catch {
+          setUser({ email: storedUser })
+        }
+      }
+      if (storedToken) {
+        await fetchUserProfile()
+      }
+      setLoading(false)
     }
+    init()
+  }, [fetchUserProfile])
+
+  const persistSession = useCallback((access, refresh, newUser) => {
+    if (access) {
+      localStorage.setItem('access', access)
+      localStorage.setItem('token', access)
+      setToken(access)
+    }
+    if (refresh) localStorage.setItem('refresh', refresh)
     if (newUser) {
       localStorage.setItem('user', JSON.stringify(newUser))
       setUser(newUser)
@@ -81,19 +100,36 @@ export const AuthProvider = ({ children }) => {
     if (!password || !username) throw new Error('Por favor, completa todos los campos.')
 
     try {
-      // Ruta verificada en config/urls.py -> api/users/login/ con slash final
-      const res = await api.post('users/login/', { email, username, password })
+      // SimpleJWT real: POST token/ con username/email
+      let res
+      try {
+        res = await api.post('token/', { username, password })
+      } catch (e) {
+        if (e.response?.status === 400 || e.response?.status === 401) {
+          // Fallback a users/login/ si token/ no acepta email
+          res = await api.post('users/login/', { email, username, password })
+        } else {
+          throw e
+        }
+      }
       const data = res.data
-      const newToken = data.access || data.token || data.key
-      const newUser = data.user || { email, username }
-      if (newToken) persistSession(newToken, newUser)
-      else if (newUser) persistSession(null, newUser)
-      return { token: newToken, user: newUser, raw: data }
+      const access = data.access || data.token
+      const refresh = data.refresh
+      if (!access) throw new Error('Credenciales incorrectas.')
+
+      persistSession(access, refresh, null)
+      const profile = await fetchUserProfile()
+      const finalUser = profile || data.user || { email, username }
+      if (!profile && data.user) {
+        setUser(data.user)
+        localStorage.setItem('user', JSON.stringify(data.user))
+      }
+      return { token: access, user: finalUser, raw: data }
     } catch (err) {
       const msg = spanishErrorMap(extractErrorMsg(err, 'Credenciales incorrectas.'))
       throw new Error(msg)
     }
-  }, [persistSession])
+  }, [persistSession, fetchUserProfile])
 
   const register = useCallback(async (userData) => {
     const email = userData.email?.trim()
@@ -118,17 +154,9 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      // Ruta verificada en users/urls.py -> api/users/register/ con slash final (Django exige trailing slash)
       const res = await api.post('users/register/', payload)
       return res.data
     } catch (err) {
-      const isNetwork = !err?.response || err?.code === 'ERR_NETWORK' || err?.message === 'Network Error'
-      const is404 = err?.response?.status === 404
-      // Fallback tolerante en modo demo: simula éxito sin guardar sesión (flujo obliga login)
-      if (isNetwork || is404) {
-        const demoUser = { email, username, role, phone_number: phone, first_name: firstName, last_name: lastName }
-        return { user: demoUser, demo: true }
-      }
       const msg = spanishErrorMap(extractErrorMsg(err, 'No se pudo crear la cuenta. Verifica los datos.'))
       if (msg.toLowerCase().includes('email') && msg.toLowerCase().includes('exist')) throw new Error('Este correo electrónico ya se encuentra registrado. Inicia sesión o utiliza otro.')
       throw new Error(msg)
@@ -152,9 +180,8 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    fetchUserProfile,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
-
-export default AuthContext

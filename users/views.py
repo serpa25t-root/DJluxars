@@ -81,3 +81,21 @@ class LoginView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+class MeView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        return Response(
+            {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'role': user.role,
+                'phone_number': getattr(user, 'phone_number', ''),
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+            }
+        )

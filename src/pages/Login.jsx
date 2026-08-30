@@ -11,6 +11,7 @@ const Login = () => {
   const location = useLocation()
   const [form, setForm] = useState({ email: '', password: '' })
   const [toast, setToast] = useState(null)
+  const [errorMsg, setErrorMsg] = useState(null)
   const [loading, setLoading] = useState(false)
   const [registeredBanner, setRegisteredBanner] = useState(
     location.state?.registered ? location.state?.message || '¡Cuenta creada con éxito! Por favor inicia sesión.' : null
@@ -25,6 +26,7 @@ const Login = () => {
   const handleChange = (e) => {
     const { id, value } = e.target
     setForm((prev) => ({ ...prev, [id]: value }))
+    if (errorMsg) setErrorMsg(null)
   }
 
   const handleSubmit = async (e) => {
@@ -33,10 +35,10 @@ const Login = () => {
     const password = form.password.trim()
 
     if (!email || !password) {
-      setToast({ msg: 'Por favor, completa todos los campos.', type: 'error' })
-      setTimeout(() => setToast(null), 2800)
+      setErrorMsg('Por favor, completa todos los campos.')
       return
     }
+    setErrorMsg(null)
 
     setLoading(true)
     try {
@@ -45,8 +47,7 @@ const Login = () => {
       setTimeout(() => navigate('/'), 700)
     } catch (err) {
       const msg = err?.message || 'Credenciales incorrectas.'
-      setToast({ msg, type: 'error' })
-      setTimeout(() => setToast(null), 3200)
+      setErrorMsg(msg)
     } finally {
       setLoading(false)
     }
@@ -72,6 +73,14 @@ const Login = () => {
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <p className="text-sm leading-relaxed text-emerald-200">{registeredBanner}</p>
+          </div>
+        )}
+        {errorMsg && (
+          <div className="rounded-xl border border-red-600/30 bg-red-600/10 px-4 py-3 flex gap-3 animate-[fadeIn_200ms_ease-out]" role="alert">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-sm leading-relaxed text-red-200">{errorMsg}</p>
           </div>
         )}
         <Input
