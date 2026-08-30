@@ -2,93 +2,128 @@ import { useState, useEffect } from 'react'
 import Button from '../../components/common/Button'
 import UploadModal from '../../components/portfolio/UploadModal'
 import UpgradeModal from '../../components/subscription/UpgradeModal'
-import { getUsage, getLimits, getPlan, checkCanUpload, incrementUsage, upgradeToPro } from '../../services/subscription'
+import { getUsage, getLimits, getPlan, incrementUsage, upgradeToPro, setUsage as setSubUsage } from '../../services/subscription'
 import { useAuth } from '../../context/AuthContext'
+import { getPortfolio, deletePortfolioItem } from '../../services/portfolio'
 
-const mockWorks = [
+const mockFallback = [
   {
     id: 1,
     title: 'Luz de Neón',
     category: 'Editorial',
     image: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=600&h=400&fit=crop',
+    file_url: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=600&h=400&fit=crop',
     likes: 128,
     views: 3420,
+    media_type: 'imagen',
   },
   {
     id: 2,
     title: 'Retrato en Sombra',
     category: 'Retrato',
     image: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&h=400&fit=crop',
+    file_url: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&h=400&fit=crop',
     likes: 89,
     views: 2103,
-  },
-  {
-    id: 3,
-    title: 'Pasarela Nocturna',
-    category: 'Moda',
-    image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&h=400&fit=crop',
-    likes: 204,
-    views: 5120,
-  },
-  {
-    id: 4,
-    title: 'Votos al Atardecer',
-    category: 'Bodas',
-    image: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=600&h=400&fit=crop',
-    likes: 312,
-    views: 7890,
-  },
-  {
-    id: 5,
-    title: 'Geometría Urbana',
-    category: 'Arquitectura',
-    image: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=600&h=400&fit=crop',
-    likes: 67,
-    views: 1890,
-  },
-  {
-    id: 6,
-    title: 'Ritual de Luces',
-    category: 'Eventos',
-    image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&h=400&fit=crop',
-    likes: 145,
-    views: 4100,
+    media_type: 'imagen',
   },
 ]
 
 const Portfolio = () => {
   const { user } = useAuth()
   const artistId = user?.id || user?.email || 'anon'
-  const [works, setWorks] = useState(mockWorks)
+  const [works, setWorks] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [deletingId, setDeletingId] = useState(null)
   const [open, setOpen] = useState(false)
   const [showUpgrade, setShowUpgrade] = useState(false)
   const [usage, setUsage] = useState(getUsage(artistId))
   const [plan, setPlan] = useState(getPlan(artistId))
   const limits = getLimits(artistId)
 
+  const syncUsageFromWorks = (list) => {
+    const photos = list.filter((w) => (w.media_type || 'imagen') !== 'video').length
+    const videos = list.filter((w) => w.media_type === 'video').length
+    const current = getUsage(artistId)
+    const next = { ...current, photos, videos }
+    // Mantén services como está (viene de bookings), solo sincroniza media
+    setUsage(next)
+    setSubUsage(artistId, next)
+  }
+
+  const fetchWorks = async () => {
+    setLoading(true)
+    try {
+      const data = await getPortfolio()
+      const list = Array.isArray(data) ? data : []
+      const normalized = list.map((item) => ({
+        id: item.id,
+        title: item.title,
+        category: item.category,
+        image: item.file_url || item.image || item.file || item.video_url || 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=600&h=400&fit=crop',
+        file_url: item.file_url || item.image,
+        likes: item.likes ?? 0,
+        views: item.views ?? 0,
+        media_type: item.media_type || (item.video_url ? 'video' : 'imagen'),
+      }))
+      setWorks(normalized)
+      syncUsageFromWorks(normalized)
+    } catch {
+      // Fallback demo si backend no responde
+      setWorks(mockFallback)
+      syncUsageFromWorks(mockFallback)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
-    setUsage(getUsage(artistId))
+    fetchWorks()
     setPlan(getPlan(artistId))
   }, [artistId])
 
   const handleOpenUpload = () => {
-    // verifica si puede subir foto (por defecto chequea fotos, el modal hará check final por tipo)
-    const check = checkCanUpload(artistId, 'imagen')
-    const checkVideo = checkCanUpload(artistId, 'video')
-    if (!check.allowed && !checkVideo.allowed) {
-      setShowUpgrade(true)
-      return
-    }
     setOpen(true)
   }
 
   const handlePublished = (newWork) => {
-    setWorks((p) => [newWork, ...p])
-    const type = newWork?.media_type || (newWork?.image ? 'imagen' : 'imagen')
-    // si el modal pasó tipo video, usarlo
-    const t = newWork?.type || type
-    incrementUsage(artistId, t === 'video' ? 'video' : 'imagen')
+    // El modal ya hizo POST real; aquí solo sincronizamos UI y cuotas
+    const enriched = {
+      id: newWork.id || Date.now(),
+      title: newWork.title,
+      category: newWork.category,
+      image: newWork.image || newWork.file_url,
+      file_url: newWork.image || newWork.file_url,
+      likes: 0,
+      views: 0,
+      media_type: newWork.media_type || newWork.type || 'imagen',
+    }
+    setWorks((p) => [enriched, ...p])
+    const type = enriched.media_type === 'video' ? 'video' : 'imagen'
+    incrementUsage(artistId, type)
     setUsage(getUsage(artistId))
+  }
+
+  const handleQuotaError = () => {
+    setOpen(false)
+    setShowUpgrade(true)
+  }
+
+  const handleDelete = async (id) => {
+    setDeletingId(id)
+    try {
+      await deletePortfolioItem(id)
+      const next = works.filter((w) => w.id !== id)
+      setWorks(next)
+      syncUsageFromWorks(next)
+    } catch {
+      // Fallback demo: elimina local aunque API falle
+      const next = works.filter((w) => w.id !== id)
+      setWorks(next)
+      syncUsageFromWorks(next)
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   const handleUpgrade = () => {
@@ -108,22 +143,16 @@ const Portfolio = () => {
       </div>
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header estilizado */}
+        {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-zinc-900 pb-6">
           <div>
             <p className="text-xs font-semibold tracking-widest text-red-400">DASHBOARD • CREADOR {plan === 'pro' && <span className="ml-2 inline-flex items-center rounded-full bg-amber-500 text-black px-2 py-0.5 text-[10px] font-bold tracking-widest">PRO</span>}</p>
             <h1 className="mt-1 font-display text-3xl font-bold tracking-tight text-white">
               Mi Portafolio <span className="bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent">Creador</span>
             </h1>
-            <p className="mt-2 text-sm text-zinc-400 max-w-xl">
-              Gestiona tus obras con acabado cinematográfico. Cada imagen cuenta una historia.
-            </p>
+            <p className="mt-2 text-sm text-zinc-400 max-w-xl">Gestiona tus obras con acabado cinematográfico. Cada imagen cuenta una historia.</p>
           </div>
-          <Button
-            variant="primary"
-            className="self-start sm:self-auto shadow-lg shadow-red-600/20"
-            onClick={handleOpenUpload}
-          >
+          <Button variant="primary" className="self-start sm:self-auto shadow-lg shadow-red-600/20" onClick={handleOpenUpload}>
             <svg xmlns="http://www.w3.org/2000/svg" className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
@@ -131,7 +160,7 @@ const Portfolio = () => {
           </Button>
         </div>
 
-        {/* Indicador de consumo */}
+        {/* Indicador de consumo sincronizado con backend */}
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
             { label: 'Fotos', current: usage.photos, max: limits.photos },
@@ -154,49 +183,74 @@ const Portfolio = () => {
           ))}
         </div>
 
-        {/* Grilla */}
-        <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {works.map((w) => (
-            <article
-              key={w.id}
-              className="group overflow-hidden rounded-2xl border border-zinc-900 bg-zinc-950 hover:border-red-600/30 hover:shadow-lg hover:shadow-red-600/10 transition-all duration-300 ease-out will-change-transform"
-            >
-              <div className="relative aspect-[4/3] overflow-hidden bg-zinc-900">
-                <img
-                  src={w.image}
-                  alt={w.title}
-                  className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 will-change-transform"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
-                <span className="absolute top-3 left-3 rounded-full border border-red-600/30 bg-red-600/15 backdrop-blur-md px-2.5 py-1 text-[11px] font-semibold tracking-wide text-red-200">
-                  {w.category}
-                </span>
-              </div>
-              <div className="p-4">
-                <h3 className="text-sm font-semibold text-white truncate">{w.title}</h3>
-                <div className="mt-3 flex items-center gap-4 text-xs text-zinc-500">
-                  <span className="inline-flex items-center gap-1.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                    {w.likes}
+        {/* Grilla con spinners */}
+        {loading ? (
+          <div className="mt-12 flex flex-col items-center justify-center py-16">
+            <div className="h-10 w-10 rounded-full border-2 border-zinc-800 border-t-red-600 animate-spin" />
+            <p className="mt-4 text-sm text-zinc-400">Cargando portafolio...</p>
+          </div>
+        ) : (
+          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {works.map((w) => (
+              <article
+                key={w.id}
+                className="group overflow-hidden rounded-2xl border border-zinc-900 bg-zinc-950 hover:border-red-600/30 hover:shadow-lg hover:shadow-red-600/10 transition-all duration-300 ease-out will-change-transform"
+              >
+                <div className="relative aspect-[4/3] overflow-hidden bg-zinc-900">
+                  {w.media_type === 'video' ? (
+                    <div className="h-full w-full flex items-center justify-center bg-zinc-900 text-zinc-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.26a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                  ) : (
+                    <img src={w.image} alt={w.title} className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 will-change-transform" loading="lazy" />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
+                  <span className="absolute top-3 left-3 rounded-full border border-red-600/30 bg-red-600/15 backdrop-blur-md px-2.5 py-1 text-[11px] font-semibold tracking-wide text-red-200">
+                    {w.category}
                   </span>
-                  <span className="inline-flex items-center gap-1.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    {w.views.toLocaleString('es-CO')}
-                  </span>
-                  <span className="ml-auto h-1 w-12 rounded-full bg-zinc-800 group-hover:bg-red-600/30 transition-colors" />
+                  <button
+                    onClick={() => handleDelete(w.id)}
+                    disabled={deletingId === w.id}
+                    className="absolute top-3 right-3 rounded-full bg-black/60 backdrop-blur-md p-2 text-zinc-400 hover:bg-red-600 hover:text-white border border-white/10 transition-colors disabled:opacity-50"
+                    aria-label="Eliminar obra"
+                  >
+                    {deletingId === w.id ? (
+                      <span className="h-4 w-4 block rounded-full border-2 border-zinc-600 border-t-white animate-spin" />
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    )}
+                  </button>
                 </div>
-              </div>
-            </article>
-          ))}
-        </div>
+                <div className="p-4">
+                  <h3 className="text-sm font-semibold text-white truncate">{w.title}</h3>
+                  <div className="mt-3 flex items-center gap-4 text-xs text-zinc-500">
+                    <span className="inline-flex items-center gap-1.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
+                      {w.likes}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      {w.views.toLocaleString('es-CO')}
+                    </span>
+                    <span className="ml-auto h-1 w-12 rounded-full bg-zinc-800 group-hover:bg-red-600/30 transition-colors" />
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
 
-        {works.length === 0 && (
+        {!loading && works.length === 0 && (
           <div className="mt-16 text-center rounded-2xl border border-dashed border-zinc-800 bg-zinc-950/50 py-16">
             <p className="text-sm text-zinc-400">Aún no tienes obras. Sube tu primera historia visual.</p>
           </div>
@@ -204,7 +258,7 @@ const Portfolio = () => {
       </div>
 
       <UploadModal isOpen={open} onClose={() => setOpen(false)} onPublished={handlePublished} onLimitReached={() => setShowUpgrade(true)} />
-      <UpgradeModal isOpen={showUpgrade} onClose={() => setShowUpgrade(false)} onUpgrade={handleUpgrade} />
+      <UpgradeModal isOpen={showUpgrade} onClose={() => setShowUpgrade(false)} onUpgrade={() => { upgradeToPro(artistId); setPlan('pro'); setUsage(getUsage(artistId)); setShowUpgrade(false)}} />
     </div>
   )
 }

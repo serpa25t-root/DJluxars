@@ -4,6 +4,7 @@ import Input from '../common/Input'
 import api from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
 import { checkCanUpload } from '../../services/subscription'
+import { createPortfolioItem } from '../../services/portfolio'
 
 const categories = ['Retrato', 'Editorial', 'Eventos', 'Moda', 'Arquitectura']
 
@@ -87,10 +88,11 @@ const UploadModal = ({ isOpen, onClose, onPublished, onLimitReached }) => {
       fd.append('equipment', form.equipment)
       if (form.type === 'imagen' && file) fd.append('image', file)
       if (form.type === 'video') fd.append('video_url', form.url)
+      if (form.type === 'imagen' && file) fd.append('file', file)
 
-      // Intenta portfolio/ primero, fallback works/
+      // Usa servicio real con parsers multipart
       try {
-        await api.post('portfolio/', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+        await createPortfolioItem(fd)
       } catch (err) {
         if (err?.response?.status === 404) {
           await api.post('works/', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
@@ -114,6 +116,18 @@ const UploadModal = ({ isOpen, onClose, onPublished, onLimitReached }) => {
         onClose()
       }, 600)
     } catch (err) {
+      if (err?.response?.status === 400) {
+        const data = err.response.data
+        const msgLow = JSON.stringify(data).toLowerCase()
+        if (msgLow.includes('límite') || msgLow.includes('limite') || msgLow.includes('quota') || msgLow.includes('plan')) {
+          setToast({ msg: 'Has alcanzado el límite de tu Plan Free.', type: 'error' })
+          setTimeout(() => {
+            onClose()
+            onLimitReached?.()
+          }, 900)
+          return
+        }
+      }
       const data = err?.response?.data
       let msg = 'No se pudo publicar. Verifica los datos.'
       if (data) {
