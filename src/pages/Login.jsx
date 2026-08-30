@@ -1,30 +1,45 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import AuthLayout from '../components/common/AuthLayout'
 import Input from '../components/common/Input'
 import Button from '../components/common/Button'
 
 const Login = () => {
+  const { login } = useAuth()
+  const navigate = useNavigate()
   const [form, setForm] = useState({ email: '', password: '' })
   const [toast, setToast] = useState(null)
+  const [loading, setLoading] = useState(false)
 
   const handleChange = (e) => {
     const { id, value } = e.target
     setForm((prev) => ({ ...prev, [id]: value }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     const email = form.email.trim()
     const password = form.password.trim()
 
     if (!email || !password) {
       setToast({ msg: 'Por favor, completa todos los campos.', type: 'error' })
-    } else {
-      setToast({ msg: 'Inicio de sesión exitoso', type: 'success' })
-      console.log('Login payload:', { email, password })
+      setTimeout(() => setToast(null), 2800)
+      return
     }
-    setTimeout(() => setToast(null), 2800)
+
+    setLoading(true)
+    try {
+      await login({ email, password })
+      setToast({ msg: 'Inicio de sesión exitoso', type: 'success' })
+      setTimeout(() => navigate('/'), 700)
+    } catch (err) {
+      const msg = err?.message || 'Credenciales incorrectas.'
+      setToast({ msg, type: 'error' })
+      setTimeout(() => setToast(null), 3200)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -72,12 +87,16 @@ const Login = () => {
           </a>
         </div>
 
-        <Button type="submit" variant="primary" className="w-full py-3.5 text-[15px] mt-2 shadow-lg shadow-red-600/20">
-          Ingresar a mi Cuenta
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={loading}
+          className="w-full py-3.5 text-[15px] mt-2 shadow-lg shadow-red-600/20 disabled:opacity-60"
+        >
+          {loading ? 'Ingresando...' : 'Ingresar a mi Cuenta'}
         </Button>
       </form>
 
-      {/* Alerta limpia en español */}
       {toast && (
         <div
           className={`fixed bottom-6 left-1/2 -translate-x-1/2 rounded-full border px-4 py-2.5 text-sm font-medium shadow-xl animate-[fadeInUp_300ms_var(--ease-out-quart)_both] ${

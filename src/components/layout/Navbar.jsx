@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 import Button from '../common/Button'
 
 const navLinks = [
@@ -10,6 +11,16 @@ const navLinks = [
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
+  const { user, isAuthenticated, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/')
+    setIsOpen(false)
+  }
+
+  const displayName = user?.username || user?.email?.split('@')[0] || user?.name || user?.first_name || user?.email
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-zinc-900 bg-black/80 backdrop-blur-xl supports-[backdrop-filter]:bg-black/70">
@@ -43,16 +54,29 @@ const Navbar = () => {
           ))}
         </div>
 
-        {/* CTAs - Desktop -> Link */}
+        {/* CTAs - Desktop */}
         <div className="hidden md:flex items-center gap-3">
-          <Link to="/login">
-            <Button variant="secondary" className="border-zinc-800">
-              Iniciar Sesión
-            </Button>
-          </Link>
-          <Link to="/register">
-            <Button variant="primary">Registrarse</Button>
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <span className="text-sm font-medium text-zinc-300 max-w-[160px] truncate">
+                {displayName}
+              </span>
+              <Button variant="secondary" className="border-zinc-800" onClick={handleLogout}>
+                Cerrar Sesión
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link to="/login">
+                <Button variant="secondary" className="border-zinc-800">
+                  Iniciar Sesión
+                </Button>
+              </Link>
+              <Link to="/register">
+                <Button variant="primary">Registrarse</Button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Hamburguesa - Mobile */}
@@ -90,16 +114,27 @@ const Navbar = () => {
               </a>
             ))}
             <div className="mt-4 flex flex-col gap-3 pt-4 border-t border-zinc-900">
-              <Link to="/login" onClick={() => setIsOpen(false)} className="w-full">
-                <Button variant="secondary" className="w-full justify-center">
-                  Iniciar Sesión
-                </Button>
-              </Link>
-              <Link to="/register" onClick={() => setIsOpen(false)} className="w-full">
-                <Button variant="primary" className="w-full justify-center">
-                  Registrarse
-                </Button>
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  <p className="px-3 text-sm font-medium text-zinc-300 truncate">Hola, {displayName}</p>
+                  <Button variant="secondary" className="w-full justify-center" onClick={handleLogout}>
+                    Cerrar Sesión
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" onClick={() => setIsOpen(false)} className="w-full">
+                    <Button variant="secondary" className="w-full justify-center">
+                      Iniciar Sesión
+                    </Button>
+                  </Link>
+                  <Link to="/register" onClick={() => setIsOpen(false)} className="w-full">
+                    <Button variant="primary" className="w-full justify-center">
+                      Registrarse
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
