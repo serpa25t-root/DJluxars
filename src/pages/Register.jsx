@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import AuthLayout from '../components/common/AuthLayout'
 import Input from '../components/common/Input'
 import Button from '../components/common/Button'
@@ -31,25 +32,39 @@ const roles = [
 const roleLabelEs = { client: 'Cliente', artist: 'Fotógrafo' }
 
 const Register = () => {
+  const { register } = useAuth()
+  const navigate = useNavigate()
   const [role, setRole] = useState('client')
   const [form, setForm] = useState({ name: '', email: '', phone: '', password: '' })
   const [toast, setToast] = useState(null)
+  const [loading, setLoading] = useState(false)
 
   const handleChange = (e) => {
     const { id, value } = e.target
     setForm((prev) => ({ ...prev, [id]: value }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     const { name, email, phone, password } = form
     if (!name.trim() || !email.trim() || !phone.trim() || !password.trim()) {
       setToast({ msg: 'Por favor, completa todos los campos.', type: 'error' })
-    } else {
-      setToast({ msg: 'Cuenta creada correctamente', type: 'success' })
-      console.log('Register payload:', { role, ...form })
+      setTimeout(() => setToast(null), 3000)
+      return
     }
-    setTimeout(() => setToast(null), 2800)
+
+    setLoading(true)
+    try {
+      await register({ name: name.trim(), email: email.trim(), phone: phone.trim(), password, role })
+      setToast({ msg: 'Cuenta creada correctamente. Redirigiendo al login…', type: 'success' })
+      setTimeout(() => navigate('/login'), 900)
+    } catch (err) {
+      const msg = err?.message || 'No se pudo crear la cuenta. Verifica los datos.'
+      setToast({ msg, type: 'error' })
+      setTimeout(() => setToast(null), 3500)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -66,7 +81,6 @@ const Register = () => {
       }
     >
       <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-        {/* Selector de Rol — mantiene taste DRY */}
         <div>
           <p className="block text-xs font-medium tracking-wide text-zinc-300 mb-2">Quiero registrarme como:</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -107,8 +121,8 @@ const Register = () => {
         <Input label="Teléfono" id="phone" type="tel" placeholder="+57 300 000 0000" value={form.phone} onChange={handleChange} required autoComplete="tel" />
         <Input label="Contraseña" id="password" type="password" placeholder="Mínimo 8 caracteres" value={form.password} onChange={handleChange} required autoComplete="new-password" />
 
-        <Button type="submit" variant="primary" className="w-full py-3.5 text-[15px] shadow-lg shadow-red-600/20">
-          Crear cuenta
+        <Button type="submit" variant="primary" disabled={loading} className="w-full py-3.5 text-[15px] shadow-lg shadow-red-600/20 disabled:opacity-60">
+          {loading ? 'Creando cuenta...' : 'Crear cuenta'}
         </Button>
 
         <p className="text-center text-[11px] leading-relaxed text-zinc-500">
