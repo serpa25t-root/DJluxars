@@ -1,6 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Button from '../../components/common/Button'
 import UploadModal from '../../components/portfolio/UploadModal'
+import UpgradeModal from '../../components/subscription/UpgradeModal'
+import { getUsage, getLimits, getPlan, checkCanUpload, incrementUsage, upgradeToPro } from '../../services/subscription'
+import { useAuth } from '../../context/AuthContext'
 
 const mockWorks = [
   {
@@ -54,12 +57,48 @@ const mockWorks = [
 ]
 
 const Portfolio = () => {
+  const { user } = useAuth()
+  const artistId = user?.id || user?.email || 'anon'
   const [works, setWorks] = useState(mockWorks)
   const [open, setOpen] = useState(false)
+  const [showUpgrade, setShowUpgrade] = useState(false)
+  const [usage, setUsage] = useState(getUsage(artistId))
+  const [plan, setPlan] = useState(getPlan(artistId))
+  const limits = getLimits(artistId)
+
+  useEffect(() => {
+    setUsage(getUsage(artistId))
+    setPlan(getPlan(artistId))
+  }, [artistId])
+
+  const handleOpenUpload = () => {
+    // verifica si puede subir foto (por defecto chequea fotos, el modal hará check final por tipo)
+    const check = checkCanUpload(artistId, 'imagen')
+    const checkVideo = checkCanUpload(artistId, 'video')
+    if (!check.allowed && !checkVideo.allowed) {
+      setShowUpgrade(true)
+      return
+    }
+    setOpen(true)
+  }
 
   const handlePublished = (newWork) => {
     setWorks((p) => [newWork, ...p])
+    const type = newWork?.media_type || (newWork?.image ? 'imagen' : 'imagen')
+    // si el modal pasó tipo video, usarlo
+    const t = newWork?.type || type
+    incrementUsage(artistId, t === 'video' ? 'video' : 'imagen')
+    setUsage(getUsage(artistId))
   }
+
+  const handleUpgrade = () => {
+    upgradeToPro(artistId)
+    setPlan('pro')
+    setUsage(getUsage(artistId))
+    setShowUpgrade(false)
+  }
+
+  const bar = (current, max) => Math.min(100, Math.round((current / max) * 100))
 
   return (
     <div className="min-h-[100dvh] bg-black">
@@ -72,7 +111,7 @@ const Portfolio = () => {
         {/* Header estilizado */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-zinc-900 pb-6">
           <div>
-            <p className="text-xs font-semibold tracking-widest text-red-400">DASHBOARD • CREADOR</p>
+            <p className="text-xs font-semibold tracking-widest text-red-400">DASHBOARD • CREADOR {plan === 'pro' && <span className="ml-2 inline-flex items-center rounded-full bg-amber-500 text-black px-2 py-0.5 text-[10px] font-bold tracking-widest">PRO</span>}</p>
             <h1 className="mt-1 font-display text-3xl font-bold tracking-tight text-white">
               Mi Portafolio <span className="bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent">Creador</span>
             </h1>
@@ -80,12 +119,39 @@ const Portfolio = () => {
               Gestiona tus obras con acabado cinematográfico. Cada imagen cuenta una historia.
             </p>
           </div>
-          <Button variant="primary" className="self-start sm:self-auto shadow-lg shadow-red-600/20" onClick={() => setOpen(true)}>
+          <Button
+            variant="primary"
+            className="self-start sm:self-auto shadow-lg shadow-red-600/20"
+            onClick={handleOpenUpload}
+          >
             <svg xmlns="http://www.w3.org/2000/svg" className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
             Subir Nueva Obra
           </Button>
+        </div>
+
+        {/* Indicador de consumo */}
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[
+            { label: 'Fotos', current: usage.photos, max: limits.photos },
+            { label: 'Videos', current: usage.videos, max: limits.videos },
+            { label: 'Servicios Activos', current: usage.services, max: limits.services },
+          ].map((item) => (
+            <div key={item.label} className="rounded-xl border border-zinc-900 bg-zinc-950 p-4">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold tracking-widest text-zinc-400">{item.label}</p>
+                <p className="text-xs font-bold text-white">{item.current}/{item.max}</p>
+              </div>
+              <div className="mt-2 h-2 rounded-full bg-zinc-900 overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${item.current >= item.max ? 'bg-red-600' : 'bg-gradient-to-r from-red-600 to-red-400'}`}
+                  style={{ width: `${bar(item.current, item.max)}%` }}
+                />
+              </div>
+              {item.current >= item.max && <p className="mt-1 text-[11px] text-red-400">Límite alcanzado</p>}
+            </div>
+          ))}
         </div>
 
         {/* Grilla */}
@@ -137,7 +203,8 @@ const Portfolio = () => {
         )}
       </div>
 
-      <UploadModal isOpen={open} onClose={() => setOpen(false)} onPublished={handlePublished} />
+      <UploadModal isOpen={open} onClose={() => setOpen(false)} onPublished={handlePublished} onLimitReached={() => setShowUpgrade(true)} />
+      <UpgradeModal isOpen={showUpgrade} onClose={() => setShowUpgrade(false)} onUpgrade={handleUpgrade} />
     </div>
   )
 }

@@ -2,10 +2,14 @@ import { useState, useEffect } from 'react'
 import Button from '../common/Button'
 import Input from '../common/Input'
 import api from '../../services/api'
+import { useAuth } from '../../context/AuthContext'
+import { checkCanUpload } from '../../services/subscription'
 
 const categories = ['Retrato', 'Editorial', 'Eventos', 'Moda', 'Arquitectura']
 
-const UploadModal = ({ isOpen, onClose, onPublished }) => {
+const UploadModal = ({ isOpen, onClose, onPublished, onLimitReached }) => {
+  const { user } = useAuth()
+  const artistId = user?.id || user?.email || 'anon'
   const [form, setForm] = useState({
     title: '',
     category: 'Retrato',
@@ -63,6 +67,15 @@ const UploadModal = ({ isOpen, onClose, onPublished }) => {
       setToast({ msg: 'Pega el enlace del video.', type: 'error' })
       return
     }
+    const check = checkCanUpload(artistId, form.type)
+    if (!check.allowed) {
+      setToast({ msg: check.message, type: 'error' })
+      setTimeout(() => {
+        onClose()
+        onLimitReached?.()
+      }, 1000)
+      return
+    }
 
     setLoading(true)
     try {
@@ -95,6 +108,8 @@ const UploadModal = ({ isOpen, onClose, onPublished }) => {
           image: preview || 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=600&h=400&fit=crop',
           likes: 0,
           views: 0,
+          type: form.type,
+          media_type: form.type,
         })
         onClose()
       }, 600)

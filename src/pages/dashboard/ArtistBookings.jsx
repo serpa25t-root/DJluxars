@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Button from '../../components/common/Button'
+import UpgradeModal from '../../components/subscription/UpgradeModal'
 import { getBookings, updateBookingStatus, seedIfEmpty } from '../../services/bookings'
+import { useAuth } from '../../context/AuthContext'
+import { checkCanAcceptBooking, getUsage, setUsage, upgradeToPro } from '../../services/subscription'
 
 const statusBadge = {
   Pendiente: 'border-amber-500/30 bg-amber-500/10 text-amber-300',
@@ -11,7 +14,11 @@ const statusBadge = {
 }
 
 const ArtistBookings = () => {
+  const { user } = useAuth()
+  const artistId = user?.id || user?.email || 'anon'
   const [bookings, setBookings] = useState([])
+  const [showUpgrade, setShowUpgrade] = useState(false)
+  const [toast, setToast] = useState(null)
 
   useEffect(() => {
     seedIfEmpty()
@@ -19,8 +26,26 @@ const ArtistBookings = () => {
   }, [])
 
   const handle = (id, status) => {
+    if (status === 'Confirmada') {
+      const check = checkCanAcceptBooking(artistId)
+      if (!check.allowed) {
+        setToast(check.message)
+        setShowUpgrade(true)
+        setTimeout(() => setToast(null), 3000)
+        return
+      }
+      const usage = getUsage(artistId)
+      setUsage(artistId, { ...usage, services: usage.services + 1 })
+    }
     const next = updateBookingStatus(id, status)
     setBookings([...next])
+  }
+
+  const handleUpgrade = () => {
+    upgradeToPro(artistId)
+    setShowUpgrade(false)
+    setToast('¡Plan PRO activado! Ahora tienes 6 servicios activos.')
+    setTimeout(() => setToast(null), 2500)
   }
 
   return (
@@ -101,6 +126,12 @@ const ArtistBookings = () => {
           {bookings.length === 0 && <p className="py-10 text-center text-sm text-zinc-500">Aún no tienes solicitudes.</p>}
         </div>
       </div>
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 rounded-full border border-amber-500/30 bg-zinc-900 px-4 py-2 text-sm font-medium text-amber-200 shadow-xl" role="alert">
+          {toast}
+        </div>
+      )}
+      <UpgradeModal isOpen={showUpgrade} onClose={() => setShowUpgrade(false)} onUpgrade={handleUpgrade} />
     </div>
   )
 }

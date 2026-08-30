@@ -7,14 +7,14 @@ import Button from '../components/common/Button'
 import { getCurrentPosition, reverseGeocode, haversine } from '../services/geo'
 
 const photographers = [
-  { id: 1, name: 'Elena Mora', specialty: 'Retrato', avatar: 'https://i.pravatar.cc/150?img=5', rating: 4.9, reviews: 128, price: 350000, delivery: '3 días', category: 'Retrato', lat: 4.711, lng: -74.0721, city: 'Bogotá' },
-  { id: 2, name: 'Marc Dubois', specialty: 'Moda', avatar: 'https://i.pravatar.cc/150?img=15', rating: 4.8, reviews: 94, price: 500000, delivery: '5 días', category: 'Moda', lat: 4.65, lng: -74.1, city: 'Bogotá' },
-  { id: 3, name: 'Sofía Reyes', specialty: 'Eventos', avatar: 'https://i.pravatar.cc/150?img=9', rating: 4.7, reviews: 76, price: 280000, delivery: '2 días', category: 'Eventos', lat: 6.2442, lng: -75.5812, city: 'Medellín' },
-  { id: 4, name: 'Javier Ortiz', specialty: 'Editorial', avatar: 'https://i.pravatar.cc/150?img=12', rating: 4.9, reviews: 210, price: 420000, delivery: '4 días', category: 'Editorial', lat: 3.4516, lng: -76.532, city: 'Cali' },
-  { id: 5, name: 'Lucía Vega', specialty: 'Retrato', avatar: 'https://i.pravatar.cc/150?img=32', rating: 4.6, reviews: 54, price: 180000, delivery: '2 días', category: 'Retrato', lat: 10.391, lng: -75.4794, city: 'Cartagena' },
-  { id: 6, name: 'Andrés Silva', specialty: 'Moda', avatar: 'https://i.pravatar.cc/150?img=33', rating: 4.85, reviews: 110, price: 600000, delivery: '6 días', category: 'Moda', lat: 11.0041, lng: -74.807, city: 'Barranquilla' },
-  { id: 7, name: 'Camila Torres', specialty: 'Eventos', avatar: 'https://i.pravatar.cc/150?img=26', rating: 4.75, reviews: 88, price: 320000, delivery: '3 días', category: 'Eventos', lat: 7.1193, lng: -73.1227, city: 'Bucaramanga' },
-  { id: 8, name: 'Diego León', specialty: 'Editorial', avatar: 'https://i.pravatar.cc/150?img=20', rating: 4.95, reviews: 152, price: 480000, delivery: '4 días', category: 'Editorial', lat: 4.711, lng: -74.0721, city: 'Bogotá' },
+  { id: 1, name: 'Elena Mora', specialty: 'Retrato', avatar: 'https://i.pravatar.cc/150?img=5', rating: 4.9, reviews: 128, price: 350000, delivery: '3 días', category: 'Retrato', lat: 4.711, lng: -74.0721, city: 'Bogotá', is_pro: true },
+  { id: 2, name: 'Marc Dubois', specialty: 'Moda', avatar: 'https://i.pravatar.cc/150?img=15', rating: 4.8, reviews: 94, price: 500000, delivery: '5 días', category: 'Moda', lat: 4.65, lng: -74.1, city: 'Bogotá', is_pro: true },
+  { id: 3, name: 'Sofía Reyes', specialty: 'Eventos', avatar: 'https://i.pravatar.cc/150?img=9', rating: 4.7, reviews: 76, price: 280000, delivery: '2 días', category: 'Eventos', lat: 6.2442, lng: -75.5812, city: 'Medellín', is_pro: false },
+  { id: 4, name: 'Javier Ortiz', specialty: 'Editorial', avatar: 'https://i.pravatar.cc/150?img=12', rating: 4.9, reviews: 210, price: 420000, delivery: '4 días', category: 'Editorial', lat: 3.4516, lng: -76.532, city: 'Cali', is_pro: false },
+  { id: 5, name: 'Lucía Vega', specialty: 'Retrato', avatar: 'https://i.pravatar.cc/150?img=32', rating: 4.6, reviews: 54, price: 180000, delivery: '2 días', category: 'Retrato', lat: 10.391, lng: -75.4794, city: 'Cartagena', is_pro: false },
+  { id: 6, name: 'Andrés Silva', specialty: 'Moda', avatar: 'https://i.pravatar.cc/150?img=33', rating: 4.85, reviews: 110, price: 600000, delivery: '6 días', category: 'Moda', lat: 11.0041, lng: -74.807, city: 'Barranquilla', is_pro: true },
+  { id: 7, name: 'Camila Torres', specialty: 'Eventos', avatar: 'https://i.pravatar.cc/150?img=26', rating: 4.75, reviews: 88, price: 320000, delivery: '3 días', category: 'Eventos', lat: 7.1193, lng: -73.1227, city: 'Bucaramanga', is_pro: false },
+  { id: 8, name: 'Diego León', specialty: 'Editorial', avatar: 'https://i.pravatar.cc/150?img=20', rating: 4.95, reviews: 152, price: 480000, delivery: '4 días', category: 'Editorial', lat: 4.711, lng: -74.0721, city: 'Bogotá', is_pro: false },
 ]
 
 const Explore = () => {
@@ -62,10 +62,13 @@ const Explore = () => {
         ...p,
         distance: p.lat && p.lng ? haversine(userLocation.lat, userLocation.lng, p.lat, p.lng) : null,
       }))
-      if (sortByDistance) {
-        list = [...list].sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))
-      }
     }
+    // Prioridad PRO siempre arriba, luego por distancia si está activo
+    list = [...list].sort((a, b) => {
+      if (a.is_pro !== b.is_pro) return b.is_pro ? 1 : -1
+      if (sortByDistance && a.distance != null && b.distance != null) return a.distance - b.distance
+      return 0
+    })
     return list
   }, [search, category, price, rating, userLocation, sortByDistance])
 
@@ -125,7 +128,14 @@ const Explore = () => {
                   <div className="flex items-start gap-4">
                     <img src={p.avatar} alt={p.name} className="h-12 w-12 rounded-full object-cover border border-zinc-800" />
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-semibold text-white truncate">{p.name}</h3>
+                      <h3 className="text-sm font-semibold text-white truncate inline-flex items-center gap-2">
+                        {p.name}
+                        {p.is_pro && (
+                          <span className="inline-flex items-center rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-black px-2 py-0.5 text-[10px] font-bold tracking-widest border border-amber-500/50 shadow-sm">
+                            PRO
+                          </span>
+                        )}
+                      </h3>
                       <p className="text-xs text-zinc-400">{p.specialty}</p>
                       <div className="mt-1 flex items-center gap-1">
                         <span className="text-red-500 text-xs">★</span>
