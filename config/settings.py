@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'users',
     'portfolio',
     'bookings',
+    'chat',
 ]
 
 MIDDLEWARE = [

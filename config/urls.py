@@ -26,6 +26,7 @@ urlpatterns = [
     path('api/portfolio/', include('portfolio.urls')),
     path('api/works/', include('portfolio.urls')),
     path('api/bookings/', include('bookings.urls')),
+    path('api/chat/', include('chat.urls')),
 ]
 
 from django.conf import settings
