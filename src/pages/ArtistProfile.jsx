@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import Button from '../components/common/Button'
+import BookingModal from '../components/booking/BookingModal'
 
 const mockProfiles = {
   1: { name: 'Elena Mora', specialty: 'Retrato', avatar: 'https://i.pravatar.cc/150?img=5', banner: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=1200&h=400&fit=crop', rating: 4.9, price: 350, delivery: '3 días', bio: 'Fotógrafa editorial con base en Bogotá. Trabajo con luz natural y narrativa íntima para retratos que perduran.', equipment: 'Canon EOS R5, 85mm f/1.4, Profoto B10', photos: ['https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&h=400&fit=crop','https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=600&h=400&fit=crop','https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&h=400&fit=crop','https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=600&h=400&fit=crop'] },
@@ -11,6 +13,8 @@ const defaults = { name: 'Artista LuxArts', specialty: 'Editorial', avatar: 'htt
 const ArtistProfile = () => {
   const { id } = useParams()
   const p = mockProfiles[id] || defaults
+  const [open, setOpen] = useState(false)
+  const photographer = { id: Number(id) || 0, name: p.name, avatar: p.avatar, specialty: p.specialty, price: p.price }
 
   return (
     <div className="min-h-[100dvh] bg-black">
@@ -63,12 +67,13 @@ const ArtistProfile = () => {
                 <div className="flex justify-between"><span className="text-zinc-500">Calificación</span><span className="text-red-400 font-semibold">★ {p.rating.toFixed(1)}</span></div>
                 <div className="flex justify-between"><span className="text-zinc-500">Especialidad</span><span className="text-white">{p.specialty}</span></div>
               </div>
-              <Button variant="primary" className="w-full mt-6 py-3.5">Solicitar Reserva</Button>
+              <Button variant="primary" className="w-full mt-6 py-3.5" onClick={() => setOpen(true)}>Solicitar Reserva</Button>
               <Link to="/explorar" className="mt-3 block text-center text-sm text-zinc-500 hover:text-white">← Volver al catálogo</Link>
             </div>
           </div>
         </div>
       </div>
+      <BookingModal isOpen={open} onClose={() => setOpen(false)} photographer={photographer} />
     </div>
   )
 }

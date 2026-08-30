@@ -6,6 +6,8 @@ import Register from './pages/Register'
 import Portfolio from './pages/dashboard/Portfolio'
 import Explore from './pages/Explore'
 import ArtistProfile from './pages/ArtistProfile'
+import ArtistBookings from './pages/dashboard/ArtistBookings'
+import ClientBookings from './pages/ClientBookings'
 
 const Placeholder = ({ title }) => (
   <div className="min-h-[100dvh] flex flex-col bg-black">
@@ -19,8 +21,8 @@ const Placeholder = ({ title }) => (
   </div>
 )
 
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth()
+const ProtectedRoute = ({ children, roles }) => {
+  const { isAuthenticated, loading, user } = useAuth()
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center bg-black text-zinc-400">
@@ -29,6 +31,7 @@ const ProtectedRoute = ({ children }) => {
     )
   }
   if (!isAuthenticated) return <Navigate to="/login" replace />
+  if (roles && !roles.includes(user?.role)) return <Navigate to="/" replace />
   return children
 }
 
@@ -48,10 +51,24 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      {/* Otras rutas por rol — placeholder */}
+      {/* Rutas con verificación de rol */}
+      <Route
+        path="/dashboard/bookings"
+        element={
+          <ProtectedRoute roles={['artist']}>
+            <ArtistBookings />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/my-bookings"
+        element={
+          <ProtectedRoute roles={['client']}>
+            <ClientBookings />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/dashboard/services" element={<Placeholder title="Mis Servicios" />} />
-      <Route path="/dashboard/bookings" element={<Placeholder title="Solicitudes" />} />
-      <Route path="/my-bookings" element={<Placeholder title="Mis Reservas" />} />
       <Route path="/chat" element={<Placeholder title="Chat" />} />
     </Routes>
   )

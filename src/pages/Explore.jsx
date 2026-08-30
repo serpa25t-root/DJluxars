@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import FilterBar from '../components/explore/FilterBar'
 import ComparatorModal, { CompareBar } from '../components/explore/ComparatorModal'
+import BookingModal from '../components/booking/BookingModal'
 import Button from '../components/common/Button'
 
 const photographers = [
@@ -22,6 +23,7 @@ const Explore = () => {
   const [rating, setRating] = useState(0)
   const [compare, setCompare] = useState([])
   const [showCompare, setShowCompare] = useState(false)
+  const [bookingPhotographer, setBookingPhotographer] = useState(null)
 
   const filtered = useMemo(() => {
     return photographers.filter((p) => {
@@ -98,6 +100,12 @@ const Explore = () => {
                       {isSelected ? '✓ Comparando' : '+ Comparar'}
                     </button>
                   </div>
+                  <button
+                    onClick={() => setBookingPhotographer({ id: p.id, name: p.name, avatar: p.avatar, specialty: p.specialty, price: p.price })}
+                    className="mt-2 w-full rounded-full bg-red-600/10 border border-red-600/20 py-2 text-sm font-medium text-red-300 hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
+                  >
+                    Solicitar Reserva
+                  </button>
                 </div>
               </div>
             )
@@ -113,6 +121,7 @@ const Explore = () => {
 
       <CompareBar selected={compare} onRemove={(id) => setCompare((prev) => prev.filter((p) => p.id !== id))} onClear={() => setCompare([])} onCompare={() => setShowCompare(true)} />
       <ComparatorModal selected={compare} isOpen={showCompare} onClose={() => setShowCompare(false)} onRemove={(id) => setCompare((prev) => prev.filter((p) => p.id !== id))} onClear={() => setCompare([])} />
+      <BookingModal isOpen={!!bookingPhotographer} onClose={() => setBookingPhotographer(null)} photographer={bookingPhotographer} />
     </div>
   )
 }
