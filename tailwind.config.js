@@ -12,11 +12,12 @@ export default {
       },
       colors: {
         lux: {
-          dark: '#0f0f12',
-          surface: '#1a1a1e',
+          dark: '#050505',
+          surface: '#0a0a0a',
           muted: '#a1a1aa',
-          accent: '#c5a253',
-          accentHover: '#b8933f',
+          accent: '#dc2626',
+          accentHover: '#b91c1c',
+          crimson: '#e50914',
         }
       }
     },
