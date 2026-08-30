@@ -55,14 +55,12 @@ const Register = () => {
     }
 
     setErrorMsg(null)
+    setSuccessMsg(null)
     setLoading(true)
     try {
       await register({ name: name.trim(), email: email.trim(), phone: phone.trim(), password, role })
-      setSuccessMsg('Cuenta creada con éxito. Redirigiendo...')
-      setTimeout(() => {
-        if (role === 'artist') navigate('/dashboard/portfolio')
-        else navigate('/explorar')
-      }, 800)
+      navigate('/login', { state: { registered: true, message: '¡Cuenta creada con éxito! Por favor inicia sesión.' } })
+      return
     } catch (err) {
       const raw = err?.message || ''
       const low = raw.toLowerCase()

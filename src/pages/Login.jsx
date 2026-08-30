@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import AuthLayout from '../components/common/AuthLayout'
 import Input from '../components/common/Input'
@@ -8,9 +8,19 @@ import Button from '../components/common/Button'
 const Login = () => {
   const { login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const [form, setForm] = useState({ email: '', password: '' })
   const [toast, setToast] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [registeredBanner, setRegisteredBanner] = useState(
+    location.state?.registered ? location.state?.message || '¡Cuenta creada con éxito! Por favor inicia sesión.' : null
+  )
+
+  useEffect(() => {
+    if (location.state?.registered) {
+      window.history.replaceState({}, document.title)
+    }
+  }, [location.state])
 
   const handleChange = (e) => {
     const { id, value } = e.target
@@ -56,6 +66,14 @@ const Login = () => {
       }
     >
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+        {registeredBanner && (
+          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 flex gap-3 animate-[fadeIn_200ms_ease-out]" role="status">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-sm leading-relaxed text-emerald-200">{registeredBanner}</p>
+          </div>
+        )}
         <Input
           label="Correo Electrónico"
           id="email"

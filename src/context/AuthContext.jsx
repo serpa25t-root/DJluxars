@@ -120,22 +120,14 @@ export const AuthProvider = ({ children }) => {
     try {
       // Ruta verificada en users/urls.py -> api/users/register/ con slash final (Django exige trailing slash)
       const res = await api.post('users/register/', payload)
-      // Si el backend responde OK, persiste sesión para demo fluido
-      if (res.data?.access || res.data?.token) {
-        const newToken = res.data.access || res.data.token
-        const newUser = res.data.user || { email, username, role }
-        persistSession(newToken, newUser)
-      }
       return res.data
     } catch (err) {
       const isNetwork = !err?.response || err?.code === 'ERR_NETWORK' || err?.message === 'Network Error'
       const is404 = err?.response?.status === 404
-      // Fallback tolerante en modo demo: simula registro exitoso si no hay backend
+      // Fallback tolerante en modo demo: simula éxito sin guardar sesión (flujo obliga login)
       if (isNetwork || is404) {
         const demoUser = { email, username, role, phone_number: phone, first_name: firstName, last_name: lastName }
-        const demoToken = `demo-${Date.now()}-${role}`
-        persistSession(demoToken, demoUser)
-        return { user: demoUser, access: demoToken, demo: true }
+        return { user: demoUser, demo: true }
       }
       const msg = spanishErrorMap(extractErrorMsg(err, 'No se pudo crear la cuenta. Verifica los datos.'))
       if (msg.toLowerCase().includes('email') && msg.toLowerCase().includes('exist')) throw new Error('Este correo electrónico ya se encuentra registrado. Inicia sesión o utiliza otro.')
