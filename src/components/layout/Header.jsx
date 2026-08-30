@@ -1,0 +1,218 @@
+import { useState, useEffect } from 'react'
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
+
+const publicLinks = [
+  { label: 'Explorar', to: '/explorar', type: 'route' },
+  { label: 'Fotógrafos', href: '#fotografos', type: 'anchor' },
+  { label: 'Servicios', href: '#servicios', type: 'anchor' },
+]
+
+const artistLinks = [
+  { label: 'Mi Portafolio', to: '/dashboard/portfolio', type: 'route' },
+  { label: 'Mis Servicios', to: '/dashboard/services', type: 'route' },
+  { label: 'Solicitudes', to: '/dashboard/bookings', type: 'route' },
+]
+
+const clientLinks = [
+  { label: 'Explorar', to: '/explorar', type: 'route' },
+  { label: 'Mis Reservas', to: '/my-bookings', type: 'route' },
+  { label: 'Chat', to: '/chat', type: 'route' },
+]
+
+const Header = () => {
+  const [isOpen, setIsOpen] = useState(false)
+  const { user, isAuthenticated, logout } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  const displayName = user?.username || user?.email?.split('@')[0] || user?.name || user?.first_name || user?.email || 'Usuario'
+  const initials = displayName.slice(0, 2).toUpperCase()
+  const isOnline = isAuthenticated
+
+  let navLinks = publicLinks
+  if (isAuthenticated) {
+    if (user?.role === 'artist') navLinks = artistLinks
+    else if (user?.role === 'client') navLinks = clientLinks
+  }
+
+  const handleLogout = () => {
+    logout()
+    navigate('/')
+    setIsOpen(false)
+  }
+
+  useEffect(() => setIsOpen(false), [location.pathname])
+  useEffect(() => {
+    const onResize = () => { if (window.innerWidth >= 768) setIsOpen(false) }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+
+  return (
+    <header className="sticky top-0 z-50 backdrop-blur-xl bg-zinc-950/80 border-b border-red-900/20 shadow-2xl shadow-black/50">
+      <nav className="mx-auto flex h-[64px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-600 text-white shadow-md shadow-red-600/20 group-hover:bg-red-600 group-hover:shadow-lg group-hover:shadow-red-600/40 group-hover:scale-105 transition-all duration-300 ease-out will-change-transform">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </div>
+          <span className="font-display text-xl font-semibold tracking-tight text-white">
+            LuxArts
+          </span>
+          <span className="hidden sm:inline-flex ml-1 rounded-full border border-red-600/30 bg-red-600/10 px-2 py-0.5 text-[10px] font-semibold tracking-widest text-red-400 group-hover:bg-red-600 group-hover:text-white group-hover:border-red-600 transition-colors duration-300">
+            CINEMATIC
+          </span>
+        </Link>
+
+        <div className="hidden md:flex items-center gap-1">
+          {navLinks.map((link) =>
+            link.type === 'route' ? (
+              <NavLink
+                key={link.label}
+                to={link.to}
+                className={({ isActive }) =>
+                  `px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ease-out ${
+                    isActive
+                      ? 'bg-zinc-900 text-white border border-red-600/20 shadow-sm shadow-red-600/10'
+                      : 'text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent'
+                  }`
+                }
+              >
+                {link.label}
+              </NavLink>
+            ) : (
+              <a
+                key={link.label}
+                href={link.href}
+                className="px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors duration-150 ease-out rounded-full hover:bg-zinc-900 border border-transparent"
+              >
+                {link.label}
+              </a>
+            )
+          )}
+        </div>
+
+        <div className="hidden md:flex items-center gap-4">
+          {isAuthenticated ? (
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2.5 rounded-full border border-zinc-800 bg-zinc-900/60 pl-1 pr-3 py-1 hover:border-red-600/30 transition-colors">
+                <div className="relative">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800 border-2 border-red-600/40 text-white text-xs font-bold">
+                    {initials.slice(0, 2)}
+                  </div>
+                  <span className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-zinc-950 ${isOnline ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                </div>
+                <span className="text-sm font-medium text-zinc-200 max-w-[120px] truncate">Hola, {displayName}</span>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 rounded-full border border-red-600/30 bg-red-600/10 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all text-sm font-medium text-red-300 hover:shadow-md hover:shadow-red-600/20 active:scale-95"
+              >
+                Cerrar Sesión
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <Link to="/login" className="px-4 py-2 rounded-full border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-900 hover:border-zinc-700 transition-all text-sm font-medium">
+                Iniciar Sesión
+              </Link>
+              <Link to="/register" className="px-5 py-2 rounded-full bg-red-600 text-white hover:bg-red-700 shadow-md shadow-red-600/20 hover:shadow-lg hover:shadow-red-600/30 transition-all text-sm font-semibold active:scale-95">
+                Registrarse
+              </Link>
+            </div>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="inline-flex md:hidden items-center justify-center rounded-lg p-2.5 text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+          aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
+          aria-expanded={isOpen}
+        >
+          {isOpen ? (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
+        </button>
+      </nav>
+
+      {isOpen && (
+        <div className="md:hidden border-t border-red-900/20 bg-zinc-950 shadow-2xl shadow-black/50 animate-[fadeIn_200ms_ease-out]">
+          <div className="px-4 py-4 sm:px-6">
+            {isAuthenticated && (
+              <div className="mb-4 flex items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5">
+                <div className="relative">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-800 border-2 border-red-600/40 text-white text-sm font-bold">
+                    {initials.slice(0, 2)}
+                  </div>
+                  <span className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-zinc-900 ${isOnline ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-white truncate">Hola, {displayName}</p>
+                  <p className="text-xs text-zinc-400">Sesión activa</p>
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-1">
+              {navLinks.map((link) =>
+                link.type === 'route' ? (
+                  <NavLink
+                    key={link.label}
+                    to={link.to}
+                    onClick={() => setIsOpen(false)}
+                    className={({ isActive }) =>
+                      `px-3 py-3 text-base font-medium rounded-lg transition-colors ${isActive ? 'bg-zinc-900 text-white border border-red-600/20' : 'text-zinc-300 hover:text-white hover:bg-zinc-900 border border-transparent'}`
+                    }
+                  >
+                    {link.label}
+                  </NavLink>
+                ) : (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    onClick={() => setIsOpen(false)}
+                    className="px-3 py-3 text-base font-medium text-zinc-300 hover:text-white hover:bg-zinc-900 rounded-lg transition-colors"
+                  >
+                    {link.label}
+                  </a>
+                )
+              )}
+            </div>
+
+            <div className="mt-4 flex flex-col gap-3 pt-4 border-t border-zinc-900">
+              {isAuthenticated ? (
+                <button
+                  onClick={handleLogout}
+                  className="w-full px-4 py-2.5 rounded-full border border-red-600/30 bg-red-600/10 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all text-sm font-medium text-red-300 text-center"
+                >
+                  Cerrar Sesión
+                </button>
+              ) : (
+                <>
+                  <Link to="/login" onClick={() => setIsOpen(false)} className="w-full px-4 py-2.5 rounded-full border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-900 text-center text-sm font-medium transition-colors">
+                    Iniciar Sesión
+                  </Link>
+                  <Link to="/register" onClick={() => setIsOpen(false)} className="w-full px-4 py-2.5 rounded-full bg-red-600 text-white hover:bg-red-700 text-center text-sm font-semibold transition-colors">
+                    Registrarse
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </header>
+  )
+}
+
+export default Header

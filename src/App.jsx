@@ -11,6 +11,8 @@ import ArtistProfile from './pages/ArtistProfile'
 import ArtistBookings from './pages/dashboard/ArtistBookings'
 import ClientBookings from './pages/ClientBookings'
 import Chat from './pages/Chat'
+import DashboardLayout from './components/layout/DashboardLayout'
+import ArtistDashboard from './pages/dashboard/ArtistDashboard'
 
 const Placeholder = ({ title }) => (
   <div className="min-h-[100dvh] flex flex-col bg-black">
@@ -47,22 +49,21 @@ function AppRoutes() {
       <Route path="/explorar" element={<Explore />} />
       <Route path="/fotografos/:id" element={<ArtistProfile />} />
       <Route
-        path="/dashboard/portfolio"
+        path="/dashboard"
         element={
           <ProtectedRoute>
-            <Portfolio />
+            <DashboardLayout />
           </ProtectedRoute>
         }
-      />
-      {/* Rutas con verificación de rol */}
-      <Route
-        path="/dashboard/bookings"
-        element={
-          <ProtectedRoute roles={['artist']}>
-            <ArtistBookings />
-          </ProtectedRoute>
-        }
-      />
+      >
+        <Route index element={<ArtistDashboard />} />
+        <Route path="portfolio" element={<Portfolio />} />
+        <Route path="bookings" element={<ProtectedRoute roles={['artist']}><ArtistBookings /></ProtectedRoute>} />
+        <Route path="services" element={<Placeholder title="Mis Servicios" />} />
+        <Route path="favorites" element={<Placeholder title="Favoritos" />} />
+        <Route path="stats" element={<Placeholder title="Estadísticas" />} />
+        <Route path="settings" element={<Placeholder title="Configuración" />} />
+      </Route>
       <Route
         path="/my-bookings"
         element={
@@ -71,7 +72,6 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      <Route path="/dashboard/services" element={<Placeholder title="Mis Servicios" />} />
       <Route
         path="/chat"
         element={
