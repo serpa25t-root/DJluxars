@@ -45,13 +45,15 @@ const ClientBookings = () => {
                 <div className="mt-4 space-y-1.5 text-sm">
                   <div className="flex justify-between"><span className="text-zinc-500">Fecha</span><span className="text-white">{b.date}</span></div>
                   <div className="flex justify-between"><span className="text-zinc-500">Ubicación</span><span className="text-white truncate ml-4">{b.location}</span></div>
-                  <div className="flex justify-between"><span className="text-zinc-500">Tarifa</span><span className="font-bold text-white">${b.price}</span></div>
+                  <div className="flex justify-between"><span className="text-zinc-500">Tarifa</span><span className="font-bold text-white">${b.price.toLocaleString('es-CO')} COP</span></div>
                 </div>
 
                 <p className="mt-3 text-xs leading-relaxed text-zinc-400 line-clamp-2">{b.message}</p>
 
                 <div className="mt-4 flex gap-2">
-                  <Button variant="secondary" className="flex-1 text-sm py-2 border-zinc-800">Contactar Fotógrafo</Button>
+                  <Link to={`/chat?contactId=${b.photographerId}&name=${encodeURIComponent(b.photographerName)}`} className="flex-1">
+                    <Button variant="secondary" className="w-full text-sm py-2 border-zinc-800">Contactar Fotógrafo</Button>
+                  </Link>
                   <Link to={`/fotografos/${b.photographerId}`} className="flex-1">
                     <Button variant="primary" className="w-full text-sm py-2">Ver Perfil</Button>
                   </Link>

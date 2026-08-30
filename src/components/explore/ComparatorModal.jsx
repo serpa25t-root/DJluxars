@@ -42,7 +42,7 @@ const ComparatorModal = ({ selected, onRemove, onClear, isOpen, onClose }) => {
               <tr>
                 <td className="px-4 py-3 text-zinc-400">Precio base</td>
                 {selected.map((p) => (
-                  <td key={p.id} className="px-4 py-3 text-white font-semibold">${p.price} <span className="text-zinc-500 font-normal">/ sesión</span></td>
+                  <td key={p.id} className="px-4 py-3 text-white font-semibold">${p.price.toLocaleString('es-CO')} <span className="text-zinc-500 font-normal">COP / sesión</span></td>
                 ))}
               </tr>
               <tr>

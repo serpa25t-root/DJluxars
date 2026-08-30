@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import ScrollToTop from './components/common/ScrollToTop'
+import BackToTop from './components/common/BackToTop'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -8,6 +10,7 @@ import Explore from './pages/Explore'
 import ArtistProfile from './pages/ArtistProfile'
 import ArtistBookings from './pages/dashboard/ArtistBookings'
 import ClientBookings from './pages/ClientBookings'
+import Chat from './pages/Chat'
 
 const Placeholder = ({ title }) => (
   <div className="min-h-[100dvh] flex flex-col bg-black">
@@ -69,7 +72,14 @@ function AppRoutes() {
         }
       />
       <Route path="/dashboard/services" element={<Placeholder title="Mis Servicios" />} />
-      <Route path="/chat" element={<Placeholder title="Chat" />} />
+      <Route
+        path="/chat"
+        element={
+          <ProtectedRoute>
+            <Chat />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   )
 }
@@ -78,7 +88,9 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <AppRoutes />
+        <BackToTop />
       </BrowserRouter>
     </AuthProvider>
   )

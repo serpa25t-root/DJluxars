@@ -30,7 +30,7 @@ const BookingModal = ({ isOpen, onClose, photographer }) => {
 
   if (!isOpen || !photographer) return null
 
-  const base = photographer.price || 300
+  const base = photographer.price || 350000
   const factor = services.find((s) => s.value === form.service)?.factor || 1
   const estimated = Math.round(base * factor)
 
@@ -146,9 +146,9 @@ const BookingModal = ({ isOpen, onClose, photographer }) => {
           <div className="rounded-xl border border-red-600/20 bg-red-600/10 px-4 py-3 flex items-center justify-between">
             <div>
               <p className="text-xs tracking-widest text-red-300 font-semibold">TARIFA ESTIMADA</p>
-              <p className="text-sm text-zinc-400">Base ${base} × {factor} ({form.service})</p>
+              <p className="text-sm text-zinc-400">Base ${base.toLocaleString('es-CO')} × {factor} ({form.service})</p>
             </div>
-            <p className="text-xl font-bold text-white">${estimated} <span className="text-xs font-normal text-zinc-400">USD</span></p>
+            <p className="text-xl font-bold text-white">${estimated.toLocaleString('es-CO')} <span className="text-xs font-normal text-zinc-400">COP</span></p>
           </div>
 
           <Button type="submit" variant="primary" disabled={loading} className="w-full py-3.5 disabled:opacity-60">

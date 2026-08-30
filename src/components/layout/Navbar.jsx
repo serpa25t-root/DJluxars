@@ -64,7 +64,7 @@ const Navbar = () => {
   }, [])
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-zinc-900 bg-black/80 backdrop-blur-xl supports-[backdrop-filter]:bg-black/70">
+    <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-zinc-950/80 border-b border-red-600/10">
       <nav className="mx-auto flex h-[64px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo -> / */}
         <Link to="/" className="flex items-center gap-2.5 group">

@@ -6,20 +6,20 @@ import BookingModal from '../components/booking/BookingModal'
 import Button from '../components/common/Button'
 
 const photographers = [
-  { id: 1, name: 'Elena Mora', specialty: 'Retrato', avatar: 'https://i.pravatar.cc/150?img=5', rating: 4.9, reviews: 128, price: 350, delivery: '3 días', category: 'Retrato' },
-  { id: 2, name: 'Marc Dubois', specialty: 'Moda', avatar: 'https://i.pravatar.cc/150?img=15', rating: 4.8, reviews: 94, price: 500, delivery: '5 días', category: 'Moda' },
-  { id: 3, name: 'Sofía Reyes', specialty: 'Eventos', avatar: 'https://i.pravatar.cc/150?img=9', rating: 4.7, reviews: 76, price: 280, delivery: '2 días', category: 'Eventos' },
-  { id: 4, name: 'Javier Ortiz', specialty: 'Editorial', avatar: 'https://i.pravatar.cc/150?img=12', rating: 4.9, reviews: 210, price: 420, delivery: '4 días', category: 'Editorial' },
-  { id: 5, name: 'Lucía Vega', specialty: 'Retrato', avatar: 'https://i.pravatar.cc/150?img=32', rating: 4.6, reviews: 54, price: 180, delivery: '2 días', category: 'Retrato' },
-  { id: 6, name: 'Andrés Silva', specialty: 'Moda', avatar: 'https://i.pravatar.cc/150?img=33', rating: 4.85, reviews: 110, price: 600, delivery: '6 días', category: 'Moda' },
-  { id: 7, name: 'Camila Torres', specialty: 'Eventos', avatar: 'https://i.pravatar.cc/150?img=26', rating: 4.75, reviews: 88, price: 320, delivery: '3 días', category: 'Eventos' },
-  { id: 8, name: 'Diego León', specialty: 'Editorial', avatar: 'https://i.pravatar.cc/150?img=20', rating: 4.95, reviews: 152, price: 480, delivery: '4 días', category: 'Editorial' },
+  { id: 1, name: 'Elena Mora', specialty: 'Retrato', avatar: 'https://i.pravatar.cc/150?img=5', rating: 4.9, reviews: 128, price: 350000, delivery: '3 días', category: 'Retrato' },
+  { id: 2, name: 'Marc Dubois', specialty: 'Moda', avatar: 'https://i.pravatar.cc/150?img=15', rating: 4.8, reviews: 94, price: 500000, delivery: '5 días', category: 'Moda' },
+  { id: 3, name: 'Sofía Reyes', specialty: 'Eventos', avatar: 'https://i.pravatar.cc/150?img=9', rating: 4.7, reviews: 76, price: 280000, delivery: '2 días', category: 'Eventos' },
+  { id: 4, name: 'Javier Ortiz', specialty: 'Editorial', avatar: 'https://i.pravatar.cc/150?img=12', rating: 4.9, reviews: 210, price: 420000, delivery: '4 días', category: 'Editorial' },
+  { id: 5, name: 'Lucía Vega', specialty: 'Retrato', avatar: 'https://i.pravatar.cc/150?img=32', rating: 4.6, reviews: 54, price: 180000, delivery: '2 días', category: 'Retrato' },
+  { id: 6, name: 'Andrés Silva', specialty: 'Moda', avatar: 'https://i.pravatar.cc/150?img=33', rating: 4.85, reviews: 110, price: 600000, delivery: '6 días', category: 'Moda' },
+  { id: 7, name: 'Camila Torres', specialty: 'Eventos', avatar: 'https://i.pravatar.cc/150?img=26', rating: 4.75, reviews: 88, price: 320000, delivery: '3 días', category: 'Eventos' },
+  { id: 8, name: 'Diego León', specialty: 'Editorial', avatar: 'https://i.pravatar.cc/150?img=20', rating: 4.95, reviews: 152, price: 480000, delivery: '4 días', category: 'Editorial' },
 ]
 
 const Explore = () => {
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('Todas')
-  const [price, setPrice] = useState(800)
+  const [price, setPrice] = useState(800000)
   const [rating, setRating] = useState(0)
   const [compare, setCompare] = useState([])
   const [showCompare, setShowCompare] = useState(false)
@@ -86,7 +86,7 @@ const Explore = () => {
                         <span className="text-xs text-zinc-500">({p.reviews})</span>
                       </div>
                     </div>
-                    <span className="rounded-full border border-zinc-800 bg-zinc-900 px-2.5 py-1 text-xs font-semibold text-zinc-300">{p.price} USD</span>
+                    <span className="rounded-full border border-zinc-800 bg-zinc-900 px-2.5 py-1 text-xs font-semibold text-zinc-300">${p.price.toLocaleString('es-CO')} COP</span>
                   </div>
                   <p className="mt-3 text-xs text-zinc-500">Entrega {p.delivery} • Base por sesión</p>
                   <div className="mt-4 flex gap-2">

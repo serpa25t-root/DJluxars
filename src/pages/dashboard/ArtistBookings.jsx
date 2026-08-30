@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import Button from '../../components/common/Button'
 import { getBookings, updateBookingStatus, seedIfEmpty } from '../../services/bookings'
 
@@ -55,25 +56,30 @@ const ArtistBookings = () => {
                     <p className="text-white">{b.service}</p>
                     <p className="text-xs text-zinc-500">{b.location}</p>
                   </td>
-                  <td className="px-4 py-4 font-semibold text-white">${b.price}</td>
+                  <td className="px-4 py-4 font-semibold text-white">${b.price.toLocaleString('es-CO')} COP</td>
                   <td className="px-4 py-4">
                     <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${statusBadge[b.status] || statusBadge.Pendiente}`}>
                       {b.status}
                     </span>
                   </td>
                   <td className="px-4 py-4">
-                    {b.status === 'Pendiente' ? (
-                      <div className="flex gap-2">
-                        <Button variant="primary" className="text-xs px-3 py-1.5" onClick={() => handle(b.id, 'Confirmada')}>
-                          Aceptar Solicitud
-                        </Button>
-                        <Button variant="secondary" className="text-xs px-3 py-1.5 border-zinc-800" onClick={() => handle(b.id, 'Rechazada')}>
-                          Rechazar Solicitud
-                        </Button>
-                      </div>
-                    ) : (
-                      <span className="text-xs text-zinc-500">—</span>
-                    )}
+                    <div className="flex flex-wrap gap-2 items-center">
+                      {b.status === 'Pendiente' ? (
+                        <>
+                          <Button variant="primary" className="text-xs px-3 py-1.5" onClick={() => handle(b.id, 'Confirmada')}>
+                            Aceptar Solicitud
+                          </Button>
+                          <Button variant="secondary" className="text-xs px-3 py-1.5 border-zinc-800" onClick={() => handle(b.id, 'Rechazada')}>
+                            Rechazar Solicitud
+                          </Button>
+                        </>
+                      ) : (
+                        <span className="text-xs text-zinc-500">—</span>
+                      )}
+                      <Link to={`/chat?contactId=${b.id}&name=${encodeURIComponent(b.clientName)}`}>
+                        <Button variant="secondary" className="text-xs px-3 py-1.5 border-zinc-800">Contactar Fotógrafo</Button>
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}

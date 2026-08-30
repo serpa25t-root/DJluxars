@@ -25,14 +25,14 @@ const FilterBar = ({ category, onCategory, price, onPrice, rating, onRating }) =
           <div className="flex items-center gap-3">
             <input
               type="range"
-              min="50"
-              max="800"
-              step="50"
+              min="50000"
+              max="1500000"
+              step="50000"
               value={price}
               onChange={(e) => onPrice(Number(e.target.value))}
               className="flex-1 accent-red-600"
             />
-            <span className="text-sm font-semibold text-white whitespace-nowrap">${price} USD</span>
+            <span className="text-sm font-semibold text-white whitespace-nowrap">${price.toLocaleString('es-CO')} COP</span>
           </div>
         </div>
 

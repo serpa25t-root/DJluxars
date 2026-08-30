@@ -3,7 +3,18 @@ const KEY = 'luxarts_bookings'
 export const getBookings = () => {
   try {
     const raw = localStorage.getItem(KEY)
-    return raw ? JSON.parse(raw) : []
+    const list = raw ? JSON.parse(raw) : []
+    // Migración a COP: si precios antiguos en USD (< 10000), conviértelos
+    let migrated = false
+    const fixed = list.map((b) => {
+      if (typeof b.price === 'number' && b.price < 10000) {
+        migrated = true
+        return { ...b, price: b.price * 1000 }
+      }
+      return b
+    })
+    if (migrated) saveBookings(fixed)
+    return migrated ? fixed : list
   } catch {
     return []
   }
@@ -41,7 +52,7 @@ export const seedIfEmpty = () => {
       service: 'Evento',
       location: 'Cartagena',
       message: 'Boda al atardecer, 80 invitados, luz natural.',
-      price: 420,
+      price: 420000,
       status: 'Pendiente',
       createdAt: new Date().toISOString(),
     },
@@ -57,7 +68,7 @@ export const seedIfEmpty = () => {
       service: 'Comercial',
       location: 'Bogotá',
       message: 'Campaña editorial otoño, estudio.',
-      price: 750,
+      price: 750000,
       status: 'Confirmada',
       createdAt: new Date().toISOString(),
     },
