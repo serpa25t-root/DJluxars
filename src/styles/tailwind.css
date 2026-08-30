@@ -1,0 +1,7 @@
+/* Configuración adicional de Tailwind - LuxArts */
+/* Este archivo puede importar extensiones o capas personalizadas si se requieren.
+   La configuración principal se encuentra en tailwind.config.js y src/index.css */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
