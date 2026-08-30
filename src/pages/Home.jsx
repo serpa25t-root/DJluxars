@@ -35,11 +35,7 @@ const Home = () => {
             >
               <div className="inline-flex items-center gap-2.5 rounded-full border border-red-600/30 bg-red-600/10 px-4 py-1.5 backdrop-blur-md">
                 <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse shadow-sm shadow-red-500/50" />
-                <span className="text-xs font-semibold tracking-widest text-red-300">EST. 2026 • CINEMATIC STUDIO</span>
-                <span className="hidden sm:inline-flex h-3 w-px bg-red-600/30 mx-1" />
-                <span className="hidden sm:inline text-xs font-medium tracking-wide text-zinc-300">
-                  2.500+ fotógrafos verificados
-                </span>
+                <span className="text-xs font-semibold tracking-widest text-red-300">PORTAFOLIOS EDITORIALES • TALENTO VERIFICADO</span>
               </div>
             </div>
 
@@ -59,8 +55,7 @@ const Home = () => {
                 <p
                   className="mt-5 max-w-2xl mx-auto lg:mx-0 text-[15px] leading-relaxed text-zinc-400 sm:text-[17px] animate-[fadeInUp_600ms_var(--ease-out-quart)_140ms_both]"
                 >
-                  Portafolios con acabado de sala de cine. Contrata talento, cura tu obra y
-                  proyecta tu visión en negro absoluto con acentos crimson.
+                  Exhibe tu portafolio con calidad cinemática y conecta con clientes listos para contratar tu talento. La plataforma exclusiva para fotógrafos y creadores visuales.
                 </p>
 
                 <div
@@ -233,7 +228,7 @@ const Home = () => {
             <div className="grid grid-cols-2 gap-8 md:grid-cols-4 divide-x divide-zinc-900">
               <div className="text-center px-2">
                 <p className="font-display text-3xl font-bold text-white">15k<span className="text-red-600">+</span></p>
-                <p className="mt-1 text-xs font-medium uppercase tracking-widest text-zinc-500">Obras publicadas</p>
+                <p className="mt-1 text-xs font-medium uppercase tracking-widest text-zinc-500">Obras Publicadas</p>
               </div>
               <div className="text-center px-2">
                 <p className="font-display text-3xl font-bold text-white">98<span className="text-red-600">%</span></p>
@@ -241,7 +236,7 @@ const Home = () => {
               </div>
               <div className="text-center px-2">
                 <p className="font-display text-3xl font-bold text-white">2.5k</p>
-                <p className="mt-1 text-xs font-medium uppercase tracking-widest text-zinc-500">Fotógrafos verificados</p>
+                <p className="mt-1 text-xs font-medium uppercase tracking-widest text-zinc-500">Reservas Activas</p>
               </div>
               <div className="text-center px-2">
                 <p className="font-display text-3xl font-bold text-white">24/7</p>
