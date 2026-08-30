@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import Button from '../common/Button'
 
 const publicLinks = [
-  { label: 'Explorar', href: '#explorar', type: 'anchor' },
+  { label: 'Explorar', to: '/explorar', type: 'route' },
   { label: 'Fotógrafos', href: '#fotografos', type: 'anchor' },
   { label: 'Servicios', href: '#servicios', type: 'anchor' },
 ]
@@ -16,7 +16,7 @@ const artistLinks = [
 ]
 
 const clientLinks = [
-  { label: 'Explorar', href: '#explorar', type: 'anchor' },
+  { label: 'Explorar', to: '/explorar', type: 'route' },
   { label: 'Mis Reservas', to: '/my-bookings', type: 'route' },
   { label: 'Chat', to: '/chat', type: 'route' },
 ]

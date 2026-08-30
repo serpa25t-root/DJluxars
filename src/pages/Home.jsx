@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
 import Button from '../components/common/Button'
@@ -61,18 +62,22 @@ const Home = () => {
                 <div
                   className="mt-8 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start animate-[fadeInUp_600ms_var(--ease-out-quart)_200ms_both]"
                 >
-                  <Button
-                    variant="primary"
-                    className="px-8 py-3.5 text-[15px] shadow-xl shadow-red-600/20 hover:shadow-red-600/30"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                    Explorar Galería
-                  </Button>
-                  <Button variant="secondary" className="px-8 py-3.5 text-[15px] border-zinc-800 hover:border-red-600/30">
-                    Unirme como Fotógrafo
-                  </Button>
+                  <Link to="/explorar">
+                    <Button
+                      variant="primary"
+                      className="px-8 py-3.5 text-[15px] shadow-xl shadow-red-600/20 hover:shadow-red-600/30"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      Explorar Galería
+                    </Button>
+                  </Link>
+                  <Link to="/register">
+                    <Button variant="secondary" className="px-8 py-3.5 text-[15px] border-zinc-800 hover:border-red-600/30">
+                      Unirme como Fotógrafo
+                    </Button>
+                  </Link>
                 </div>
 
                 {/* Social proof — red stars */}

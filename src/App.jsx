@@ -4,6 +4,8 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Portfolio from './pages/dashboard/Portfolio'
+import Explore from './pages/Explore'
+import ArtistProfile from './pages/ArtistProfile'
 
 const Placeholder = ({ title }) => (
   <div className="min-h-[100dvh] flex flex-col bg-black">
@@ -36,6 +38,8 @@ function AppRoutes() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/explorar" element={<Explore />} />
+      <Route path="/fotografos/:id" element={<ArtistProfile />} />
       <Route
         path="/dashboard/portfolio"
         element={
