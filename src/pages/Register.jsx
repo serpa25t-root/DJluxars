@@ -36,32 +36,45 @@ const Register = () => {
   const navigate = useNavigate()
   const [role, setRole] = useState('client')
   const [form, setForm] = useState({ name: '', email: '', phone: '', password: '' })
-  const [toast, setToast] = useState(null)
+  const [errorMsg, setErrorMsg] = useState(null)
+  const [successMsg, setSuccessMsg] = useState(null)
   const [loading, setLoading] = useState(false)
 
   const handleChange = (e) => {
     const { id, value } = e.target
     setForm((prev) => ({ ...prev, [id]: value }))
+    if (errorMsg) setErrorMsg(null)
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     const { name, email, phone, password } = form
     if (!name.trim() || !email.trim() || !phone.trim() || !password.trim()) {
-      setToast({ msg: 'Por favor, completa todos los campos.', type: 'error' })
-      setTimeout(() => setToast(null), 3000)
+      setErrorMsg('Por favor completa todos los campos requeridos.')
       return
     }
 
+    setErrorMsg(null)
     setLoading(true)
     try {
       await register({ name: name.trim(), email: email.trim(), phone: phone.trim(), password, role })
-      setToast({ msg: 'Cuenta creada correctamente. Redirigiendo al login…', type: 'success' })
-      setTimeout(() => navigate('/login'), 900)
+      setSuccessMsg('Cuenta creada con éxito. Redirigiendo...')
+      setTimeout(() => {
+        if (role === 'artist') navigate('/dashboard/portfolio')
+        else navigate('/explorar')
+      }, 800)
     } catch (err) {
-      const msg = err?.message || 'No se pudo crear la cuenta. Verifica los datos.'
-      setToast({ msg, type: 'error' })
-      setTimeout(() => setToast(null), 3500)
+      const raw = err?.message || ''
+      const low = raw.toLowerCase()
+      if (low.includes('no se encontró el servicio') || low.includes('network error') || err?.response?.status === 500 || err?.response?.status === 404) {
+        setErrorMsg('No fue posible conectar con el servicio de registro. Inténtalo de nuevo en unos minutos.')
+      } else if (low.includes('ya se encuentra registrado') || (low.includes('email') && low.includes('exist')) || low.includes('ya está registrado')) {
+        setErrorMsg('Este correo electrónico ya se encuentra registrado. Inicia sesión o utiliza otro.')
+      } else if (low.includes('completa todos los campos')) {
+        setErrorMsg('Por favor completa todos los campos requeridos.')
+      } else {
+        setErrorMsg(raw || 'No fue posible conectar con el servicio de registro. Inténtalo de nuevo en unos minutos.')
+      }
     } finally {
       setLoading(false)
     }
@@ -116,6 +129,23 @@ const Register = () => {
           </p>
         </div>
 
+        {errorMsg && (
+          <div className="rounded-xl border border-red-600/30 bg-red-600/10 px-4 py-3 flex gap-3 animate-[fadeIn_200ms_ease-out]" role="alert">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-sm leading-relaxed text-red-200">{errorMsg}</p>
+          </div>
+        )}
+        {successMsg && (
+          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 flex gap-3" role="status">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-sm leading-relaxed text-emerald-200">{successMsg}</p>
+          </div>
+        )}
+
         <Input label="Nombre completo" id="name" placeholder="Ana López" value={form.name} onChange={handleChange} required autoComplete="name" />
         <Input label="Correo Electrónico" id="email" type="email" placeholder="ana@estudio.com" value={form.email} onChange={handleChange} required autoComplete="email" />
         <Input label="Teléfono" id="phone" type="tel" placeholder="+57 300 000 0000" value={form.phone} onChange={handleChange} required autoComplete="tel" />
@@ -130,22 +160,6 @@ const Register = () => {
           <a href="#" className="underline decoration-zinc-700 underline-offset-2 hover:text-zinc-300">Política de privacidad</a>.
         </p>
       </form>
-
-      {toast && (
-        <div
-          className={`fixed bottom-6 left-1/2 -translate-x-1/2 rounded-full border px-4 py-2.5 text-sm font-medium shadow-xl animate-[fadeInUp_300ms_var(--ease-out-quart)_both] ${
-            toast.type === 'success'
-              ? 'border-red-600/30 bg-zinc-900 text-white shadow-red-600/20'
-              : 'border-amber-500/30 bg-zinc-900 text-amber-200 shadow-amber-500/20'
-          }`}
-          role="alert"
-        >
-          <span className="inline-flex items-center gap-2">
-            <span className={`h-2 w-2 rounded-full ${toast.type === 'success' ? 'bg-red-500 animate-pulse' : 'bg-amber-400'}`} />
-            {toast.msg}
-          </span>
-        </div>
-      )}
     </AuthLayout>
   )
 }
