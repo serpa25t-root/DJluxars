@@ -4,17 +4,30 @@ export const getBookings = () => {
   try {
     const raw = localStorage.getItem(KEY)
     const list = raw ? JSON.parse(raw) : []
-    // Migración a COP: si precios antiguos en USD (< 10000), conviértelos
     let migrated = false
     const fixed = list.map((b) => {
+      let nb = { ...b }
       if (typeof b.price === 'number' && b.price < 10000) {
+        nb.price = b.price * 1000
         migrated = true
-        return { ...b, price: b.price * 1000 }
       }
-      return b
+      const base = nb.base_price ?? nb.price
+      if (nb.base_price == null) {
+        nb.base_price = base
+        migrated = true
+      }
+      if (nb.platform_fee == null) {
+        nb.platform_fee = Math.round(base * 0.1)
+        migrated = true
+      }
+      if (nb.artist_payout == null) {
+        nb.artist_payout = base - nb.platform_fee
+        migrated = true
+      }
+      return nb
     })
     if (migrated) saveBookings(fixed)
-    return migrated ? fixed : list
+    return migrated ? fixed : fixed
   } catch {
     return []
   }
@@ -53,6 +66,9 @@ export const seedIfEmpty = () => {
       location: 'Cartagena',
       message: 'Boda al atardecer, 80 invitados, luz natural.',
       price: 420000,
+      base_price: 420000,
+      platform_fee: 42000,
+      artist_payout: 378000,
       status: 'Pendiente',
       createdAt: new Date().toISOString(),
     },
@@ -69,6 +85,9 @@ export const seedIfEmpty = () => {
       location: 'Bogotá',
       message: 'Campaña editorial otoño, estudio.',
       price: 750000,
+      base_price: 750000,
+      platform_fee: 75000,
+      artist_payout: 675000,
       status: 'Confirmada',
       createdAt: new Date().toISOString(),
     },

@@ -1,6 +1,19 @@
 const categories = ['Todas', 'Retrato', 'Moda', 'Eventos', 'Editorial']
 
-const FilterBar = ({ category, onCategory, price, onPrice, rating, onRating }) => {
+const FilterBar = ({
+  category,
+  onCategory,
+  price,
+  onPrice,
+  rating,
+  onRating,
+  onUseLocation,
+  locationLabel,
+  loadingLocation,
+  sortByDistance,
+  onToggleSort,
+  hasLocation,
+}) => {
   return (
     <div className="rounded-2xl border border-zinc-900 bg-zinc-950 p-4 flex flex-col gap-4">
       <div className="flex flex-wrap gap-2">
@@ -54,6 +67,36 @@ const FilterBar = ({ category, onCategory, price, onPrice, rating, onRating }) =
             ))}
           </div>
         </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-zinc-900">
+        <button
+          onClick={onUseLocation}
+          disabled={loadingLocation}
+          className="inline-flex items-center gap-2 rounded-full border border-red-600/30 bg-red-600/10 px-4 py-2 text-sm font-medium text-red-300 hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors disabled:opacity-60"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 11a3 3 0 100-6 3 3 0 000 6z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 22s7-6.5 7-11a7 7 0 11-14 0c0 4.5 7 11 7 11z" />
+          </svg>
+          {loadingLocation ? 'Detectando...' : 'Usar mi ubicación actual'}
+        </button>
+        {locationLabel && (
+          <span className="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">
+            {locationLabel}
+          </span>
+        )}
+        {hasLocation && (
+          <label className="ml-auto flex items-center gap-2 text-xs text-zinc-400 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={sortByDistance}
+              onChange={(e) => onToggleSort(e.target.checked)}
+              className="h-3.5 w-3.5 rounded border-zinc-700 bg-zinc-900 text-red-600 focus:ring-red-600/20"
+            />
+            Ordenar por cercanía
+          </label>
+        )}
       </div>
     </div>
   )

@@ -56,7 +56,20 @@ const ArtistBookings = () => {
                     <p className="text-white">{b.service}</p>
                     <p className="text-xs text-zinc-500">{b.location}</p>
                   </td>
-                  <td className="px-4 py-4 font-semibold text-white">${b.price.toLocaleString('es-CO')} COP</td>
+                  <td className="px-4 py-4 text-xs leading-relaxed">
+                    {(() => {
+                      const base = b.base_price ?? b.price
+                      const fee = b.platform_fee ?? Math.round(base * 0.1)
+                      const payout = b.artist_payout ?? base - fee
+                      return (
+                        <div className="space-y-0.5">
+                          <p className="text-white">Valor del Servicio: <span className="font-semibold">${base.toLocaleString('es-CO')} COP</span></p>
+                          <p className="text-red-300">Comisión LuxArts (10%): <span className="font-semibold">-${fee.toLocaleString('es-CO')} COP</span></p>
+                          <p className="text-emerald-300">Ganancia Neta Fotógrafo: <span className="font-semibold">${payout.toLocaleString('es-CO')} COP</span></p>
+                        </div>
+                      )
+                    })()}
+                  </td>
                   <td className="px-4 py-4">
                     <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${statusBadge[b.status] || statusBadge.Pendiente}`}>
                       {b.status}

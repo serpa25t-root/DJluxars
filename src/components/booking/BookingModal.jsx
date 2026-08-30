@@ -33,6 +33,8 @@ const BookingModal = ({ isOpen, onClose, photographer }) => {
   const base = photographer.price || 350000
   const factor = services.find((s) => s.value === form.service)?.factor || 1
   const estimated = Math.round(base * factor)
+  const platformFee = Math.round(estimated * 0.1)
+  const artistPayout = estimated - platformFee
 
   const handleChange = (e) => {
     const { id, value } = e.target
@@ -55,6 +57,9 @@ const BookingModal = ({ isOpen, onClose, photographer }) => {
       location: form.location,
       message: form.message,
       price: estimated,
+      base_price: estimated,
+      platform_fee: platformFee,
+      artist_payout: artistPayout,
     }
     try {
       await api.post('bookings/', payload)
@@ -72,7 +77,7 @@ const BookingModal = ({ isOpen, onClose, photographer }) => {
       }
     }
 
-    // Persistencia local para paneles
+    // Persistencia local para paneles — incluye comisión 10%
     addBooking({
       id: Date.now(),
       photographerId: photographer.id,
@@ -86,6 +91,9 @@ const BookingModal = ({ isOpen, onClose, photographer }) => {
       location: form.location,
       message: form.message,
       price: estimated,
+      base_price: estimated,
+      platform_fee: platformFee,
+      artist_payout: artistPayout,
       status: 'Pendiente',
       createdAt: new Date().toISOString(),
     })
@@ -147,6 +155,7 @@ const BookingModal = ({ isOpen, onClose, photographer }) => {
             <div>
               <p className="text-xs tracking-widest text-red-300 font-semibold">TARIFA ESTIMADA</p>
               <p className="text-sm text-zinc-400">Base ${base.toLocaleString('es-CO')} × {factor} ({form.service})</p>
+              <p className="text-[11px] text-zinc-500">Total final para ti — sin desglose</p>
             </div>
             <p className="text-xl font-bold text-white">${estimated.toLocaleString('es-CO')} <span className="text-xs font-normal text-zinc-400">COP</span></p>
           </div>

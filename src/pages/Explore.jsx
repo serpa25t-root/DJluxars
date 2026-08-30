@@ -4,16 +4,17 @@ import FilterBar from '../components/explore/FilterBar'
 import ComparatorModal, { CompareBar } from '../components/explore/ComparatorModal'
 import BookingModal from '../components/booking/BookingModal'
 import Button from '../components/common/Button'
+import { getCurrentPosition, reverseGeocode, haversine } from '../services/geo'
 
 const photographers = [
-  { id: 1, name: 'Elena Mora', specialty: 'Retrato', avatar: 'https://i.pravatar.cc/150?img=5', rating: 4.9, reviews: 128, price: 350000, delivery: '3 días', category: 'Retrato' },
-  { id: 2, name: 'Marc Dubois', specialty: 'Moda', avatar: 'https://i.pravatar.cc/150?img=15', rating: 4.8, reviews: 94, price: 500000, delivery: '5 días', category: 'Moda' },
-  { id: 3, name: 'Sofía Reyes', specialty: 'Eventos', avatar: 'https://i.pravatar.cc/150?img=9', rating: 4.7, reviews: 76, price: 280000, delivery: '2 días', category: 'Eventos' },
-  { id: 4, name: 'Javier Ortiz', specialty: 'Editorial', avatar: 'https://i.pravatar.cc/150?img=12', rating: 4.9, reviews: 210, price: 420000, delivery: '4 días', category: 'Editorial' },
-  { id: 5, name: 'Lucía Vega', specialty: 'Retrato', avatar: 'https://i.pravatar.cc/150?img=32', rating: 4.6, reviews: 54, price: 180000, delivery: '2 días', category: 'Retrato' },
-  { id: 6, name: 'Andrés Silva', specialty: 'Moda', avatar: 'https://i.pravatar.cc/150?img=33', rating: 4.85, reviews: 110, price: 600000, delivery: '6 días', category: 'Moda' },
-  { id: 7, name: 'Camila Torres', specialty: 'Eventos', avatar: 'https://i.pravatar.cc/150?img=26', rating: 4.75, reviews: 88, price: 320000, delivery: '3 días', category: 'Eventos' },
-  { id: 8, name: 'Diego León', specialty: 'Editorial', avatar: 'https://i.pravatar.cc/150?img=20', rating: 4.95, reviews: 152, price: 480000, delivery: '4 días', category: 'Editorial' },
+  { id: 1, name: 'Elena Mora', specialty: 'Retrato', avatar: 'https://i.pravatar.cc/150?img=5', rating: 4.9, reviews: 128, price: 350000, delivery: '3 días', category: 'Retrato', lat: 4.711, lng: -74.0721, city: 'Bogotá' },
+  { id: 2, name: 'Marc Dubois', specialty: 'Moda', avatar: 'https://i.pravatar.cc/150?img=15', rating: 4.8, reviews: 94, price: 500000, delivery: '5 días', category: 'Moda', lat: 4.65, lng: -74.1, city: 'Bogotá' },
+  { id: 3, name: 'Sofía Reyes', specialty: 'Eventos', avatar: 'https://i.pravatar.cc/150?img=9', rating: 4.7, reviews: 76, price: 280000, delivery: '2 días', category: 'Eventos', lat: 6.2442, lng: -75.5812, city: 'Medellín' },
+  { id: 4, name: 'Javier Ortiz', specialty: 'Editorial', avatar: 'https://i.pravatar.cc/150?img=12', rating: 4.9, reviews: 210, price: 420000, delivery: '4 días', category: 'Editorial', lat: 3.4516, lng: -76.532, city: 'Cali' },
+  { id: 5, name: 'Lucía Vega', specialty: 'Retrato', avatar: 'https://i.pravatar.cc/150?img=32', rating: 4.6, reviews: 54, price: 180000, delivery: '2 días', category: 'Retrato', lat: 10.391, lng: -75.4794, city: 'Cartagena' },
+  { id: 6, name: 'Andrés Silva', specialty: 'Moda', avatar: 'https://i.pravatar.cc/150?img=33', rating: 4.85, reviews: 110, price: 600000, delivery: '6 días', category: 'Moda', lat: 11.0041, lng: -74.807, city: 'Barranquilla' },
+  { id: 7, name: 'Camila Torres', specialty: 'Eventos', avatar: 'https://i.pravatar.cc/150?img=26', rating: 4.75, reviews: 88, price: 320000, delivery: '3 días', category: 'Eventos', lat: 7.1193, lng: -73.1227, city: 'Bucaramanga' },
+  { id: 8, name: 'Diego León', specialty: 'Editorial', avatar: 'https://i.pravatar.cc/150?img=20', rating: 4.95, reviews: 152, price: 480000, delivery: '4 días', category: 'Editorial', lat: 4.711, lng: -74.0721, city: 'Bogotá' },
 ]
 
 const Explore = () => {
@@ -24,16 +25,49 @@ const Explore = () => {
   const [compare, setCompare] = useState([])
   const [showCompare, setShowCompare] = useState(false)
   const [bookingPhotographer, setBookingPhotographer] = useState(null)
+  const [userLocation, setUserLocation] = useState(null)
+  const [locationLabel, setLocationLabel] = useState('')
+  const [loadingLocation, setLoadingLocation] = useState(false)
+  const [sortByDistance, setSortByDistance] = useState(false)
+
+  const handleUseLocation = async () => {
+    setLoadingLocation(true)
+    try {
+      const pos = await getCurrentPosition()
+      setUserLocation(pos)
+      try {
+        const geo = await reverseGeocode(pos.lat, pos.lng)
+        setLocationLabel(geo.display)
+      } catch {
+        setLocationLabel(`${pos.lat.toFixed(3)}, ${pos.lng.toFixed(3)}`)
+      }
+      setSortByDistance(true)
+    } catch (err) {
+      setLocationLabel(err.message || 'No se pudo obtener ubicación')
+    } finally {
+      setLoadingLocation(false)
+    }
+  }
 
   const filtered = useMemo(() => {
-    return photographers.filter((p) => {
+    let list = photographers.filter((p) => {
       if (category !== 'Todas' && p.category !== category) return false
       if (p.price > price) return false
       if (p.rating < rating) return false
       if (search && !`${p.name} ${p.specialty}`.toLowerCase().includes(search.toLowerCase())) return false
       return true
     })
-  }, [search, category, price, rating])
+    if (userLocation) {
+      list = list.map((p) => ({
+        ...p,
+        distance: p.lat && p.lng ? haversine(userLocation.lat, userLocation.lng, p.lat, p.lng) : null,
+      }))
+      if (sortByDistance) {
+        list = [...list].sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))
+      }
+    }
+    return list
+  }, [search, category, price, rating, userLocation, sortByDistance])
 
   const toggleCompare = (p) => {
     setCompare((prev) => {
@@ -66,7 +100,20 @@ const Explore = () => {
         </div>
 
         <div className="mt-6">
-          <FilterBar category={category} onCategory={setCategory} price={price} onPrice={setPrice} rating={rating} onRating={setRating} />
+          <FilterBar
+            category={category}
+            onCategory={setCategory}
+            price={price}
+            onPrice={setPrice}
+            rating={rating}
+            onRating={setRating}
+            onUseLocation={handleUseLocation}
+            locationLabel={locationLabel}
+            loadingLocation={loadingLocation}
+            sortByDistance={sortByDistance}
+            onToggleSort={setSortByDistance}
+            hasLocation={!!userLocation}
+          />
         </div>
 
         <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -87,6 +134,11 @@ const Explore = () => {
                       </div>
                     </div>
                     <span className="rounded-full border border-zinc-800 bg-zinc-900 px-2.5 py-1 text-xs font-semibold text-zinc-300">${p.price.toLocaleString('es-CO')} COP</span>
+                    {p.distance != null && (
+                      <span className="rounded-full border border-red-600/30 bg-red-600/15 px-2.5 py-1 text-xs font-semibold text-red-300 whitespace-nowrap">
+                        A {p.distance.toFixed(1)} km de ti
+                      </span>
+                    )}
                   </div>
                   <p className="mt-3 text-xs text-zinc-500">Entrega {p.delivery} • Base por sesión</p>
                   <div className="mt-4 flex gap-2">
