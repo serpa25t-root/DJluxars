@@ -37,6 +37,20 @@ class User(AbstractUser):
         verbose_name='teléfono'
     )
 
+    departamento = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name='departamento',
+        help_text='Departamento de residencia para escalabilidad de búsqueda'
+    )
+
+    ciudad = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name='ciudad',
+        help_text='Ciudad de residencia para escalabilidad de búsqueda'
+    )
+
     bio = models.TextField(
         blank=True,
         verbose_name='biografía',

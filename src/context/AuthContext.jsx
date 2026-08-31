@@ -136,6 +136,8 @@ export const AuthProvider = ({ children }) => {
     const password = userData.password
     const role = userData.role
     const phone = userData.phone || userData.phone_number || ''
+    const departamento = userData.departamento?.trim() || ''
+    const ciudad = userData.ciudad?.trim() || ''
     const rawName = userData.name || userData.first_name || ''
     const usernameRaw = userData.username || email?.split('@')[0] || rawName.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') || 'user'
     const username = usernameRaw.slice(0, 30)
@@ -151,6 +153,8 @@ export const AuthProvider = ({ children }) => {
       phone_number: phone,
       first_name: firstName,
       last_name: lastName,
+      departamento,
+      ciudad,
     }
 
     try {
