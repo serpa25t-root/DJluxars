@@ -5,8 +5,9 @@ import BookingModal from '../components/booking/BookingModal'
 import Button from '../components/common/Button'
 import { getCurrentPosition, reverseGeocode, haversine } from '../services/geo'
 import { useAuth } from '../context/AuthContext'
-import { Search, MapPin, Calendar, Sparkles } from 'lucide-react'
+import { Search, MapPin, Calendar, Sparkles, DollarSign } from 'lucide-react'
 import useColombiaApi from '../services/colombiaApi'
+import { getServices } from '../services/serviceStore'
 
 const photographers = [
   { id: 1, name: 'Elena Mora', specialty: 'Retrato', avatar: 'https://i.pravatar.cc/150?img=5', rating: 4.9, reviews: 128, price: 350000, delivery: '3 días', category: 'Retrato', lat: 4.711, lng: -74.0721, city: 'Bogotá', is_pro: true },
@@ -28,13 +29,25 @@ const Explore = () => {
   const [searchParams] = useSearchParams()
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('Todas')
-  const [price, setPrice] = useState(800000)
+  const [price, setPrice] = useState(1000000)
   const [rating, setRating] = useState(0)
   const [locationFilter, setLocationFilter] = useState('')
   const [dateFilter, setDateFilter] = useState('')
   const { departments, cities, loadingDepartments, loadingCities, loadCities } = useColombiaApi()
   const [selectedDept, setSelectedDept] = useState('')
   const [selectedCity, setSelectedCity] = useState('')
+  const [allServices, setAllServices] = useState([])
+
+  useEffect(() => {
+    setAllServices(getServices())
+    const onStorage = () => setAllServices(getServices())
+    window.addEventListener('storage', onStorage)
+    window.addEventListener('luxarts_services_updated', onStorage)
+    return () => {
+      window.removeEventListener('storage', onStorage)
+      window.removeEventListener('luxarts_services_updated', onStorage)
+    }
+  }, [])
 
   useEffect(() => {
     const cat = searchParams.get('category')
@@ -88,30 +101,45 @@ const Explore = () => {
   }
 
   const filtered = useMemo(() => {
-    let list = photographers.filter((p) => {
-      if (category !== 'Todas' && p.category !== category) return false
-      if (p.price > price) return false
-      if (p.rating < rating) return false
-      if (search && !`${p.name} ${p.specialty} ${p.city}`.toLowerCase().includes(search.toLowerCase())) return false
-      if (locationFilter && !`${p.city}`.toLowerCase().includes(locationFilter.toLowerCase())) return false
-      // Date filter: si hay fecha, filtra por disponibilidad simulada (no bloquea si no hay dato)
-      if (dateFilter && p.availableDate && p.availableDate !== dateFilter) return false
+    // SCRUM-35: filtrar SERVICIOS por Nombre, Categoría, Departamento, Municipio y Rango Precio
+    let list = allServices.filter((s) => {
+      if (category !== 'Todas' && s.category !== category) return false
+      if (s.price > price) return false
+      if (search && !`${s.title} ${s.category}`.toLowerCase().includes(search.toLowerCase())) return false
+      if (locationFilter) {
+        const loc = `${s.municipio || ''} ${s.departamento || ''} ${s.city || ''}`.toLowerCase()
+        if (!loc.includes(locationFilter.toLowerCase())) return false
+      }
+      if (dateFilter && s.availableDate && s.availableDate !== dateFilter) return false
       return true
     })
-    if (userLocation) {
-      list = list.map((p) => ({
-        ...p,
-        distance: p.lat && p.lng ? haversine(userLocation.lat, userLocation.lng, p.lat, p.lng) : null,
+    // Si no hay servicios, fallback a fotógrafos transformados (por si localStorage vacío)
+    if (list.length === 0 && allServices.length === 0) {
+      // fallback photographers como servicios temporales
+      let pList = photographers.filter((p) => {
+        if (category !== 'Todas' && p.category !== category) return false
+        if (p.price > price) return false
+        if (search && !`${p.name} ${p.specialty} ${p.city}`.toLowerCase().includes(search.toLowerCase())) return false
+        return true
+      })
+      // transform to service shape
+      return pList.map((p) => ({
+        id: `photographer-${p.id}`,
+        title: `${p.specialty} con ${p.name}`,
+        category: p.category,
+        departamento: p.city === 'Bogotá' ? 'Cundinamarca' : p.city === 'Medellín' ? 'Antioquia' : 'Bolívar',
+        municipio: p.city,
+        price: p.price,
+        coverImage: p.avatar.replace('150', '600'),
+        features: [`${p.delivery} entrega`, `${p.rating} ★ calificación`, `Base por sesión`],
+        authorName: p.name,
+        authorAvatar: p.avatar,
+        verified: p.is_pro,
       }))
     }
-    // Prioridad PRO siempre arriba, luego por distancia si está activo
-    list = [...list].sort((a, b) => {
-      if (a.is_pro !== b.is_pro) return b.is_pro ? 1 : -1
-      if (sortByDistance && a.distance != null && b.distance != null) return a.distance - b.distance
-      return 0
-    })
-    return list
-  }, [search, category, price, rating, userLocation, sortByDistance, locationFilter, dateFilter])
+    // Orden por precio ascendente para marketplace
+    return [...list].sort((a, b) => a.price - b.price)
+  }, [allServices, search, category, price, rating, userLocation, sortByDistance, locationFilter, dateFilter])
 
   const toggleCompare = (p) => {
     setCompare((prev) => {
@@ -168,10 +196,10 @@ const Explore = () => {
           <p className="mt-2 text-sm text-zinc-400 max-w-2xl">Explora fotógrafos verificados, filtra por estilo y compara propuestas sin salir de la página.</p>
         </div>
 
-        {/* ÚNICA barra flotante superior con Glassmorphism — SCRUM-34: p-4 + selectores anidados Colombia */}
+        {/* ÚNICA barra flotante superior con Glassmorphism — SCRUM-34/35: p-4 + selectores anidados Colombia + precio */}
         <section className="relative z-20 mt-6">
           <div className="bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-3xl p-4 shadow-2xl">
-            <form onSubmit={handleSearchBarSubmit} className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_auto] gap-3 items-end">
+            <form onSubmit={handleSearchBarSubmit} className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr_1fr_auto] gap-3 items-end">
               <div>
                 <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><Search className="h-3.5 w-3.5" /> Search query</label>
                 <div className="relative">
@@ -264,6 +292,25 @@ const Explore = () => {
                   className="w-full rounded-xl border border-zinc-800 bg-zinc-950/60 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-red-600/40 focus:outline-none focus:ring-2 focus:ring-red-600/15 transition-all [&::-webkit-calendar-picker-indicator]:opacity-40 [&::-webkit-calendar-picker-indicator]:invert"
                 />
               </div>
+              <div>
+                <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><DollarSign className="h-3.5 w-3.5" /> Precio COP</label>
+                <div className="relative">
+                  <select
+                    value={price}
+                    onChange={(e) => setPrice(Number(e.target.value))}
+                    className="w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-950/60 px-3 py-3 pr-8 text-sm text-white focus:border-red-600/40 focus:outline-none focus:ring-2 focus:ring-red-600/15 transition-all"
+                  >
+                    <option value={1000000}>Hasta $1.000.000</option>
+                    <option value={800000}>Hasta $800.000</option>
+                    <option value={500000}>Hasta $500.000</option>
+                    <option value={350000}>Hasta $350.000</option>
+                    <option value={10000000}>Sin límite</option>
+                  </select>
+                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                  </span>
+                </div>
+              </div>
               <div className="flex">
                 <button type="submit" className="w-full lg:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-red-600/25 hover:bg-red-700 hover:shadow-xl active:scale-[0.98] transition-all whitespace-nowrap">
                   <Search className="h-4 w-4" />
@@ -287,67 +334,67 @@ const Explore = () => {
           </div>
         </section>
 
-        <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((p) => {
-            const isSelected = compare.some((c) => c.id === p.id)
+        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((s) => {
+            const isSelected = compare.some((c) => c.id === s.id)
+            const isService = !!s.title
+            const cover = s.coverImage || s.avatar || `https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&h=400&fit=crop`
+            const category = s.category || s.specialty || 'General'
+            const location = s.municipio ? `${s.municipio}, ${s.departamento}` : s.departamento || s.city || s.location || ''
+            const features = s.features || (s.delivery ? [`${s.delivery} entrega`, `${s.rating ? s.rating+'★' : ''} calificación`.trim()] : [])
+            const authorName = s.authorName || s.name || 'Fotógrafo'
+            const authorAvatar = s.authorAvatar || s.avatar || `https://i.pravatar.cc/150?img=${(Number(String(s.id).slice(-2)) % 70) + 1}`
+            const verified = s.verified ?? s.is_pro ?? false
             return (
-              <div key={p.id} className="group rounded-2xl border border-zinc-900 bg-zinc-950 overflow-hidden hover:border-red-600/25 hover:shadow-lg hover:shadow-red-600/10 transition-all duration-300">
-                <div className="p-5">
-                  <div className="flex items-start gap-4">
-                    <img src={p.avatar} alt={p.name} className="h-12 w-12 rounded-full object-cover border border-zinc-800" />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-semibold text-white truncate inline-flex items-center gap-2">
-                        {p.name}
-                        {p.is_pro && (
-                          <span className="inline-flex items-center rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-black px-2 py-0.5 text-[10px] font-bold tracking-widest border border-amber-500/50 shadow-sm">
-                            PRO
-                          </span>
-                        )}
-                      </h3>
-                      <p className="text-xs text-zinc-400">{p.specialty}</p>
-                      <div className="mt-1 flex items-center gap-1">
-                        <span className="text-red-500 text-xs">★</span>
-                        <span className="text-xs font-semibold text-white">{p.rating.toFixed(1)}</span>
-                        <span className="text-xs text-zinc-500">({p.reviews})</span>
-                      </div>
-                    </div>
-                    <span className="rounded-full border border-zinc-800 bg-zinc-900 px-2.5 py-1 text-xs font-semibold text-zinc-300">${p.price.toLocaleString('es-CO')} COP</span>
-                    {p.distance != null && (
-                      <span className="rounded-full border border-red-600/30 bg-red-600/15 px-2.5 py-1 text-xs font-semibold text-red-300 whitespace-nowrap">
-                        A {p.distance.toFixed(1)} km de ti
-                      </span>
-                    )}
+              <div key={s.id} className="group relative flex flex-col overflow-hidden rounded-3xl border border-zinc-800/60 bg-zinc-900/60 backdrop-blur-xl hover:border-red-600/20 hover:shadow-xl hover:shadow-red-600/5 transition-all duration-300 will-change-transform">
+                {/* Imagen Portada con hover zoom suave */}
+                <div className="relative h-48 overflow-hidden bg-zinc-900">
+                  <img src={cover} alt={s.title || s.name} className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 will-change-transform" loading="lazy" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                  <div className="absolute top-3 left-3 flex gap-2">
+                    <span className="rounded-full bg-red-600 text-white px-2.5 py-1 text-[10px] font-bold tracking-widest border border-red-500/30 shadow-md">{category}</span>
+                    {location && <span className="rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-white px-2.5 py-1 text-[10px] font-medium">{location}</span>}
                   </div>
-                  {/* Hover preview — miniaturas portfolio */}
-                  <div className="mt-3 grid grid-cols-3 gap-1.5 rounded-xl overflow-hidden">
-                    {[
-                      `https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=300&h=200&fit=crop&crop=center&auto=format`,
-                      `https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=300&h=200&fit=crop&crop=center&auto=format`,
-                      `https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=300&h=200&fit=crop&crop=center&auto=format`,
-                    ].map((src, i) => (
-                      <div key={i} className="relative aspect-[4/3] overflow-hidden rounded-lg bg-zinc-900">
-                        <img src={src} alt={`Portfolio ${i+1}`} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500 will-change-transform" loading="lazy" />
-                        {i === 2 && <span className="absolute inset-0 bg-black/40 flex items-center justify-center text-[10px] font-bold text-white">+12</span>}
-                      </div>
-                    ))}
+                  {verified && <span className="absolute top-3 right-3 rounded-full bg-white text-black px-2 py-1 text-[10px] font-bold flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Verificado</span>}
+                </div>
+                <div className="p-5 flex flex-col flex-1">
+                  <h3 className="font-display text-base font-bold text-white leading-tight line-clamp-2">{s.title || `${s.specialty} con ${s.name}`}</h3>
+                  {isService && features.length > 0 ? (
+                    <p className="mt-2 text-xs text-zinc-400 line-clamp-2">{features.slice(0, 3).join(' • ')}</p>
+                  ) : (
+                    <p className="mt-2 text-xs text-zinc-400">Entrega {s.delivery} • Base por sesión</p>
+                  )}
+                  {isService && features.length > 0 && (
+                    <ul className="mt-3 space-y-1">
+                      {features.slice(0, 3).map((f, i) => (
+                        <li key={i} className="flex items-center gap-1.5 text-xs text-zinc-300"><span className="h-1 w-1 rounded-full bg-red-500" />{f}</li>
+                      ))}
+                    </ul>
+                  )}
+                  {/* Strip autor */}
+                  <div className="mt-4 flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-950/60 px-2 py-1.5">
+                    <img src={authorAvatar} alt={authorName} className="h-7 w-7 rounded-full object-cover border border-zinc-800" />
+                    <span className="text-xs font-medium text-white truncate flex-1">{authorName}</span>
+                    {verified && <span className="rounded-full bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 text-[10px] font-bold">Verificado</span>}
                   </div>
-                  <p className="mt-3 text-xs text-zinc-500">Entrega {p.delivery} • Base por sesión</p>
-                  <div className="mt-4 flex gap-2">
-                    <Link to={`/fotografos/${p.id}`} className="flex-1">
-                      <Button variant="secondary" className="w-full text-sm py-2 border-zinc-800">Ver Perfil</Button>
+                  {/* Precio fijo destacado */}
+                  <p className="mt-4 text-lg font-bold tracking-tight text-white">{`$${Number(s.price).toLocaleString('es-CO')} COP`}</p>
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <Link to={`/fotografos/${String(s.authorId || s.id).replace('srv_','')}`} className="inline-flex items-center justify-center rounded-full border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-medium text-zinc-300 hover:bg-zinc-900 hover:border-zinc-700 transition-colors">
+                      Ver Perfil
                     </Link>
                     <button
-                      onClick={() => toggleCompare(p)}
-                      className={`rounded-full px-4 py-2 text-sm font-medium border transition-colors ${isSelected ? 'bg-red-600 border-red-600 text-white' : 'border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-red-600/30 hover:text-white'}`}
+                      onClick={() => toggleCompare(s)}
+                      className={`rounded-full px-3 py-2 text-xs font-medium border transition-colors ${isSelected ? 'bg-red-600 border-red-600 text-white' : 'border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-red-600/30 hover:text-white'}`}
                     >
                       {isSelected ? '✓ Comparando' : '+ Comparar'}
                     </button>
                   </div>
                   <button
-                    onClick={() => handleBooking({ id: p.id, name: p.name, avatar: p.avatar, specialty: p.specialty, price: p.price })}
-                    className="mt-2 w-full rounded-full bg-red-600/10 border border-red-600/20 py-2 text-sm font-medium text-red-300 hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
+                    onClick={() => handleBooking({ id: s.id, name: s.title || s.name, avatar: cover, specialty: category, price: s.price })}
+                    className="mt-2 w-full rounded-full bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 shadow-md shadow-red-600/20 transition-colors"
                   >
-                    Solicitar Reserva
+                    Reservar Servicio
                   </button>
                 </div>
               </div>

@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Calendar, DollarSign, CheckCircle2, Percent, ArrowRight, MessageSquare, Check, X, Briefcase, Eye, Loader2, TrendingUp } from 'lucide-react'
+import { Calendar, DollarSign, CheckCircle2, Percent, ArrowRight, MessageSquare, Check, X, Briefcase, Eye, Loader2, TrendingUp, Package, Layers } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { fetchArtistBookings, acceptBooking, rejectBooking } from '../../services/bookings'
+import ServiceManager from '../../components/dashboard/ServiceManager'
 
 const TABS = [
   { id: 'pendiente', label: 'Pendientes', value: 'Pendiente' },
@@ -13,6 +14,7 @@ const TABS = [
 const ArtistDashboard = () => {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const [activeSection, setActiveSection] = useState('reservas')
   const [activeTab, setActiveTab] = useState('Pendiente')
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
@@ -150,7 +152,21 @@ const ArtistDashboard = () => {
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Secciones principales: Reservas | Mis Servicios */}
+      <div className="flex items-center gap-2 p-1 rounded-full bg-zinc-900 border border-zinc-800 w-fit">
+        <button onClick={() => setActiveSection('reservas')} className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition-all ${activeSection === 'reservas' ? 'bg-red-600 text-white shadow-md' : 'text-zinc-400 hover:text-white'}`}>
+          <Calendar className="h-4 w-4" /> Reservas
+        </button>
+        <button onClick={() => setActiveSection('servicios')} className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition-all ${activeSection === 'servicios' ? 'bg-white text-zinc-900 shadow-md' : 'text-zinc-400 hover:text-white'}`}>
+          <Package className="h-4 w-4" /> Mis Servicios
+        </button>
+      </div>
+
+      {activeSection === 'servicios' ? (
+        <ServiceManager />
+      ) : (
+        <>
+      {/* Tabs reservas */}
       <div className="flex flex-wrap items-center gap-2 border-b border-zinc-800 pb-4">
         {TABS.map((t) => {
           const active = activeTab === t.value
@@ -233,6 +249,8 @@ const ArtistDashboard = () => {
             </div>
           ))}
         </div>
+      )}
+        </>
       )}
     </div>
   )
