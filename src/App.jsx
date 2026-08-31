@@ -13,6 +13,7 @@ import ClientBookings from './pages/ClientBookings'
 import Chat from './pages/Chat'
 import DashboardLayout from './components/layout/DashboardLayout'
 import ArtistDashboard from './pages/dashboard/ArtistDashboard'
+import ClientDashboard from './pages/dashboard/ClientDashboard'
 
 const Placeholder = ({ title }) => (
   <div className="min-h-[100dvh] flex flex-col bg-black">
@@ -40,6 +41,12 @@ const ProtectedRoute = ({ children, roles }) => {
   return children
 }
 
+const DashboardIndex = () => {
+  const { user } = useAuth()
+  if (user?.role === 'client') return <ClientDashboard />
+  return <ArtistDashboard />
+}
+
 function AppRoutes() {
   return (
     <Routes>
@@ -56,13 +63,15 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<ArtistDashboard />} />
+        <Route index element={<DashboardIndex />} />
         <Route path="portfolio" element={<Portfolio />} />
         <Route path="bookings" element={<ProtectedRoute roles={['artist']}><ArtistBookings /></ProtectedRoute>} />
         <Route path="services" element={<Placeholder title="Mis Servicios" />} />
         <Route path="favorites" element={<Placeholder title="Favoritos" />} />
         <Route path="stats" element={<Placeholder title="Estadísticas" />} />
         <Route path="settings" element={<Placeholder title="Configuración" />} />
+        <Route path="projects" element={<Placeholder title="Mis Proyectos" />} />
+        <Route path="reviews" element={<Placeholder title="Valoraciones" />} />
       </Route>
       <Route
         path="/my-bookings"
