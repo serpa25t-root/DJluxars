@@ -78,17 +78,34 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
+# Senior fix: Supabase direct host (db.*.supabase.co) only resolves to IPv6 (AAAA record).
+# Many local networks / ISPs lack IPv6, causing "Network is unreachable" or timeouts.
+# To keep local dev working without touching prod config, we add a SQLite fallback.
+# Use Postgres when USE_SQLITE != True and DB_HOST is set; otherwise use local SQLite.
+# For production with IPv4-only networks, use Supabase pooler (aws-0-*.pooler.supabase.com)
+# instead of the direct db.* host.
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT', '5432'),
+_USE_SQLITE = os.getenv('USE_SQLITE', 'False').lower() in ('true', '1', 'yes')
+_DB_HOST = os.getenv('DB_HOST')
+
+if _USE_SQLITE or not _DB_HOST:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DB_NAME'),
+            'USER': os.getenv('DB_USER'),
+            'PASSWORD': os.getenv('DB_PASSWORD'),
+            'HOST': _DB_HOST,
+            'PORT': os.getenv('DB_PORT', '5432'),
+        }
+    }
 
 
 # Password validation
