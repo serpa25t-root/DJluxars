@@ -1,11 +1,40 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
 import Button from '../components/common/Button'
+import api from '../services/api'
 
 const Home = () => {
   const { isAuthenticated } = useAuth()
+  const [featuredArtists, setFeaturedArtists] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  const mockArtists = [
+    { id: 1, first_name: 'Elena', last_name: 'Mora', name: 'Elena Mora', profile_picture: 'https://i.pravatar.cc/150?img=5', category: 'Retrato', avatar: 'https://i.pravatar.cc/150?img=5' },
+    { id: 2, first_name: 'Marc', last_name: 'Dubois', name: 'Marc Dubois', profile_picture: 'https://i.pravatar.cc/150?img=15', category: 'Moda', avatar: 'https://i.pravatar.cc/150?img=15' },
+    { id: 3, first_name: 'Sofía', last_name: 'Reyes', name: 'Sofía Reyes', profile_picture: 'https://i.pravatar.cc/150?img=9', category: 'Eventos', avatar: 'https://i.pravatar.cc/150?img=9' },
+    { id: 4, name: 'Javier Ortiz', first_name: 'Javier', last_name: 'Ortiz', profile_picture: 'https://i.pravatar.cc/150?img=12', category: 'Editorial', avatar: 'https://i.pravatar.cc/150?img=12' },
+  ]
+
+  useEffect(() => {
+    const fetchFeaturedArtists = async () => {
+      try {
+        const response = await api.get('users/?role=artist')
+        const data = response.data.results || response.data
+        setFeaturedArtists(Array.isArray(data) ? data : [])
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchFeaturedArtists()
+  }, [])
+
+  const displayArtists = featuredArtists.length > 0 ? featuredArtists : (!isLoading ? mockArtists : [])
+
   return (
     <div className="min-h-screen flex flex-col bg-black">
       <Navbar />
@@ -238,6 +267,44 @@ const Home = () => {
                 <span className="font-display font-semibold tracking-widest">KINOFOLK</span>
                 <span className="font-display font-semibold tracking-widest">ESQUIRE</span>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Fotógrafos Recomendados - API Real con fallback */}
+        <section className="py-16 bg-zinc-950 border-t border-zinc-900">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex items-end justify-between">
+              <div>
+                <h2 className="font-serif text-3xl font-bold text-white">Fotógrafos Recomendados</h2>
+                <p className="mt-2 text-sm text-zinc-400">Talento verificado, listo para tu próximo proyecto</p>
+              </div>
+              <Link to="/explorar" className="hidden sm:inline-flex text-sm font-medium text-red-500 hover:text-red-400">Ver todos →</Link>
+            </div>
+            <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {isLoading
+                ? Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="animate-pulse bg-zinc-900 rounded-3xl h-80 border border-zinc-800" />
+                  ))
+                : displayArtists.map((artist) => (
+                    <Link
+                      key={artist?.id || artist?.username}
+                      to={`/fotografos/${artist?.id || 1}`}
+                      className="group rounded-3xl overflow-hidden border border-zinc-800 bg-zinc-900 hover:border-red-900/30 transition-colors"
+                    >
+                      <div className="aspect-[4/3] overflow-hidden bg-zinc-900">
+                        <img
+                          src={artist?.profile_picture || artist?.avatar || `https://i.pravatar.cc/300?img=${(artist?.id % 70) + 1}`}
+                          alt={artist?.name || `${artist?.first_name || ''} ${artist?.last_name || ''}`.trim() || 'Fotógrafo'}
+                          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-semibold text-white truncate">{artist?.name || `${artist?.first_name || ''} ${artist?.last_name || ''}`.trim() || artist?.username || 'Fotógrafo'}</h3>
+                        <p className="text-xs text-zinc-500 mt-1">{artist?.category || artist?.specialty || 'General'} • {artist?.role || 'artist'}</p>
+                      </div>
+                    </Link>
+                  ))}
             </div>
           </div>
         </section>

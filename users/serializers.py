@@ -32,3 +32,25 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+
+class UserListSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    profile_picture = serializers.SerializerMethodField()
+    category = serializers.CharField(source='role', read_only=True)
+    avatar = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name', 'name', 'email', 'role', 'category', 'profile_picture', 'avatar']
+
+    def get_name(self, obj):
+        full = f"{obj.first_name} {obj.last_name}".strip()
+        return full or obj.username
+
+    def get_profile_picture(self, obj):
+        # Placeholder avatar
+        return f"https://i.pravatar.cc/150?img={(obj.id % 70) + 1}"
+
+    def get_avatar(self, obj):
+        return f"https://i.pravatar.cc/150?img={(obj.id % 70) + 1}"

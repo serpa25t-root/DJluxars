@@ -4,7 +4,7 @@ from rest_framework import status, permissions
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import RegisterSerializer
+from .serializers import RegisterSerializer, UserListSerializer
 
 User = get_user_model()
 
@@ -99,3 +99,16 @@ class MeView(APIView):
                 'last_name': user.last_name,
             }
         )
+
+
+class UserListView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        role = request.query_params.get('role')
+        qs = User.objects.all()
+        if role:
+            qs = qs.filter(role=role)
+        serializer = UserListSerializer(qs[:20], many=True)
+        # Soporta paginación simple results
+        return Response({'results': serializer.data})
