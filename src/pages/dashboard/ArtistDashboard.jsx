@@ -13,10 +13,10 @@ const ArtistDashboard = () => {
           Tu talento, <br /> tu historia, <br /> <span className="text-red-600 drop-shadow-[0_0_15px_rgba(220,38,38,0.5)]">tu legado.</span>
         </h1>
         <div className="mt-6 flex gap-4">
-          <Link to="/explorar" className="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-lg text-sm font-semibold text-white shadow-lg shadow-red-600/20 transition-colors">
+          <Link to="/explorar" className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-full font-medium transition-all shadow-lg shadow-red-900/20">
             Explorar Proyectos
           </Link>
-          <Link to="/dashboard/portfolio" className="border border-zinc-700 hover:border-red-600 px-6 py-3 rounded-lg text-sm font-semibold text-white hover:bg-zinc-900 transition-colors">
+          <Link to="/dashboard/portfolio" className="bg-transparent border border-zinc-700 hover:border-zinc-500 hover:bg-zinc-800/50 text-white px-8 py-3 rounded-full font-medium transition-all">
             + Nuevo Proyecto
           </Link>
         </div>
@@ -24,25 +24,25 @@ const ArtistDashboard = () => {
 
       {/* Bento Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-zinc-900/50 rounded-2xl border border-zinc-800/50 p-6">
+        <div className="bg-zinc-900/40 backdrop-blur-md border border-white/5 rounded-3xl p-8 shadow-xl">
           <h2 className="text-sm font-semibold text-white">Resumen de actividad</h2>
           <div className="mt-6 grid grid-cols-2 gap-4">
-            <div className="rounded-xl bg-zinc-950 border border-zinc-800/50 p-4">
+            <div className="bg-black/40 border border-white/5 rounded-2xl p-5 hover:bg-black/60 transition-colors">
               <p className="text-2xl font-bold text-white">12</p>
               <p className="text-sm text-zinc-400">Proyectos activos</p>
               <p className="text-green-500 text-sm mt-2">↑ 20% vs mes anterior</p>
             </div>
-            <div className="rounded-xl bg-zinc-950 border border-zinc-800/50 p-4">
+            <div className="bg-black/40 border border-white/5 rounded-2xl p-5 hover:bg-black/60 transition-colors">
               <p className="text-2xl font-bold text-white">5</p>
               <p className="text-sm text-zinc-400">Solicitudes pendientes</p>
               <p className="text-green-500 text-sm mt-2">↑ 8% vs mes anterior</p>
             </div>
-            <div className="rounded-xl bg-zinc-950 border border-zinc-800/50 p-4">
+            <div className="bg-black/40 border border-white/5 rounded-2xl p-5 hover:bg-black/60 transition-colors">
               <p className="text-2xl font-bold text-white">8</p>
               <p className="text-sm text-zinc-400">Entregas este mes</p>
               <p className="text-green-500 text-sm mt-2">↑ 12% completadas</p>
             </div>
-            <div className="rounded-xl bg-zinc-950 border border-zinc-800/50 p-4">
+            <div className="bg-black/40 border border-white/5 rounded-2xl p-5 hover:bg-black/60 transition-colors">
               <p className="text-2xl font-bold text-white">96%</p>
               <p className="text-sm text-zinc-400">Satisfacción</p>
               <p className="text-green-500 text-sm mt-2">↑ 1.5% vs mes anterior</p>
@@ -50,7 +50,7 @@ const ArtistDashboard = () => {
           </div>
         </div>
 
-        <div className="bg-zinc-900/50 rounded-2xl border border-zinc-800/50 p-6">
+        <div className="bg-zinc-900/40 backdrop-blur-md border border-white/5 rounded-3xl p-8 shadow-xl">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-white">Próximas reservas</h2>
             <Link to="/dashboard/bookings" className="text-xs font-medium text-red-400 hover:text-red-300">Ver todo →</Link>
@@ -126,42 +126,50 @@ const ArtistDashboard = () => {
       </div>
 
       {/* Footer Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-red-900/20 pt-8">
-        <div className="flex flex-col items-center text-center p-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-600/10 border border-red-600/20 text-red-500 mb-2">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 border-t border-zinc-800/50 pt-10 mt-10">
+        <div className="flex flex-col items-center justify-center text-center space-y-3">
+          <div className="w-12 h-12 rounded-full bg-red-900/20 border border-red-900/30 flex items-center justify-center text-red-500">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
-          <p className="text-2xl font-bold text-white">15K+</p>
-          <p className="text-xs text-zinc-500">Obras</p>
+          <div>
+            <h4 className="text-2xl font-bold text-white">15K+</h4>
+            <p className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mt-1">Obras</p>
+          </div>
         </div>
-        <div className="flex flex-col items-center text-center p-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-600/10 border border-red-600/20 text-red-500 mb-2">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        <div className="flex flex-col items-center justify-center text-center space-y-3">
+          <div className="w-12 h-12 rounded-full bg-red-900/20 border border-red-900/30 flex items-center justify-center text-red-500">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l2.036 6.29" />
             </svg>
           </div>
-          <p className="text-2xl font-bold text-white">4.9/5</p>
-          <p className="text-xs text-zinc-500">Calificación</p>
+          <div>
+            <h4 className="text-2xl font-bold text-white">4.9/5</h4>
+            <p className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mt-1">Calificación</p>
+          </div>
         </div>
-        <div className="flex flex-col items-center text-center p-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-600/10 border border-red-600/20 text-red-500 mb-2">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        <div className="flex flex-col items-center justify-center text-center space-y-3">
+          <div className="w-12 h-12 rounded-full bg-red-900/20 border border-red-900/30 flex items-center justify-center text-red-500">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <p className="text-2xl font-bold text-white">98%</p>
-          <p className="text-xs text-zinc-500">Satisfacción</p>
+          <div>
+            <h4 className="text-2xl font-bold text-white">98%</h4>
+            <p className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mt-1">Satisfacción</p>
+          </div>
         </div>
-        <div className="flex flex-col items-center text-center p-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-600/10 border border-red-600/20 text-red-500 mb-2">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        <div className="flex flex-col items-center justify-center text-center space-y-3">
+          <div className="w-12 h-12 rounded-full bg-red-900/20 border border-red-900/30 flex items-center justify-center text-red-500">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <p className="text-2xl font-bold text-white">24/7</p>
-          <p className="text-xs text-zinc-500">Soporte</p>
+          <div>
+            <h4 className="text-2xl font-bold text-white">24/7</h4>
+            <p className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mt-1">Soporte</p>
+          </div>
         </div>
       </div>
     </div>

@@ -99,24 +99,31 @@ const Header = () => {
           )}
         </div>
 
-        <div className="hidden md:flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-4">
           {isAuthenticated ? (
             <div className="flex items-center gap-4">
               <div className="relative">
                 <button onClick={() => setIsNotifOpen(!isNotifOpen)} className="relative rounded-full p-2 text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors">
-                  <Bell className="w-5 h-5" />
-                  <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-600" />
+                  <div className="relative">
+                    <Bell className="w-5 h-5 text-zinc-300 hover:text-white transition-colors" />
+                    <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600"></span>
+                    </span>
+                  </div>
                 </button>
-                {isNotifOpen && <div className="absolute right-0 top-14 w-80 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl p-4 z-50">
-                  <p className="text-sm font-semibold text-white">Notificaciones</p>
-                  <div className="mt-3 space-y-3">
-                    <div className="rounded-xl bg-zinc-800/50 p-3 border border-zinc-800">
-                      <p className="text-sm font-medium text-white">Nueva reserva recibida</p>
-                      <p className="text-xs text-zinc-400">Elena Mora solicitó una sesión para el 12 Jun.</p>
-                    </div>
-                    <div className="rounded-xl bg-zinc-800/50 p-3 border border-zinc-800">
-                      <p className="text-sm font-medium text-white">Mensaje nuevo</p>
-                      <p className="text-xs text-zinc-400">Tienes un mensaje de Marc Dubois en el chat.</p>
+                {isNotifOpen && <div className="absolute right-0 top-12 w-80 bg-zinc-900/90 backdrop-blur-xl border border-zinc-700/50 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] overflow-hidden z-50">
+                  <div className="p-4">
+                    <p className="text-sm font-semibold text-white">Notificaciones</p>
+                    <div className="mt-3 space-y-3">
+                      <div className="rounded-xl bg-zinc-800/50 p-3 border border-zinc-800">
+                        <p className="text-sm font-medium text-white">Nueva reserva recibida</p>
+                        <p className="text-xs text-zinc-400">Elena Mora solicitó una sesión para el 12 Jun.</p>
+                      </div>
+                      <div className="rounded-xl bg-zinc-800/50 p-3 border border-zinc-800">
+                        <p className="text-sm font-medium text-white">Mensaje nuevo</p>
+                        <p className="text-xs text-zinc-400">Tienes un mensaje de Marc Dubois en el chat.</p>
+                      </div>
                     </div>
                   </div>
                 </div>}
