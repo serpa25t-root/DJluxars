@@ -107,6 +107,12 @@ const Header = () => {
                 </div>
                 <span className="text-sm font-medium text-zinc-200 max-w-[120px] truncate">Hola, {displayName}</span>
               </div>
+              <Link
+                to="/dashboard"
+                className="px-5 py-2 rounded-full bg-red-600 text-white hover:bg-red-700 shadow-md shadow-red-600/20 hover:shadow-lg hover:shadow-red-600/30 transition-all text-sm font-semibold active:scale-95"
+              >
+                Ir al Panel
+              </Link>
               <button
                 onClick={handleLogout}
                 className="px-4 py-2 rounded-full border border-red-600/30 bg-red-600/10 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all text-sm font-medium text-red-300 hover:shadow-md hover:shadow-red-600/20 active:scale-95"
@@ -191,12 +197,21 @@ const Header = () => {
 
             <div className="mt-4 flex flex-col gap-3 pt-4 border-t border-zinc-900">
               {isAuthenticated ? (
-                <button
-                  onClick={handleLogout}
-                  className="w-full px-4 py-2.5 rounded-full border border-red-600/30 bg-red-600/10 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all text-sm font-medium text-red-300 text-center"
-                >
-                  Cerrar Sesión
-                </button>
+                <>
+                  <Link
+                    to="/dashboard"
+                    onClick={() => setIsOpen(false)}
+                    className="w-full px-4 py-2.5 rounded-full bg-red-600 text-white hover:bg-red-700 text-center text-sm font-semibold transition-colors"
+                  >
+                    Ir al Panel
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full px-4 py-2.5 rounded-full border border-red-600/30 bg-red-600/10 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all text-sm font-medium text-red-300 text-center"
+                  >
+                    Cerrar Sesión
+                  </button>
+                </>
               ) : (
                 <>
                   <Link to="/login" onClick={() => setIsOpen(false)} className="w-full px-4 py-2.5 rounded-full border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-900 text-center text-sm font-medium transition-colors">
