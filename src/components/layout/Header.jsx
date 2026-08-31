@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom'
-import { ChevronDown, Bell } from 'lucide-react'
+import { ChevronDown, Bell, ArrowRight } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 
 const publicLinks = [
@@ -61,40 +61,39 @@ const Header = () => {
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="font-display text-xl font-semibold tracking-tight text-white">
-              LuxArts
-            </span>
-            <span className="hidden sm:inline-flex ml-1 rounded-full border border-red-600/30 bg-red-600/10 px-2 py-0.5 text-[10px] font-semibold tracking-widest text-red-400 group-hover:bg-red-600 group-hover:text-white group-hover:border-red-600 transition-colors duration-300">
-              CINEMATIC
-            </span>
-          </div>
+          <span className="font-display text-xl font-semibold tracking-tight text-white">
+            LuxArts
+          </span>
         </Link>
 
         <div className="hidden md:flex items-center gap-1">
-          {navLinks.map((link) =>
-            link.type === 'route' ? (
-              <NavLink
-                key={link.label}
-                to={link.to}
-                className={({ isActive }) =>
-                  `px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ease-out ${
-                    isActive
-                      ? 'bg-zinc-900 text-white border border-red-600/20 shadow-sm shadow-red-600/10'
-                      : 'text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent'
-                  }`
-                }
-              >
-                {link.label}
-              </NavLink>
-            ) : (
-              <a
-                key={link.label}
-                href={link.href}
-                className="px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors duration-150 ease-out rounded-full hover:bg-zinc-900 border border-transparent"
-              >
-                {link.label}
-              </a>
+          {isAuthenticated ? (
+            <Link to="/dashboard" className="flex items-center gap-2 text-white hover:text-red-500 font-medium transition-colors">Panel <ArrowRight className="w-4 h-4" /></Link>
+          ) : (
+            navLinks.map((link) =>
+              link.type === 'route' ? (
+                <NavLink
+                  key={link.label}
+                  to={link.to}
+                  className={({ isActive }) =>
+                    `px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ease-out ${
+                      isActive
+                        ? 'bg-zinc-900 text-white border border-red-600/20 shadow-sm shadow-red-600/10'
+                        : 'text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent'
+                    }`
+                  }
+                >
+                  {link.label}
+                </NavLink>
+              ) : (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  className="px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors duration-150 ease-out rounded-full hover:bg-zinc-900 border border-transparent"
+                >
+                  {link.label}
+                </a>
+              )
             )
           )}
         </div>
@@ -138,15 +137,9 @@ const Header = () => {
                 <span className="text-sm font-medium text-zinc-200 max-w-[120px] truncate">Hola, {displayName}</span>
                 <ChevronDown className="w-4 h-4 text-zinc-400" />
               </div>
-              <Link
-                to="/dashboard"
-                className="px-5 py-2 rounded-full bg-red-600 text-white hover:bg-red-700 shadow-md shadow-red-600/20 hover:shadow-lg hover:shadow-red-600/30 transition-all text-sm font-semibold active:scale-95"
-              >
-                Ir al Panel
-              </Link>
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 rounded-full border border-red-600/30 bg-red-600/10 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all text-sm font-medium text-red-300 hover:shadow-md hover:shadow-red-600/20 active:scale-95"
+                className="px-4 py-2 rounded-full border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-900 hover:border-zinc-700 transition-all text-sm font-medium"
               >
                 Cerrar Sesión
               </button>
@@ -228,21 +221,12 @@ const Header = () => {
 
             <div className="mt-4 flex flex-col gap-3 pt-4 border-t border-zinc-900">
               {isAuthenticated ? (
-                <>
-                  <Link
-                    to="/dashboard"
-                    onClick={() => setIsOpen(false)}
-                    className="w-full px-4 py-2.5 rounded-full bg-red-600 text-white hover:bg-red-700 text-center text-sm font-semibold transition-colors"
-                  >
-                    Ir al Panel
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full px-4 py-2.5 rounded-full border border-red-600/30 bg-red-600/10 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all text-sm font-medium text-red-300 text-center"
-                  >
-                    Cerrar Sesión
-                  </button>
-                </>
+                <button
+                  onClick={handleLogout}
+                  className="w-full px-4 py-2.5 rounded-full border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-900 hover:border-zinc-700 transition-all text-sm font-medium text-center"
+                >
+                  Cerrar Sesión
+                </button>
               ) : (
                 <>
                   <Link to="/login" onClick={() => setIsOpen(false)} className="w-full px-4 py-2.5 rounded-full border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-900 text-center text-sm font-medium transition-colors">

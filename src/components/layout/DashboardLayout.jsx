@@ -108,7 +108,6 @@ const DashboardLayout = () => {
             </button>
             <Link to="/" className="flex items-center gap-2">
               <span className="font-display text-lg font-semibold tracking-tight text-white">LuxArts</span>
-              <span className="rounded-full border border-red-600/30 bg-red-600/10 px-2 py-0.5 text-[10px] font-semibold tracking-widest text-red-400">CINEMATIC</span>
             </Link>
           </div>
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom'
+import { ChevronDown, Bell, ArrowRight } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 
 const publicLinks = [
@@ -22,6 +23,7 @@ const clientLinks = [
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false)
+  const [isNotifOpen, setIsNotifOpen] = useState(false)
   const { user, isAuthenticated, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
@@ -62,42 +64,69 @@ const Header = () => {
           <span className="font-display text-xl font-semibold tracking-tight text-white">
             LuxArts
           </span>
-          <span className="hidden sm:inline-flex ml-1 rounded-full border border-red-600/30 bg-red-600/10 px-2 py-0.5 text-[10px] font-semibold tracking-widest text-red-400 group-hover:bg-red-600 group-hover:text-white group-hover:border-red-600 transition-colors duration-300">
-            CINEMATIC
-          </span>
         </Link>
 
         <div className="hidden md:flex items-center gap-1">
-          {navLinks.map((link) =>
-            link.type === 'route' ? (
-              <NavLink
-                key={link.label}
-                to={link.to}
-                className={({ isActive }) =>
-                  `px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ease-out ${
-                    isActive
-                      ? 'bg-zinc-900 text-white border border-red-600/20 shadow-sm shadow-red-600/10'
-                      : 'text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent'
-                  }`
-                }
-              >
-                {link.label}
-              </NavLink>
-            ) : (
-              <a
-                key={link.label}
-                href={link.href}
-                className="px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors duration-150 ease-out rounded-full hover:bg-zinc-900 border border-transparent"
-              >
-                {link.label}
-              </a>
+          {isAuthenticated ? (
+            <Link to="/dashboard" className="flex items-center gap-2 text-white hover:text-red-500 font-medium transition-colors">Panel <ArrowRight className="w-4 h-4" /></Link>
+          ) : (
+            navLinks.map((link) =>
+              link.type === 'route' ? (
+                <NavLink
+                  key={link.label}
+                  to={link.to}
+                  className={({ isActive }) =>
+                    `px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ease-out ${
+                      isActive
+                        ? 'bg-zinc-900 text-white border border-red-600/20 shadow-sm shadow-red-600/10'
+                        : 'text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent'
+                    }`
+                  }
+                >
+                  {link.label}
+                </NavLink>
+              ) : (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  className="px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors duration-150 ease-out rounded-full hover:bg-zinc-900 border border-transparent"
+                >
+                  {link.label}
+                </a>
+              )
             )
           )}
         </div>
 
-        <div className="hidden md:flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-4">
           {isAuthenticated ? (
             <div className="flex items-center gap-4">
+              <div className="relative">
+                <button onClick={() => setIsNotifOpen(!isNotifOpen)} className="relative rounded-full p-2 text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors">
+                  <div className="relative">
+                    <Bell className="w-5 h-5 text-zinc-300 hover:text-white transition-colors" />
+                    <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600"></span>
+                    </span>
+                  </div>
+                </button>
+                {isNotifOpen && <div className="absolute right-0 top-12 w-80 bg-zinc-900/90 backdrop-blur-xl border border-zinc-700/50 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] overflow-hidden z-50">
+                  <div className="p-4">
+                    <p className="text-sm font-semibold text-white">Notificaciones</p>
+                    <div className="mt-3 space-y-3">
+                      <div className="rounded-xl bg-zinc-800/50 p-3 border border-zinc-800">
+                        <p className="text-sm font-medium text-white">Nueva reserva recibida</p>
+                        <p className="text-xs text-zinc-400">Elena Mora solicitó una sesión para el 12 Jun.</p>
+                      </div>
+                      <div className="rounded-xl bg-zinc-800/50 p-3 border border-zinc-800">
+                        <p className="text-sm font-medium text-white">Mensaje nuevo</p>
+                        <p className="text-xs text-zinc-400">Tienes un mensaje de Marc Dubois en el chat.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>}
+              </div>
               <div className="flex items-center gap-2.5 rounded-full border border-zinc-800 bg-zinc-900/60 pl-1 pr-3 py-1 hover:border-red-600/30 transition-colors">
                 <div className="relative">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800 border-2 border-red-600/40 text-white text-xs font-bold">
@@ -106,16 +135,11 @@ const Header = () => {
                   <span className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-zinc-950 ${isOnline ? 'bg-emerald-500' : 'bg-red-500'}`} />
                 </div>
                 <span className="text-sm font-medium text-zinc-200 max-w-[120px] truncate">Hola, {displayName}</span>
+                <ChevronDown className="w-4 h-4 text-zinc-400" />
               </div>
-              <Link
-                to="/dashboard"
-                className="px-5 py-2 rounded-full bg-red-600 text-white hover:bg-red-700 shadow-md shadow-red-600/20 hover:shadow-lg hover:shadow-red-600/30 transition-all text-sm font-semibold active:scale-95"
-              >
-                Ir al Panel
-              </Link>
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 rounded-full border border-red-600/30 bg-red-600/10 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all text-sm font-medium text-red-300 hover:shadow-md hover:shadow-red-600/20 active:scale-95"
+                className="px-4 py-2 rounded-full border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-900 hover:border-zinc-700 transition-all text-sm font-medium"
               >
                 Cerrar Sesión
               </button>
@@ -197,21 +221,12 @@ const Header = () => {
 
             <div className="mt-4 flex flex-col gap-3 pt-4 border-t border-zinc-900">
               {isAuthenticated ? (
-                <>
-                  <Link
-                    to="/dashboard"
-                    onClick={() => setIsOpen(false)}
-                    className="w-full px-4 py-2.5 rounded-full bg-red-600 text-white hover:bg-red-700 text-center text-sm font-semibold transition-colors"
-                  >
-                    Ir al Panel
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full px-4 py-2.5 rounded-full border border-red-600/30 bg-red-600/10 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all text-sm font-medium text-red-300 text-center"
-                  >
-                    Cerrar Sesión
-                  </button>
-                </>
+                <button
+                  onClick={handleLogout}
+                  className="w-full px-4 py-2.5 rounded-full border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-900 hover:border-zinc-700 transition-all text-sm font-medium text-center"
+                >
+                  Cerrar Sesión
+                </button>
               ) : (
                 <>
                   <Link to="/login" onClick={() => setIsOpen(false)} className="w-full px-4 py-2.5 rounded-full border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-900 text-center text-sm font-medium transition-colors">

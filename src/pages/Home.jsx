@@ -70,7 +70,7 @@ const Home = () => {
                         variant="primary"
                         className="px-8 py-3.5 text-[15px] shadow-xl shadow-red-600/20 hover:shadow-red-600/30"
                       >
-                        Ir al Panel
+                        Continuar a mi cuenta
                       </Button>
                     </Link>
                   ) : (
