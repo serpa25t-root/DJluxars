@@ -100,9 +100,10 @@ const Photographers = () => {
         const locLabel = getLocationLabel(p).toLowerCase()
         if (!locLabel.includes(location.toLowerCase())) return false
       }
+      if (date && p.availableDate && p.availableDate !== date) return false
       return true
     })
-  }, [photographers, search, category, location])
+  }, [photographers, search, category, location, date])
 
   const formatCOP = (v) => `$${Number(v).toLocaleString('es-CO')} COP`
 

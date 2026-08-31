@@ -1,177 +1,239 @@
-import { Link } from 'react-router-dom'
+import { useState, useEffect, useMemo } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Calendar, DollarSign, CheckCircle2, Percent, ArrowRight, MessageSquare, Check, X, Briefcase, Eye, Loader2, TrendingUp } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import { fetchArtistBookings, acceptBooking, rejectBooking } from '../../services/bookings'
+
+const TABS = [
+  { id: 'pendiente', label: 'Pendientes', value: 'Pendiente' },
+  { id: 'confirmada', label: 'Confirmadas', value: 'Confirmada' },
+  { id: 'completada', label: 'Completadas', value: 'Completada' },
+]
 
 const ArtistDashboard = () => {
   const { user } = useAuth()
+  const navigate = useNavigate()
+  const [activeTab, setActiveTab] = useState('Pendiente')
+  const [bookings, setBookings] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [actionLoading, setActionLoading] = useState(null)
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true)
+      try {
+        const data = await fetchArtistBookings()
+        setBookings(Array.isArray(data) ? data : [])
+      } catch {
+        setBookings([])
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [])
+
+  const filtered = useMemo(() => {
+    const norm = (s) => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    return bookings.filter((b) => norm(b.status) === norm(activeTab))
+  }, [bookings, activeTab])
+
+  const metrics = useMemo(() => {
+    const now = new Date()
+    const month = now.getMonth()
+    const year = now.getFullYear()
+    const confirmed = bookings.filter((b) => b.status?.toLowerCase().includes('confirmada'))
+    const monthConfirmed = confirmed.filter((b) => {
+      const d = new Date(b.date || b.createdAt)
+      return d.getMonth() === month && d.getFullYear() === year
+    })
+    const ingresos = monthConfirmed.reduce((sum, b) => sum + (Number(b.artist_payout ?? b.price ?? 0)), 0)
+    const total = bookings.length || 1
+    const tasa = Math.round((confirmed.length / total) * 100)
+    return {
+      ingresos,
+      confirmadas: confirmed.length,
+      tasa,
+    }
+  }, [bookings])
+
+  const formatCOP = (v) => `$${Number(v).toLocaleString('es-CO')} COP`
+  const formatDate = (d) => {
+    if (!d) return '—'
+    try {
+      const date = new Date(d)
+      return date.toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' })
+    } catch { return d }
+  }
+
+  const handleAccept = async (id) => {
+    setActionLoading(id)
+    try {
+      await acceptBooking(id)
+      setBookings((prev) => prev.map((b) => b.id === id ? { ...b, status: 'Confirmada' } : b))
+    } finally {
+      setActionLoading(null)
+    }
+  }
+  const handleReject = async (id) => {
+    setActionLoading(id)
+    try {
+      await rejectBooking(id)
+      setBookings((prev) => prev.map((b) => b.id === id ? { ...b, status: 'Rechazada' } : b))
+    } finally {
+      setActionLoading(null)
+    }
+  }
+  const handleChat = (b) => {
+    const pid = b.clientId || b.photographerId || b.id
+    navigate(`/chat?photographer=${pid}`)
+  }
+
+  const counts = useMemo(() => {
+    const c = { Pendiente: 0, Confirmada: 0, Completada: 0 }
+    bookings.forEach((b) => {
+      const s = b.status || ''
+      if (s.toLowerCase().includes('pendiente')) c.Pendiente++
+      else if (s.toLowerCase().includes('confirmada')) c.Confirmada++
+      else if (s.toLowerCase().includes('completada')) c.Completada++
+    })
+    return c
+  }, [bookings])
 
   return (
-    <div className="flex-1 overflow-y-auto p-8 space-y-12">
-      {/* Hero Section */}
-      <div>
-        <p className="text-zinc-400">Bienvenido de nuevo, {user?.first_name || "Jesús"} 👋</p>
-        <h1 className="font-serif text-5xl md:text-6xl leading-tight mt-2">
-          Tu talento, <br /> tu historia, <br /> <span className="text-red-600 drop-shadow-[0_0_15px_rgba(220,38,38,0.5)]">tu legado.</span>
-        </h1>
-        <div className="mt-6 flex gap-4">
-          <Link to="/explorar" className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-full font-medium transition-all shadow-lg shadow-red-900/20">
-            Explorar Proyectos
-          </Link>
-          <Link to="/dashboard/portfolio" className="bg-transparent border border-zinc-700 hover:border-zinc-500 hover:bg-zinc-800/50 text-white px-8 py-3 rounded-full font-medium transition-all">
-            + Nuevo Proyecto
-          </Link>
+    <div className="space-y-8 bg-[#070708] text-white">
+      {/* Header */}
+      <div className="relative overflow-hidden rounded-3xl border border-zinc-800/60 bg-zinc-900/40 backdrop-blur-xl p-8">
+        <div className="absolute -top-20 right-20 h-64 w-64 rounded-full bg-red-600/10 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 h-[1px] w-full bg-gradient-to-r from-transparent via-red-600/20 to-transparent" />
+        <div className="relative">
+          <p className="text-sm text-zinc-400">Studio Command Center</p>
+          <h1 className="mt-1 font-display text-3xl font-bold tracking-tight">Bienvenido, <span className="text-red-600">{user?.first_name || user?.username || 'Artista'}</span></h1>
+          <p className="mt-2 text-sm text-zinc-400 max-w-xl">Gestiona tus reservas en tiempo real, controla tus ingresos y mantén tu portafolio impecable.</p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link to="/dashboard/portfolio" className="inline-flex items-center gap-2 rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-600/20 hover:bg-red-700 transition-colors">
+              <Briefcase className="h-4 w-4" /> Editar Portafolio
+            </Link>
+            <Link to={`/fotografos/${user?.id || ''}`} className="inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/60 px-5 py-2.5 text-sm font-semibold text-white hover:bg-zinc-800 hover:border-zinc-700 transition-colors">
+              <Eye className="h-4 w-4" /> Ver Perfil Público <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* Bento Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-zinc-900/40 backdrop-blur-md border border-white/5 rounded-3xl p-8 shadow-xl">
-          <h2 className="text-sm font-semibold text-white">Resumen de actividad</h2>
-          <div className="mt-6 grid grid-cols-2 gap-4">
-            <div className="bg-black/40 border border-white/5 rounded-2xl p-5 hover:bg-black/60 transition-colors">
-              <p className="text-2xl font-bold text-white">12</p>
-              <p className="text-sm text-zinc-400">Proyectos activos</p>
-              <p className="text-green-500 text-sm mt-2">↑ 20% vs mes anterior</p>
-            </div>
-            <div className="bg-black/40 border border-white/5 rounded-2xl p-5 hover:bg-black/60 transition-colors">
-              <p className="text-2xl font-bold text-white">5</p>
-              <p className="text-sm text-zinc-400">Solicitudes pendientes</p>
-              <p className="text-green-500 text-sm mt-2">↑ 8% vs mes anterior</p>
-            </div>
-            <div className="bg-black/40 border border-white/5 rounded-2xl p-5 hover:bg-black/60 transition-colors">
-              <p className="text-2xl font-bold text-white">8</p>
-              <p className="text-sm text-zinc-400">Entregas este mes</p>
-              <p className="text-green-500 text-sm mt-2">↑ 12% completadas</p>
-            </div>
-            <div className="bg-black/40 border border-white/5 rounded-2xl p-5 hover:bg-black/60 transition-colors">
-              <p className="text-2xl font-bold text-white">96%</p>
-              <p className="text-sm text-zinc-400">Satisfacción</p>
-              <p className="text-green-500 text-sm mt-2">↑ 1.5% vs mes anterior</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-zinc-900/40 backdrop-blur-md border border-white/5 rounded-3xl p-8 shadow-xl">
+      {/* Métricas Financieras */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="rounded-3xl border border-zinc-800/60 bg-zinc-900/60 backdrop-blur-xl p-6 hover:border-red-600/20 hover:shadow-lg hover:shadow-red-600/5 transition-all">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-white">Próximas reservas</h2>
-            <Link to="/dashboard/bookings" className="text-xs font-medium text-red-400 hover:text-red-300">Ver todo →</Link>
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-600/10 border border-red-600/20 text-red-500"><DollarSign className="h-5 w-5" /></span>
+            <TrendingUp className="h-4 w-4 text-emerald-500" />
           </div>
-          <div className="mt-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <img src="https://i.pravatar.cc/100?img=32" alt="Vogue" className="h-10 w-10 rounded-full object-cover border border-zinc-800" />
-                <div>
-                  <p className="text-sm font-medium text-white">Sesión editorial — Vogue</p>
-                  <p className="text-xs text-zinc-500">12 Jun, 10:00 AM</p>
-                </div>
-              </div>
-              <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Confirmada</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <img src="https://i.pravatar.cc/100?img=14" alt="Hacienda" className="h-10 w-10 rounded-full object-cover border border-zinc-800" />
-                <div>
-                  <p className="text-sm font-medium text-white">Boda — Hacienda Paraíso</p>
-                  <p className="text-xs text-zinc-500">15 Jun, 4:00 PM</p>
-                </div>
-              </div>
-              <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">Pendiente</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <img src="https://i.pravatar.cc/100?img=26" alt="Zara" className="h-10 w-10 rounded-full object-cover border border-zinc-800" />
-                <div>
-                  <p className="text-sm font-medium text-white">Campaña moda — Zara TRF</p>
-                  <p className="text-xs text-zinc-500">18 Jun, 9:00 AM</p>
-                </div>
-              </div>
-              <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">Pendiente</span>
-            </div>
+          <p className="mt-4 text-xs font-semibold tracking-widest text-zinc-500 uppercase">Ingresos del Mes ($COP)</p>
+          <p className="mt-1 text-2xl font-bold text-white">{formatCOP(metrics.ingresos)}</p>
+          <p className="mt-1 text-xs text-zinc-500">Solo reservas confirmadas del mes actual</p>
+        </div>
+        <div className="rounded-3xl border border-zinc-800/60 bg-zinc-900/60 backdrop-blur-xl p-6 hover:border-red-600/20 hover:shadow-lg hover:shadow-red-600/5 transition-all">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+            <CheckCircle2 className="h-5 w-5" />
           </div>
+          <p className="mt-4 text-xs font-semibold tracking-widest text-zinc-500 uppercase">Reservas Confirmadas</p>
+          <p className="mt-1 text-2xl font-bold text-white">{metrics.confirmadas}</p>
+          <p className="mt-1 text-xs text-zinc-500">Total históricas confirmadas</p>
+        </div>
+        <div className="rounded-3xl border border-zinc-800/60 bg-zinc-900/60 backdrop-blur-xl p-6 hover:border-red-600/20 hover:shadow-lg hover:shadow-red-600/5 transition-all">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
+            <Percent className="h-5 w-5" />
+          </div>
+          <p className="mt-4 text-xs font-semibold tracking-widest text-zinc-500 uppercase">Tasa de Aprobación</p>
+          <p className="mt-1 text-2xl font-bold text-white">{metrics.tasa}%</p>
+          <p className="mt-1 text-xs text-zinc-500">Confirmadas / Totales</p>
         </div>
       </div>
 
-      {/* Proyectos recientes */}
-      <div>
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-white">Proyectos recientes</h2>
-          <Link to="/dashboard/portfolio" className="text-sm font-medium text-red-500 hover:text-red-400">Ver todos</Link>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-4">
-          <div>
-            <img src="https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400&h=260&fit=crop" alt="Nocturne" className="aspect-video rounded-xl object-cover hover:scale-105 transition-transform w-full" />
-            <p className="mt-2 text-sm font-medium text-white">Nocturne Studio</p>
-            <p className="text-xs text-zinc-400">12 fotos • Agosto 2026</p>
-          </div>
-          <div>
-            <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=260&fit=crop" alt="Luz" className="aspect-video rounded-xl object-cover hover:scale-105 transition-transform w-full" />
-            <p className="mt-2 text-sm font-medium text-white">Luz de Neón</p>
-            <p className="text-xs text-zinc-400">8 fotos • Agosto 2026</p>
-          </div>
-          <div>
-            <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&h=260&fit=crop" alt="Pasarela" className="aspect-video rounded-xl object-cover hover:scale-105 transition-transform w-full" />
-            <p className="mt-2 text-sm font-medium text-white">Pasarela Nocturna</p>
-            <p className="text-xs text-zinc-400">15 fotos • Agosto 2026</p>
-          </div>
-          <div>
-            <img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=260&fit=crop" alt="Geometria" className="aspect-video rounded-xl object-cover hover:scale-105 transition-transform w-full" />
-            <p className="mt-2 text-sm font-medium text-white">Geometría Urbana</p>
-            <p className="text-xs text-zinc-400">10 fotos • Agosto 2026</p>
-          </div>
-          <div>
-            <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=260&fit=crop" alt="Ritual" className="aspect-video rounded-xl object-cover hover:scale-105 transition-transform w-full" />
-            <p className="mt-2 text-sm font-medium text-white">Ritual de Luces</p>
-            <p className="text-xs text-zinc-400">9 fotos • Agosto 2026</p>
-          </div>
-        </div>
+      {/* Tabs */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-zinc-800 pb-4">
+        {TABS.map((t) => {
+          const active = activeTab === t.value
+          const count = counts[t.value] || 0
+          return (
+            <button
+              key={t.id}
+              onClick={() => setActiveTab(t.value)}
+              className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium border transition-all ${active ? 'bg-red-600 border-red-600 text-white shadow-md shadow-red-600/20' : 'border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:text-white hover:border-zinc-700'}`}
+            >
+              {t.label}
+              <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${active ? 'bg-white text-red-600' : 'bg-zinc-800 text-zinc-300'}`}>{count}</span>
+            </button>
+          )
+        })}
+        <Link to="/dashboard/bookings" className="ml-auto text-xs font-medium text-zinc-400 hover:text-white">Ver gestión completa →</Link>
       </div>
 
-      {/* Footer Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 border-t border-zinc-800/50 pt-10 mt-10">
-        <div className="flex flex-col items-center justify-center text-center space-y-3">
-          <div className="w-12 h-12 rounded-full bg-red-900/20 border border-red-900/30 flex items-center justify-center text-red-500">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <div>
-            <h4 className="text-2xl font-bold text-white">15K+</h4>
-            <p className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mt-1">Obras</p>
-          </div>
+      {/* Lista de reservas */}
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="animate-pulse rounded-3xl h-48 bg-zinc-900 border border-zinc-800" />
+          ))}
         </div>
-        <div className="flex flex-col items-center justify-center text-center space-y-3">
-          <div className="w-12 h-12 rounded-full bg-red-900/20 border border-red-900/30 flex items-center justify-center text-red-500">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l2.036 6.29" />
-            </svg>
-          </div>
-          <div>
-            <h4 className="text-2xl font-bold text-white">4.9/5</h4>
-            <p className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mt-1">Calificación</p>
-          </div>
+      ) : filtered.length === 0 ? (
+        <div className="rounded-3xl border border-dashed border-zinc-800 bg-zinc-950 py-16 text-center">
+          <Calendar className="h-8 w-8 text-zinc-600 mx-auto" />
+          <p className="mt-3 text-sm font-medium text-white">Sin reservas {activeTab.toLowerCase()}</p>
+          <p className="text-xs text-zinc-500 mt-1">Cuando recibas solicitudes aparecerán aquí.</p>
         </div>
-        <div className="flex flex-col items-center justify-center text-center space-y-3">
-          <div className="w-12 h-12 rounded-full bg-red-900/20 border border-red-900/30 flex items-center justify-center text-red-500">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <div>
-            <h4 className="text-2xl font-bold text-white">98%</h4>
-            <p className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mt-1">Satisfacción</p>
-          </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {filtered.map((b) => (
+            <div key={b.id} className="group flex flex-col rounded-3xl border border-zinc-800/60 bg-zinc-900/60 backdrop-blur-xl p-5 hover:border-red-600/20 hover:shadow-xl hover:shadow-red-600/5 transition-all">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <img src={b.photographerAvatar || `https://i.pravatar.cc/100?img=${(b.photographerId % 70) + 1}`} alt={b.clientName} className="h-10 w-10 rounded-full object-cover border border-zinc-800" />
+                  <div>
+                    <p className="text-sm font-semibold text-white">{b.clientName}</p>
+                    <p className="text-xs text-zinc-400">{b.service}</p>
+                  </div>
+                </div>
+                <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold tracking-widest border ${activeTab === 'Pendiente' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : activeTab === 'Confirmada' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-zinc-700/30 text-zinc-300 border-zinc-700'}`}>{b.status}</span>
+              </div>
+              <div className="mt-4 space-y-1.5 text-xs">
+                <p className="flex items-center gap-1.5 text-zinc-400"><Calendar className="h-3.5 w-3.5" /> {formatDate(b.date)}</p>
+                <p className="flex items-center gap-1.5 font-semibold text-white"><DollarSign className="h-3.5 w-3.5 text-emerald-400" /> {formatCOP(b.price)}</p>
+                {b.location && <p className="text-zinc-500 truncate">{b.location}</p>}
+              </div>
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                {activeTab === 'Pendiente' ? (
+                  <>
+                    <button
+                      onClick={() => handleAccept(b.id)}
+                      disabled={actionLoading === b.id}
+                      className="inline-flex items-center justify-center gap-1 rounded-full bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60 transition-colors"
+                    >
+                      {actionLoading === b.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />} Aceptar
+                    </button>
+                    <button
+                      onClick={() => handleReject(b.id)}
+                      disabled={actionLoading === b.id}
+                      className="inline-flex items-center justify-center gap-1 rounded-full border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-medium text-zinc-300 hover:bg-zinc-900 hover:border-zinc-700 disabled:opacity-60 transition-colors"
+                    >
+                      <X className="h-3 w-3" /> Rechazar
+                    </button>
+                    <button onClick={() => handleChat(b)} className="inline-flex items-center justify-center gap-1 rounded-full bg-zinc-900 border border-zinc-800 px-3 py-2 text-xs font-medium text-white hover:bg-red-600 hover:border-red-600 transition-colors">
+                      <MessageSquare className="h-3 w-3" /> Chat
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={() => handleChat(b)} className="col-span-3 inline-flex items-center justify-center gap-2 rounded-full bg-red-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-red-700 shadow-md shadow-red-600/20 transition-colors">
+                      <MessageSquare className="h-4 w-4" /> Ir al Chat <ArrowRight className="h-3 w-3" />
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
-        <div className="flex flex-col items-center justify-center text-center space-y-3">
-          <div className="w-12 h-12 rounded-full bg-red-900/20 border border-red-900/30 flex items-center justify-center text-red-500">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <div>
-            <h4 className="text-2xl font-bold text-white">24/7</h4>
-            <p className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mt-1">Soporte</p>
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   )
 }

@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import AuthLayout from '../components/common/AuthLayout'
 import Input from '../components/common/Input'
 import Button from '../components/common/Button'
+import useColombiaApi from '../services/colombiaApi'
 
 const roles = [
   {
@@ -39,10 +40,42 @@ const Register = () => {
   const [errorMsg, setErrorMsg] = useState(null)
   const [successMsg, setSuccessMsg] = useState(null)
   const [loading, setLoading] = useState(false)
+  const { departments, cities, loadingDepartments, loadingCities, loadCities } = useColombiaApi()
+  const [deptId, setDeptId] = useState('')
+
+  useEffect(() => {
+    // Si ya hay departamento en form (por autocompletado), precargar ciudades
+    if (form.departamento && departments.length) {
+      const found = departments.find((d) => d.name === form.departamento)
+      if (found) {
+        setDeptId(String(found.id))
+        loadCities(found.id)
+      }
+    }
+  }, [departments, form.departamento, loadCities])
 
   const handleChange = (e) => {
     const { id, value } = e.target
     setForm((prev) => ({ ...prev, [id]: value }))
+    if (errorMsg) setErrorMsg(null)
+  }
+
+  const handleDepartamentoChange = (e) => {
+    const val = e.target.value
+    // val es id o nombre? usamos id como value para fetch, pero guardamos name en form
+    const selected = departments.find((d) => String(d.id) === val || d.name === val)
+    const name = selected ? selected.name : val
+    const id = selected ? String(selected.id) : ''
+    setDeptId(id)
+    setForm((prev) => ({ ...prev, departamento: name, ciudad: '' }))
+    if (id) loadCities(id)
+    else loadCities('')
+    if (errorMsg) setErrorMsg(null)
+  }
+
+  const handleCiudadChange = (e) => {
+    const val = e.target.value
+    setForm((prev) => ({ ...prev, ciudad: val }))
     if (errorMsg) setErrorMsg(null)
   }
 
@@ -148,8 +181,42 @@ const Register = () => {
         <Input label="Correo Electrónico" id="email" type="email" placeholder="ana@estudio.com" value={form.email} onChange={handleChange} required autoComplete="email" />
         <Input label="Teléfono" id="phone" type="tel" placeholder="+57 300 000 0000" value={form.phone} onChange={handleChange} required autoComplete="tel" />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Input label="Departamento" id="departamento" placeholder="Antioquia" value={form.departamento} onChange={handleChange} autoComplete="address-level1" />
-          <Input label="Ciudad" id="ciudad" placeholder="Medellín" value={form.ciudad} onChange={handleChange} autoComplete="address-level2" />
+          <div className="space-y-1.5">
+            <label htmlFor="departamento" className="block text-xs font-medium tracking-wide text-zinc-300">Departamento</label>
+            <div className="relative">
+              <select
+                id="departamento"
+                value={deptId}
+                onChange={handleDepartamentoChange}
+                disabled={loadingDepartments}
+                className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-red-600/50 focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-red-600/20 transition-all disabled:opacity-60"
+              >
+                <option value="">{loadingDepartments ? 'Cargando departamentos...' : 'Selecciona departamento'}</option>
+                {departments.map((d) => (
+                  <option key={d.id} value={String(d.id)}>{d.name}</option>
+                ))}
+              </select>
+              {loadingDepartments && <span className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin rounded-full border-2 border-zinc-600 border-t-red-600" />}
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="ciudad" className="block text-xs font-medium tracking-wide text-zinc-300">Ciudad</label>
+            <div className="relative">
+              <select
+                id="ciudad"
+                value={form.ciudad}
+                onChange={handleCiudadChange}
+                disabled={!deptId || loadingCities}
+                className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-red-600/50 focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-red-600/20 transition-all disabled:opacity-60"
+              >
+                <option value="">{!deptId ? 'Selecciona departamento primero' : loadingCities ? 'Cargando municipios...' : 'Selecciona ciudad'}</option>
+                {cities.map((c) => (
+                  <option key={c.id} value={c.name}>{c.name}</option>
+                ))}
+              </select>
+              {loadingCities && <span className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin rounded-full border-2 border-zinc-600 border-t-red-600" />}
+            </div>
+          </div>
         </div>
         <Input label="Contraseña" id="password" type="password" placeholder="Mínimo 8 caracteres" value={form.password} onChange={handleChange} required autoComplete="new-password" />
 

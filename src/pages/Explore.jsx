@@ -1,12 +1,12 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Link, useSearchParams, useNavigate } from 'react-router-dom'
-import FilterBar from '../components/explore/FilterBar'
 import ComparatorModal, { CompareBar } from '../components/explore/ComparatorModal'
 import BookingModal from '../components/booking/BookingModal'
 import Button from '../components/common/Button'
 import { getCurrentPosition, reverseGeocode, haversine } from '../services/geo'
 import { useAuth } from '../context/AuthContext'
 import { Search, MapPin, Calendar, Sparkles } from 'lucide-react'
+import useColombiaApi from '../services/colombiaApi'
 
 const photographers = [
   { id: 1, name: 'Elena Mora', specialty: 'Retrato', avatar: 'https://i.pravatar.cc/150?img=5', rating: 4.9, reviews: 128, price: 350000, delivery: '3 días', category: 'Retrato', lat: 4.711, lng: -74.0721, city: 'Bogotá', is_pro: true },
@@ -32,6 +32,9 @@ const Explore = () => {
   const [rating, setRating] = useState(0)
   const [locationFilter, setLocationFilter] = useState('')
   const [dateFilter, setDateFilter] = useState('')
+  const { departments, cities, loadingDepartments, loadingCities, loadCities } = useColombiaApi()
+  const [selectedDept, setSelectedDept] = useState('')
+  const [selectedCity, setSelectedCity] = useState('')
 
   useEffect(() => {
     const cat = searchParams.get('category')
@@ -39,10 +42,24 @@ const Explore = () => {
     const q = searchParams.get('q')
     const date = searchParams.get('date')
     if (cat) setCategory(cat)
-    if (loc) setLocationFilter(loc)
+    if (loc) {
+      setLocationFilter(loc)
+      setSelectedCity(loc)
+    }
     if (q) setSearch(q)
     if (date) setDateFilter(date)
   }, [searchParams])
+
+  // Sincroniza locationFilter derivado de selectores anidados
+  useEffect(() => {
+    if (selectedCity) setLocationFilter(selectedCity)
+    else if (selectedDept) {
+      const dept = departments.find((d) => String(d.id) === String(selectedDept))
+      setLocationFilter(dept ? dept.name : '')
+    } else {
+      setLocationFilter('')
+    }
+  }, [selectedDept, selectedCity, departments])
   const [compare, setCompare] = useState([])
   const [showCompare, setShowCompare] = useState(false)
   const [bookingPhotographer, setBookingPhotographer] = useState(null)
@@ -151,12 +168,12 @@ const Explore = () => {
           <p className="mt-2 text-sm text-zinc-400 max-w-2xl">Explora fotógrafos verificados, filtra por estilo y compara propuestas sin salir de la página.</p>
         </div>
 
-        {/* Buscador flotante Glassmorphism — movido desde Home para layout despejado */}
+        {/* ÚNICA barra flotante superior con Glassmorphism — SCRUM-34: p-4 + selectores anidados Colombia */}
         <section className="relative z-20 mt-6">
-          <div className="bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-3xl p-6 shadow-2xl">
-            <form onSubmit={handleSearchBarSubmit} className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr_1fr_1fr_auto] gap-4 items-end">
+          <div className="bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-3xl p-4 shadow-2xl">
+            <form onSubmit={handleSearchBarSubmit} className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_auto] gap-3 items-end">
               <div>
-                <label className="text-xs font-medium text-zinc-400 mb-1.5 block flex items-center gap-1.5"><Search className="h-3.5 w-3.5" /> Search query</label>
+                <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><Search className="h-3.5 w-3.5" /> Search query</label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                   <input
@@ -169,7 +186,7 @@ const Explore = () => {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-medium text-zinc-400 mb-1.5 block flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5" /> Session type</label>
+                <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5" /> Session type</label>
                 <div className="relative">
                   <select
                     value={category}
@@ -187,17 +204,58 @@ const Explore = () => {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-medium text-zinc-400 mb-1.5 block flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Location</label>
-                <input
-                  type="text"
-                  value={locationFilter}
-                  onChange={(e) => setLocationFilter(e.target.value)}
-                  placeholder="Ubicación"
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-950/60 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-red-600/40 focus:outline-none focus:ring-2 focus:ring-red-600/15 transition-all"
-                />
+                <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Departamento</label>
+                <div className="relative">
+                  <select
+                    value={selectedDept}
+                    onChange={(e) => {
+                      const val = e.target.value
+                      setSelectedDept(val)
+                      setSelectedCity('')
+                      if (val) loadCities(val)
+                    }}
+                    disabled={loadingDepartments}
+                    className="w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-950/60 px-3 py-3 pr-8 text-sm text-white focus:border-red-600/40 focus:outline-none focus:ring-2 focus:ring-red-600/15 transition-all disabled:opacity-60"
+                  >
+                    <option value="">{loadingDepartments ? 'Cargando...' : 'Departamento'}</option>
+                    {departments.map((d) => (
+                      <option key={d.id} value={String(d.id)}>{d.name}</option>
+                    ))}
+                  </select>
+                  {loadingDepartments ? (
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin rounded-full border-2 border-zinc-600 border-t-red-600" />
+                  ) : (
+                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                    </span>
+                  )}
+                </div>
               </div>
               <div>
-                <label className="text-xs font-medium text-zinc-400 mb-1.5 block flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> Date</label>
+                <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Municipio</label>
+                <div className="relative">
+                  <select
+                    value={selectedCity}
+                    onChange={(e) => setSelectedCity(e.target.value)}
+                    disabled={!selectedDept || loadingCities}
+                    className="w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-950/60 px-3 py-3 pr-8 text-sm text-white focus:border-red-600/40 focus:outline-none focus:ring-2 focus:ring-red-600/15 transition-all disabled:opacity-60"
+                  >
+                    <option value="">{!selectedDept ? 'Municipio' : loadingCities ? 'Cargando...' : 'Municipio'}</option>
+                    {cities.map((c) => (
+                      <option key={c.id} value={c.name}>{c.name}</option>
+                    ))}
+                  </select>
+                  {loadingCities ? (
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin rounded-full border-2 border-zinc-600 border-t-red-600" />
+                  ) : (
+                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> Date</label>
                 <input
                   type="date"
                   value={dateFilter}
@@ -213,7 +271,7 @@ const Explore = () => {
                 </button>
               </div>
             </form>
-            <div className="mt-5 flex flex-wrap items-center gap-2">
+            <div className="mt-4 flex flex-wrap items-center gap-2">
               <span className="text-xs text-zinc-500 mr-1">Búsquedas populares:</span>
               {popularSearches.map((pill) => (
                 <button
@@ -228,23 +286,6 @@ const Explore = () => {
             </div>
           </div>
         </section>
-
-        <div className="mt-6">
-          <FilterBar
-            category={category}
-            onCategory={setCategory}
-            price={price}
-            onPrice={setPrice}
-            rating={rating}
-            onRating={setRating}
-            onUseLocation={handleUseLocation}
-            locationLabel={locationLabel}
-            loadingLocation={loadingLocation}
-            sortByDistance={sortByDistance}
-            onToggleSort={setSortByDistance}
-            hasLocation={!!userLocation}
-          />
-        </div>
 
         <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((p) => {
@@ -276,6 +317,19 @@ const Explore = () => {
                         A {p.distance.toFixed(1)} km de ti
                       </span>
                     )}
+                  </div>
+                  {/* Hover preview — miniaturas portfolio */}
+                  <div className="mt-3 grid grid-cols-3 gap-1.5 rounded-xl overflow-hidden">
+                    {[
+                      `https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=300&h=200&fit=crop&crop=center&auto=format`,
+                      `https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=300&h=200&fit=crop&crop=center&auto=format`,
+                      `https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=300&h=200&fit=crop&crop=center&auto=format`,
+                    ].map((src, i) => (
+                      <div key={i} className="relative aspect-[4/3] overflow-hidden rounded-lg bg-zinc-900">
+                        <img src={src} alt={`Portfolio ${i+1}`} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500 will-change-transform" loading="lazy" />
+                        {i === 2 && <span className="absolute inset-0 bg-black/40 flex items-center justify-center text-[10px] font-bold text-white">+12</span>}
+                      </div>
+                    ))}
                   </div>
                   <p className="mt-3 text-xs text-zinc-500">Entrega {p.delivery} • Base por sesión</p>
                   <div className="mt-4 flex gap-2">
