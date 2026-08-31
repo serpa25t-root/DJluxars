@@ -14,6 +14,7 @@ import Chat from './pages/Chat'
 import DashboardLayout from './components/layout/DashboardLayout'
 import ArtistDashboard from './pages/dashboard/ArtistDashboard'
 import ClientDashboard from './pages/dashboard/ClientDashboard'
+import ProSubscription from './pages/dashboard/ProSubscription'
 
 const Placeholder = ({ title }) => (
   <div className="min-h-[100dvh] flex flex-col bg-black">
@@ -69,9 +70,11 @@ function AppRoutes() {
         <Route path="services" element={<Placeholder title="Mis Servicios" />} />
         <Route path="favorites" element={<Placeholder title="Favoritos" />} />
         <Route path="stats" element={<Placeholder title="Estadísticas" />} />
-        <Route path="settings" element={<Placeholder title="Configuración" />} />
+        <Route path="settings" element={<Settings />} />
+        <Route path="configuracion" element={<Settings />} />
         <Route path="projects" element={<Placeholder title="Mis Proyectos" />} />
         <Route path="reviews" element={<Placeholder title="Valoraciones" />} />
+        <Route path="pro" element={<ProSubscription />} />
       </Route>
       <Route
         path="/my-bookings"
