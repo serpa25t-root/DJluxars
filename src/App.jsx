@@ -49,10 +49,23 @@ const DashboardIndex = () => {
   return <ArtistDashboard />
 }
 
+const HomeRoute = () => {
+  const { isAuthenticated, loading } = useAuth()
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center bg-black text-zinc-400">
+        Cargando...
+      </div>
+    )
+  }
+  if (isAuthenticated) return <Navigate to="/dashboard" replace />
+  return <Home />
+}
+
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<HomeRoute />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/explorar" element={<Explore />} />

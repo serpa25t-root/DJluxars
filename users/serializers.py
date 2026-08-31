@@ -7,10 +7,12 @@ User = get_user_model()
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
     phone_number = serializers.CharField(required=False, allow_blank=True)
+    departamento = serializers.CharField(required=False, allow_blank=True)
+    ciudad = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password', 'role', 'phone_number', 'first_name', 'last_name']
+        fields = ['id', 'username', 'email', 'password', 'role', 'phone_number', 'first_name', 'last_name', 'departamento', 'ciudad']
         extra_kwargs = {
             'email': {'required': True},
             'username': {'required': True},
@@ -42,7 +44,7 @@ class UserListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'name', 'email', 'role', 'category', 'profile_picture', 'avatar']
+        fields = ['id', 'username', 'first_name', 'last_name', 'name', 'email', 'role', 'category', 'profile_picture', 'avatar', 'departamento', 'ciudad']
 
     def get_name(self, obj):
         full = f"{obj.first_name} {obj.last_name}".strip()

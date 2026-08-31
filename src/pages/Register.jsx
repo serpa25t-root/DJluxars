@@ -35,7 +35,7 @@ const Register = () => {
   const { register } = useAuth()
   const navigate = useNavigate()
   const [role, setRole] = useState('client')
-  const [form, setForm] = useState({ name: '', email: '', phone: '', password: '' })
+  const [form, setForm] = useState({ name: '', email: '', phone: '', departamento: '', ciudad: '', password: '' })
   const [errorMsg, setErrorMsg] = useState(null)
   const [successMsg, setSuccessMsg] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -48,7 +48,7 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    const { name, email, phone, password } = form
+    const { name, email, phone, departamento, ciudad, password } = form
     if (!name.trim() || !email.trim() || !phone.trim() || !password.trim()) {
       setErrorMsg('Por favor completa todos los campos requeridos.')
       return
@@ -58,7 +58,7 @@ const Register = () => {
     setSuccessMsg(null)
     setLoading(true)
     try {
-      await register({ name: name.trim(), email: email.trim(), phone: phone.trim(), password, role })
+      await register({ name: name.trim(), email: email.trim(), phone: phone.trim(), departamento: departamento.trim(), ciudad: ciudad.trim(), password, role })
       navigate('/login', { state: { registered: true, message: '¡Cuenta creada con éxito! Por favor inicia sesión.' } })
       return
     } catch (err) {
@@ -147,6 +147,10 @@ const Register = () => {
         <Input label="Nombre completo" id="name" placeholder="Ana López" value={form.name} onChange={handleChange} required autoComplete="name" />
         <Input label="Correo Electrónico" id="email" type="email" placeholder="ana@estudio.com" value={form.email} onChange={handleChange} required autoComplete="email" />
         <Input label="Teléfono" id="phone" type="tel" placeholder="+57 300 000 0000" value={form.phone} onChange={handleChange} required autoComplete="tel" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Input label="Departamento" id="departamento" placeholder="Antioquia" value={form.departamento} onChange={handleChange} autoComplete="address-level1" />
+          <Input label="Ciudad" id="ciudad" placeholder="Medellín" value={form.ciudad} onChange={handleChange} autoComplete="address-level2" />
+        </div>
         <Input label="Contraseña" id="password" type="password" placeholder="Mínimo 8 caracteres" value={form.password} onChange={handleChange} required autoComplete="new-password" />
 
         <Button type="submit" variant="primary" disabled={loading} className="w-full py-3.5 text-[15px] shadow-lg shadow-red-600/20 disabled:opacity-60">
