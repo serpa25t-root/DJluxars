@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Heart, User, Sparkles, CalendarDays, Package, Mountain, ShieldCheck, Lock, CreditCard, Headphones, Award, Search, MapPin, Calendar, ArrowRight, Play } from 'lucide-react'
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
+import { useAuth } from '../context/AuthContext'
 
 const categories = [
   {
@@ -53,11 +54,29 @@ const popularSearches = ['Boda', 'Retrato', 'Eventos', 'Producto', 'Moda', 'Pais
 const sessionTypes = ['Bodas', 'Retrato', 'Moda', 'Eventos', 'Editorial', 'Producto', 'Familia', 'Paisajes']
 
 const Home = () => {
+  const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [searchType, setSearchType] = useState('')
   const [searchLocation, setSearchLocation] = useState('')
   const [searchDate, setSearchDate] = useState('')
+
+  // SCRUM-32 Part 2: protección acciones públicas — redirige a /login si no autenticado
+  const handleBooking = (photographer) => {
+    if (!isAuthenticated) {
+      navigate('/login')
+      return
+    }
+  }
+  const handleChat = (photographerId) => {
+    if (!isAuthenticated) {
+      navigate('/login')
+      return
+    }
+    navigate(`/chat?photographer=${photographerId}`)
+  }
+  const handleContact = handleChat
+  const openBookingModal = handleBooking
 
   const handleSearchSubmit = (e) => {
     e.preventDefault()
@@ -157,9 +176,9 @@ const Home = () => {
                 <div className="relative w-full max-w-[420px] animate-[scaleIn_700ms_var(--ease-out-expo)_180ms_both] will-change-transform">
                   <div className="relative overflow-hidden rounded-[28px] border border-zinc-800/60 bg-zinc-900 aspect-[4/5] shadow-2xl shadow-black/50">
                     <img
-                      src="https://images.unsplash.com/photo-1554048612-b6a97ae9aa07?w=800&h=1000&fit=crop&crop=faces"
+                      src="https://images.unsplash.com/photo-1554048612-b6a482bc67e5?auto=format&fit=crop&w=1000&q=80"
                       alt="Fotógrafo profesional sosteniendo cámara"
-                      className="h-full w-full object-cover"
+                      className="object-cover w-full h-full"
                       loading="eager"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />

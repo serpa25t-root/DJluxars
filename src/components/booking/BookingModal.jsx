@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { MessageSquare } from 'lucide-react'
 import Button from '../common/Button'
 import Input from '../common/Input'
 import api from '../../services/api'
@@ -14,7 +15,7 @@ const services = [
 ]
 
 const BookingModal = ({ isOpen, onClose, photographer }) => {
-  const { user } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const navigate = useNavigate()
   const [form, setForm] = useState({ date: '', service: 'Sesión Studio', location: '', message: '' })
   const [loading, setLoading] = useState(false)
@@ -43,8 +44,33 @@ const BookingModal = ({ isOpen, onClose, photographer }) => {
     setForm((p) => ({ ...p, [id]: value }))
   }
 
+  // SCRUM-32 Part 2: protección - si no autenticado, redirige a /login y no abre modal ni llama API
+  const handleBooking = () => {
+    if (!isAuthenticated) {
+      navigate('/login')
+      return
+    }
+  }
+  const handleChat = () => {
+    if (!isAuthenticated) {
+      onClose()
+      navigate('/login')
+      return
+    }
+    onClose()
+    navigate(`/chat?photographer=${photographer.id}`)
+  }
+
+  const handleContact = handleChat
+  const openBookingModal = handleBooking
+
   const handleSubmit = async (e) => {
     e.preventDefault()
+    // Protección pública: visitante no autenticado → /login
+    if (!isAuthenticated) {
+      navigate('/login')
+      return
+    }
     if (!form.date || !form.location.trim() || !form.message.trim()) {
       setToast({ msg: 'Completa fecha, ubicación y detalles.', type: 'error' })
       setTimeout(() => setToast(null), 2800)
@@ -162,20 +188,19 @@ const BookingModal = ({ isOpen, onClose, photographer }) => {
             <span className="hidden sm:inline-flex rounded-full bg-white text-black px-3 py-1 text-xs font-bold">${estimated.toLocaleString('es-CO')}</span>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button type="submit" variant="primary" disabled={loading} className="flex-1 py-3.5 disabled:opacity-60 shadow-lg shadow-red-600/20">
+          {/* Footer ultra limpio — solo 2 botones */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Button type="submit" variant="primary" disabled={loading} className="w-full py-3.5 disabled:opacity-60 shadow-lg shadow-red-600/20">
               {loading ? 'Enviando...' : `Solicitar Reserva ($${estimated.toLocaleString('es-CO')} COP)`}
             </Button>
             <Button
               type="button"
               variant="secondary"
-              className="flex-1 py-3.5 border-zinc-800"
-              onClick={() => {
-                onClose()
-                navigate(`/chat?contactId=${photographer.id}&name=${encodeURIComponent(photographer.name)}`)
-              }}
+              className="w-full py-3.5 border-zinc-700 bg-transparent text-zinc-200 hover:bg-zinc-900 hover:border-zinc-600 hover:text-white flex items-center justify-center gap-2"
+              onClick={handleChat}
             >
-              Consultar / Negociar por Chat
+              <MessageSquare className="h-4 w-4" />
+              Chat
             </Button>
           </div>
         </form>

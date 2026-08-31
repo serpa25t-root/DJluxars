@@ -1,10 +1,11 @@
 import { useState, useMemo, useEffect } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import FilterBar from '../components/explore/FilterBar'
 import ComparatorModal, { CompareBar } from '../components/explore/ComparatorModal'
 import BookingModal from '../components/booking/BookingModal'
 import Button from '../components/common/Button'
 import { getCurrentPosition, reverseGeocode, haversine } from '../services/geo'
+import { useAuth } from '../context/AuthContext'
 
 const photographers = [
   { id: 1, name: 'Elena Mora', specialty: 'Retrato', avatar: 'https://i.pravatar.cc/150?img=5', rating: 4.9, reviews: 128, price: 350000, delivery: '3 días', category: 'Retrato', lat: 4.711, lng: -74.0721, city: 'Bogotá', is_pro: true },
@@ -18,6 +19,8 @@ const photographers = [
 ]
 
 const Explore = () => {
+  const { isAuthenticated } = useAuth()
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('Todas')
@@ -87,6 +90,26 @@ const Explore = () => {
       return [...prev, p]
     })
   }
+
+  // SCRUM-32 Part 2: protección acciones públicas — redirige a /login si no autenticado
+  const handleBooking = (photographer) => {
+    if (!isAuthenticated) {
+      navigate('/login')
+      return
+    }
+    setBookingPhotographer(photographer)
+  }
+
+  const handleChat = (photographerId) => {
+    if (!isAuthenticated) {
+      navigate('/login')
+      return
+    }
+    navigate(`/chat?photographer=${photographerId}`)
+  }
+
+  const openBookingModal = handleBooking
+  const handleContact = handleChat
 
   return (
     <div className="min-h-[100dvh] bg-black">
@@ -171,7 +194,7 @@ const Explore = () => {
                     </button>
                   </div>
                   <button
-                    onClick={() => setBookingPhotographer({ id: p.id, name: p.name, avatar: p.avatar, specialty: p.specialty, price: p.price })}
+                    onClick={() => handleBooking({ id: p.id, name: p.name, avatar: p.avatar, specialty: p.specialty, price: p.price })}
                     className="mt-2 w-full rounded-full bg-red-600/10 border border-red-600/20 py-2 text-sm font-medium text-red-300 hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
                   >
                     Solicitar Reserva
