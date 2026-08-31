@@ -33,7 +33,9 @@ const Header = () => {
   const isOnline = isAuthenticated
 
   let navLinks = publicLinks
-  if (isAuthenticated) {
+  // SCRUM-32: Aislamiento landing '/' — nunca mostrar elementos de dashboard en landing, incluso si hay sesión
+  const isLanding = location.pathname === '/'
+  if (isAuthenticated && !isLanding) {
     if (user?.role === 'artist') navLinks = artistLinks
     else if (user?.role === 'client') navLinks = clientLinks
   }
@@ -67,7 +69,7 @@ const Header = () => {
         </Link>
 
         <div className="hidden md:flex items-center gap-1">
-          {isAuthenticated ? (
+          {isAuthenticated && !isLanding ? (
             <Link to="/dashboard" className="flex items-center gap-2 text-white hover:text-red-500 font-medium transition-colors">Panel <ArrowRight className="w-4 h-4" /></Link>
           ) : (
             navLinks.map((link) =>
@@ -99,7 +101,7 @@ const Header = () => {
         </div>
 
           <div className="hidden md:flex items-center gap-4">
-          {isAuthenticated ? (
+          {isAuthenticated && !isLanding ? (
             <div className="flex items-center gap-4">
               <div className="relative">
                 <button onClick={() => setIsNotifOpen(!isNotifOpen)} className="relative rounded-full p-2 text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors">
@@ -178,7 +180,7 @@ const Header = () => {
       {isOpen && (
         <div className="md:hidden border-t border-red-900/20 bg-zinc-950 shadow-2xl shadow-black/50 animate-[fadeIn_200ms_ease-out]">
           <div className="px-4 py-4 sm:px-6">
-            {isAuthenticated && (
+            {isAuthenticated && !isLanding && (
               <div className="mb-4 flex items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5">
                 <div className="relative">
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-800 border-2 border-red-600/40 text-white text-sm font-bold">
@@ -220,7 +222,7 @@ const Header = () => {
             </div>
 
             <div className="mt-4 flex flex-col gap-3 pt-4 border-t border-zinc-900">
-              {isAuthenticated ? (
+              {isAuthenticated && !isLanding ? (
                 <button
                   onClick={handleLogout}
                   className="w-full px-4 py-2.5 rounded-full border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-900 hover:border-zinc-700 transition-all text-sm font-medium text-center"

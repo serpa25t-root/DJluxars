@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 
 const AuthContext = createContext(null)
@@ -46,6 +47,14 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [token, setToken] = useState(null)
   const [loading, setLoading] = useState(true)
+  // navigate disponible solo si AuthProvider está dentro de <BrowserRouter>
+  // fallback seguro para tests / SSR
+  let navigate = null
+  try {
+    navigate = useNavigate()
+  } catch {
+    navigate = null
+  }
 
   const fetchUserProfile = useCallback(async () => {
     try {
@@ -174,7 +183,13 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user')
     setToken(null)
     setUser(null)
-  }, [])
+    // Aislamiento SCRUM-32: al cerrar sesión siempre volver a landing pública
+    if (navigate) {
+      navigate('/')
+    } else if (typeof window !== 'undefined') {
+      window.location.href = '/'
+    }
+  }, [navigate])
 
   const value = {
     user,

@@ -49,11 +49,17 @@ const DashboardIndex = () => {
   return <ArtistDashboard />
 }
 
+/**
+ * SCRUM-32: Landing aislada.
+ * - No autenticado → muestra Home pública cinemática.
+ * - Autenticado → redirige a /dashboard (evita fuga de elementos internos en landing).
+ *   Si se accede a Home estando autenticado, Home es 100% pública y no renderiza dashboard.
+ */
 const HomeRoute = () => {
   const { isAuthenticated, loading } = useAuth()
   if (loading) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center bg-black text-zinc-400">
+      <div className="min-h-[60vh] flex items-center justify-center bg-[#08080a] text-zinc-400">
         Cargando...
       </div>
     )
@@ -112,13 +118,13 @@ function AppRoutes() {
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <BrowserRouter>
+      <AuthProvider>
         <ScrollToTop />
         <AppRoutes />
         <BackToTop />
-      </BrowserRouter>
-    </AuthProvider>
+      </AuthProvider>
+    </BrowserRouter>
   )
 }
 

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 
 const artistSidebarLinks = [
@@ -25,7 +25,15 @@ const clientSidebarLinks = [
 const DashboardLayout = () => {
   const { user, logout } = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  // SCRUM-32: logout ya navega a '/', el layout solo cierra sidebar
+
+  const handleLogout = () => {
+    logout()
+    navigate('/')
+    setIsSidebarOpen(false)
+  }
   const displayName = user?.username || user?.email?.split('@')[0] || 'Ana'
   const initials = displayName.slice(0, 1).toUpperCase()
   const isClient = user?.role === 'client'
@@ -85,7 +93,7 @@ const DashboardLayout = () => {
             </div>
           )}
           <button
-            onClick={() => { logout(); setIsSidebarOpen(false) }}
+            onClick={handleLogout}
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-500 hover:bg-red-900/20 hover:text-red-400 transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
