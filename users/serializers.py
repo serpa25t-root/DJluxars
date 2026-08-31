@@ -56,3 +56,70 @@ class UserListSerializer(serializers.ModelSerializer):
 
     def get_avatar(self, obj):
         return f"https://i.pravatar.cc/150?img={(obj.id % 70) + 1}"
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    """
+    Perfil personal editable (estilo Instagram).
+    Soporta actualización parcial vía multipart (avatar / cover).
+    """
+
+    name = serializers.SerializerMethodField()
+    avatar_url = serializers.SerializerMethodField()
+    cover_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = [
+            'id', 'username', 'email', 'role', 'first_name', 'last_name', 'name',
+            'phone_number', 'bio', 'departamento', 'ciudad', 'website',
+            'avatar', 'cover', 'avatar_url', 'cover_url', 'date_joined',
+        ]
+        read_only_fields = ['id', 'email', 'role', 'date_joined']
+        extra_kwargs = {
+            'avatar': {'required': False, 'allow_null': True},
+            'cover': {'required': False, 'allow_null': True},
+            'first_name': {'required': False},
+            'last_name': {'required': False},
+            'phone_number': {'required': False, 'allow_blank': True},
+            'bio': {'required': False, 'allow_blank': True},
+            'website': {'required': False, 'allow_blank': True},
+            'departamento': {'required': False, 'allow_blank': True},
+            'ciudad': {'required': False, 'allow_blank': True},
+        }
+
+    def get_name(self, obj):
+        full = f"{obj.first_name} {obj.last_name}".strip()
+        return full or obj.username
+
+    def _absolute(self, obj, field_name, fallback_seed=0):
+        image = getattr(obj, field_name, None)
+        if image:
+            request = self.context.get('request')
+            try:
+                return request.build_absolute_uri(image.url) if request else image.url
+            except Exception:
+                return image.url
+        return f"https://i.pravatar.cc/150?img={(obj.id % 70) + 1}"
+
+    def get_avatar_url(self, obj):
+        return self._absolute(obj, 'avatar')
+
+    def get_cover_url(self, obj):
+        # Sin portada no devolvemos placeholder: el frontend usa su degradado propio
+        image = getattr(obj, 'cover', None)
+        if not image:
+            return ''
+        request = self.context.get('request')
+        try:
+            return request.build_absolute_uri(image.url) if request else image.url
+        except Exception:
+            return image.url
+
+    def validate_username(self, value):
+        qs = User.objects.filter(username=value)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError('El nombre de usuario ya está en uso.')
+        return value

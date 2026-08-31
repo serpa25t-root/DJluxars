@@ -176,25 +176,32 @@ export const AuthProvider = ({ children }) => {
     }
   }, [])
 
+  // Fusiona cambios de perfil (avatar, nombre, bio...) en estado + localStorage
+  const updateUser = useCallback((partial) => {
+    if (!partial) return null
+    setUser((prev) => {
+      const next = { ...(prev || {}), ...partial }
+      try {
+        localStorage.setItem('user', JSON.stringify(next))
+      } catch {}
+      return next
+    })
+  }, [])
+
   const logout = useCallback(() => {
-    // SCRUM-36: Confirmación antes de cerrar sesión — si cancela, aborta todo
-    if (typeof window !== 'undefined' && !window.confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-      return false
-    }
     localStorage.removeItem('token')
     localStorage.removeItem('access')
     localStorage.removeItem('refresh')
     localStorage.removeItem('user')
     setToken(null)
     setUser(null)
-    // Aislamiento SCRUM-32 + SCRUM-36: limpiar historial con replace:true
-    if (navigate) {
-      navigate('/', { replace: true })
-    } else if (typeof window !== 'undefined') {
+    // Forzar recarga completa para limpiar estado en memoria y evitar
+    // que el navegador restaure la sesión desde bfcache al usar "Atrás"
+    if (typeof window !== 'undefined') {
       window.location.replace('/')
     }
     return true
-  }, [navigate])
+  }, [])
 
   const value = {
     user,
@@ -205,6 +212,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     fetchUserProfile,
+    updateUser,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

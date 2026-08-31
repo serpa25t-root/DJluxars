@@ -24,9 +24,16 @@ const clientLinks = [
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [isNotifOpen, setIsNotifOpen] = useState(false)
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
   const { user, isAuthenticated, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+
+  // Demo: notificaciones — vaciar array para ocultar el badge rojo
+  const [notifications] = useState([
+    { id: 1, title: 'Nueva reserva recibida', body: 'Elena Mora solicitó una sesión para el 12 Jun.' },
+    { id: 2, title: 'Mensaje nuevo', body: 'Tienes un mensaje de Marc Dubois en el chat.' },
+  ])
 
   const displayName = user?.username || user?.email?.split('@')[0] || user?.name || user?.first_name || user?.email || 'Usuario'
   const initials = displayName.slice(0, 2).toUpperCase()
@@ -41,9 +48,13 @@ const Header = () => {
   }
 
   const handleLogout = () => {
-    // SCRUM-36: confirmación + navigate('/', {replace:true}) dentro de logout()
-    const confirmed = logout()
-    if (confirmed) setIsOpen(false)
+    setShowLogoutModal(true)
+  }
+
+  const confirmLogout = () => {
+    logout()
+    setShowLogoutModal(false)
+    setIsOpen(false)
   }
 
   useEffect(() => setIsOpen(false), [location.pathname])
@@ -107,27 +118,33 @@ const Header = () => {
                 <button onClick={() => setIsNotifOpen(!isNotifOpen)} className="relative rounded-full p-2 text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors">
                   <div className="relative">
                     <Bell className="w-5 h-5 text-zinc-300 hover:text-white transition-colors" />
-                    <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600"></span>
-                    </span>
+                    {notifications.length > 0 && (
+                      <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600"></span>
+                      </span>
+                    )}
                   </div>
                 </button>
-                {isNotifOpen && <div className="absolute right-0 top-12 w-80 bg-zinc-900/90 backdrop-blur-xl border border-zinc-700/50 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] overflow-hidden z-50">
-                  <div className="p-4">
-                    <p className="text-sm font-semibold text-white">Notificaciones</p>
-                    <div className="mt-3 space-y-3">
-                      <div className="rounded-xl bg-zinc-800/50 p-3 border border-zinc-800">
-                        <p className="text-sm font-medium text-white">Nueva reserva recibida</p>
-                        <p className="text-xs text-zinc-400">Elena Mora solicitó una sesión para el 12 Jun.</p>
-                      </div>
-                      <div className="rounded-xl bg-zinc-800/50 p-3 border border-zinc-800">
-                        <p className="text-sm font-medium text-white">Mensaje nuevo</p>
-                        <p className="text-xs text-zinc-400">Tienes un mensaje de Marc Dubois en el chat.</p>
-                      </div>
+                {isNotifOpen && (
+                  <div className="absolute right-0 top-12 w-80 bg-zinc-900/90 backdrop-blur-xl border border-zinc-700/50 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] overflow-hidden z-50">
+                    <div className="p-4">
+                      <p className="text-sm font-semibold text-white">Notificaciones</p>
+                      {notifications.length === 0 ? (
+                        <p className="mt-3 text-sm text-zinc-400">No tienes notificaciones nuevas.</p>
+                      ) : (
+                        <div className="mt-3 space-y-3">
+                          {notifications.map((n) => (
+                            <div key={n.id} className="rounded-xl bg-zinc-800/50 p-3 border border-zinc-800">
+                              <p className="text-sm font-medium text-white">{n.title}</p>
+                              <p className="text-xs text-zinc-400">{n.body}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>}
+                )}
               </div>
               <div className="flex items-center gap-2.5 rounded-full border border-zinc-800 bg-zinc-900/60 pl-1 pr-3 py-1 hover:border-red-600/30 transition-colors">
                 <div className="relative">
@@ -239,6 +256,31 @@ const Header = () => {
                   </Link>
                 </>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <div className="w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
+            <h3 className="text-lg font-semibold text-white">¿Cerrar sesión?</h3>
+            <p className="mt-2 text-sm text-zinc-400">
+              ¿Estás seguro de que deseas salir? Tendrás que iniciar sesión de nuevo para acceder.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="flex-1 rounded-full border border-zinc-700 bg-transparent px-4 py-2.5 text-sm font-medium text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmLogout}
+                className="flex-1 rounded-full bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 shadow-md shadow-red-600/20 transition-colors"
+              >
+                Sí, cerrar sesión
+              </button>
             </div>
           </div>
         </div>

@@ -16,8 +16,11 @@ import Chat from './pages/Chat'
 import DashboardLayout from './components/layout/DashboardLayout'
 import ArtistDashboard from './pages/dashboard/ArtistDashboard'
 import ClientDashboard from './pages/dashboard/ClientDashboard'
+import Profile from './pages/dashboard/Profile'
 import Settings from './pages/dashboard/Settings'
 import ProSubscription from './pages/dashboard/ProSubscription'
+import History from './pages/dashboard/History'
+import AppSettings from './pages/dashboard/AppSettings'
 
 const Placeholder = ({ title }) => (
   <div className="min-h-[100dvh] flex flex-col bg-black">
@@ -90,12 +93,16 @@ function AppRoutes() {
       >
         <Route index element={<DashboardIndex />} />
         <Route path="portfolio" element={<Portfolio />} />
+        <Route path="perfil" element={<Profile />} />
+        <Route path="profile" element={<Profile />} />
         <Route path="bookings" element={<ProtectedRoute roles={['artist']}><ArtistBookings /></ProtectedRoute>} />
         <Route path="services" element={<Placeholder title="Mis Servicios" />} />
         <Route path="favorites" element={<Placeholder title="Favoritos" />} />
         <Route path="stats" element={<Placeholder title="Estadísticas" />} />
+        <Route path="history" element={<History />} />
         <Route path="settings" element={<Settings />} />
         <Route path="configuracion" element={<Settings />} />
+        <Route path="app-settings" element={<AppSettings />} />
         <Route path="projects" element={<Placeholder title="Mis Proyectos" />} />
         <Route path="reviews" element={<Placeholder title="Valoraciones" />} />
         <Route path="pro" element={<ProSubscription />} />

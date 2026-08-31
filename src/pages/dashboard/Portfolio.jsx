@@ -190,60 +190,74 @@ const Portfolio = () => {
             <p className="mt-4 text-sm text-zinc-400">Cargando portafolio...</p>
           </div>
         ) : (
-          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-8 grid grid-cols-3 gap-1 sm:gap-2">
+            <button
+              type="button"
+              onClick={handleOpenUpload}
+              className="group flex aspect-square flex-col items-center justify-center gap-2 rounded-sm border border-dashed border-zinc-800 bg-zinc-950 text-zinc-500 hover:border-red-600/40 hover:text-white transition-colors"
+              aria-label="Subir nueva obra"
+            >
+              <span className="flex h-12 w-12 items-center justify-center rounded-full border border-zinc-800 group-hover:border-red-600/50 group-hover:bg-red-600/10 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+              </span>
+              <span className="text-[11px] font-semibold tracking-widest uppercase">Nueva</span>
+            </button>
+
             {works.map((w) => (
               <article
                 key={w.id}
-                className="group overflow-hidden rounded-2xl border border-zinc-900 bg-zinc-950 hover:border-red-600/30 hover:shadow-lg hover:shadow-red-600/10 transition-all duration-300 ease-out will-change-transform"
+                className="group relative aspect-square overflow-hidden bg-zinc-900"
               >
-                <div className="relative aspect-[4/3] overflow-hidden bg-zinc-900">
-                  {w.media_type === 'video' ? (
-                    <div className="h-full w-full flex items-center justify-center bg-zinc-900 text-zinc-400">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.26a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
+                {w.media_type === 'video' ? (
+                  <div className="h-full w-full flex items-center justify-center bg-zinc-900 text-zinc-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.26a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                ) : (
+                  <img src={w.image} alt={w.title} className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105 will-change-transform" loading="lazy" />
+                )}
+
+                <span className="absolute left-2 top-2 rounded-full border border-red-600/30 bg-red-600/15 backdrop-blur-md px-2 py-0.5 text-[10px] font-semibold tracking-wide text-red-200">
+                  {w.category}
+                </span>
+
+                <button
+                  onClick={() => handleDelete(w.id)}
+                  disabled={deletingId === w.id}
+                  className="absolute right-2 top-2 rounded-full bg-black/70 backdrop-blur-md p-1.5 text-zinc-300 hover:bg-red-600 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
+                  aria-label="Eliminar obra"
+                >
+                  {deletingId === w.id ? (
+                    <span className="h-3.5 w-3.5 block rounded-full border-2 border-zinc-600 border-t-white animate-spin" />
                   ) : (
-                    <img src={w.image} alt={w.title} className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 will-change-transform" loading="lazy" />
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
-                  <span className="absolute top-3 left-3 rounded-full border border-red-600/30 bg-red-600/15 backdrop-blur-md px-2.5 py-1 text-[11px] font-semibold tracking-wide text-red-200">
-                    {w.category}
-                  </span>
-                  <button
-                    onClick={() => handleDelete(w.id)}
-                    disabled={deletingId === w.id}
-                    className="absolute top-3 right-3 rounded-full bg-black/60 backdrop-blur-md p-2 text-zinc-400 hover:bg-red-600 hover:text-white border border-white/10 transition-colors disabled:opacity-50"
-                    aria-label="Eliminar obra"
-                  >
-                    {deletingId === w.id ? (
-                      <span className="h-4 w-4 block rounded-full border-2 border-zinc-600 border-t-white animate-spin" />
-                    ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-                <div className="p-4">
-                  <h3 className="text-sm font-semibold text-white truncate">{w.title}</h3>
-                  <div className="mt-3 flex items-center gap-4 text-xs text-zinc-500">
-                    <span className="inline-flex items-center gap-1.5">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </button>
+
+                {/* Overlay estilo Instagram */}
+                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/60 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                  <div className="flex items-center gap-6">
+                    <span className="inline-flex items-center gap-2 text-sm font-bold text-white">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 fill-white" viewBox="0 0 24 24">
+                        <path d="M12 21s-7.5-4.7-9.5-9A5.5 5.5 0 0112 6.5 5.5 5.5 0 0121.5 12c-2 4.3-9.5 9-9.5 9z" />
                       </svg>
                       {w.likes}
                     </span>
-                    <span className="inline-flex items-center gap-1.5">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <span className="inline-flex items-center gap-2 text-sm font-bold text-white">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
                       {w.views.toLocaleString('es-CO')}
                     </span>
-                    <span className="ml-auto h-1 w-12 rounded-full bg-zinc-800 group-hover:bg-red-600/30 transition-colors" />
                   </div>
+                  <p className="mt-1 max-w-[90%] truncate text-xs font-medium text-zinc-200">{w.title}</p>
                 </div>
               </article>
             ))}

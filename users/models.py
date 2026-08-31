@@ -57,8 +57,27 @@ class User(AbstractUser):
         help_text='Descripción breve del usuario/artista'
     )
 
-    # Si en el futuro se usa avatar, usar ImageField (requiere Pillow + MEDIA config)
-    # avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
+    # Perfil visual estilo Instagram (requiere Pillow + MEDIA config, ya configurados)
+    avatar = models.ImageField(
+        upload_to='avatars/',
+        blank=True,
+        null=True,
+        verbose_name='foto de perfil'
+    )
+
+    cover = models.ImageField(
+        upload_to='covers/',
+        blank=True,
+        null=True,
+        verbose_name='imagen de portada',
+        help_text='Banner superior del perfil personal'
+    )
+
+    website = models.URLField(
+        blank=True,
+        verbose_name='sitio web',
+        help_text='Enlace externo (portafolio, redes, etc.)'
+    )
 
     class Meta:
         verbose_name = 'usuario'
