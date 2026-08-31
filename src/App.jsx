@@ -7,6 +7,8 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Portfolio from './pages/dashboard/Portfolio'
 import Explore from './pages/Explore'
+import Photographers from './pages/Photographers'
+import Services from './pages/Services'
 import ArtistProfile from './pages/ArtistProfile'
 import ArtistBookings from './pages/dashboard/ArtistBookings'
 import ClientBookings from './pages/ClientBookings'
@@ -75,6 +77,8 @@ function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/explorar" element={<Explore />} />
+      <Route path="/fotografos" element={<Photographers />} />
+      <Route path="/servicios" element={<Services />} />
       <Route path="/fotografos/:id" element={<ArtistProfile />} />
       <Route
         path="/dashboard"

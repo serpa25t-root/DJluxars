@@ -5,8 +5,8 @@ import { useAuth } from '../../context/AuthContext'
 
 const publicLinks = [
   { label: 'Explorar', to: '/explorar', type: 'route' },
-  { label: 'Fotógrafos', href: '#fotografos', type: 'anchor' },
-  { label: 'Servicios', href: '#servicios', type: 'anchor' },
+  { label: 'Fotógrafos', to: '/fotografos', type: 'route' },
+  { label: 'Servicios', to: '/servicios', type: 'route' },
 ]
 
 const artistLinks = [

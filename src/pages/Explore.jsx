@@ -6,6 +6,7 @@ import BookingModal from '../components/booking/BookingModal'
 import Button from '../components/common/Button'
 import { getCurrentPosition, reverseGeocode, haversine } from '../services/geo'
 import { useAuth } from '../context/AuthContext'
+import { Search, MapPin, Calendar, Sparkles } from 'lucide-react'
 
 const photographers = [
   { id: 1, name: 'Elena Mora', specialty: 'Retrato', avatar: 'https://i.pravatar.cc/150?img=5', rating: 4.9, reviews: 128, price: 350000, delivery: '3 días', category: 'Retrato', lat: 4.711, lng: -74.0721, city: 'Bogotá', is_pro: true },
@@ -18,6 +19,9 @@ const photographers = [
   { id: 8, name: 'Diego León', specialty: 'Editorial', avatar: 'https://i.pravatar.cc/150?img=20', rating: 4.95, reviews: 152, price: 480000, delivery: '4 días', category: 'Editorial', lat: 4.711, lng: -74.0721, city: 'Bogotá', is_pro: false },
 ]
 
+const popularSearches = ['Boda', 'Retrato', 'Eventos', 'Producto', 'Moda', 'Paisajes']
+const sessionTypes = ['Bodas', 'Retrato', 'Moda', 'Eventos', 'Editorial', 'Producto', 'Familia', 'Paisajes']
+
 const Explore = () => {
   const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
@@ -26,12 +30,18 @@ const Explore = () => {
   const [category, setCategory] = useState('Todas')
   const [price, setPrice] = useState(800000)
   const [rating, setRating] = useState(0)
+  const [locationFilter, setLocationFilter] = useState('')
+  const [dateFilter, setDateFilter] = useState('')
 
   useEffect(() => {
     const cat = searchParams.get('category')
     const loc = searchParams.get('location')
+    const q = searchParams.get('q')
+    const date = searchParams.get('date')
     if (cat) setCategory(cat)
-    if (loc) setSearch(loc)
+    if (loc) setLocationFilter(loc)
+    if (q) setSearch(q)
+    if (date) setDateFilter(date)
   }, [searchParams])
   const [compare, setCompare] = useState([])
   const [showCompare, setShowCompare] = useState(false)
@@ -66,6 +76,9 @@ const Explore = () => {
       if (p.price > price) return false
       if (p.rating < rating) return false
       if (search && !`${p.name} ${p.specialty} ${p.city}`.toLowerCase().includes(search.toLowerCase())) return false
+      if (locationFilter && !`${p.city}`.toLowerCase().includes(locationFilter.toLowerCase())) return false
+      // Date filter: si hay fecha, filtra por disponibilidad simulada (no bloquea si no hay dato)
+      if (dateFilter && p.availableDate && p.availableDate !== dateFilter) return false
       return true
     })
     if (userLocation) {
@@ -81,7 +94,7 @@ const Explore = () => {
       return 0
     })
     return list
-  }, [search, category, price, rating, userLocation, sortByDistance])
+  }, [search, category, price, rating, userLocation, sortByDistance, locationFilter, dateFilter])
 
   const toggleCompare = (p) => {
     setCompare((prev) => {
@@ -111,6 +124,23 @@ const Explore = () => {
   const openBookingModal = handleBooking
   const handleContact = handleChat
 
+  const handlePillClick = (pill) => {
+    setCategory(pill)
+    setSearch(pill)
+  }
+
+  const handleSearchBarSubmit = (e) => {
+    e.preventDefault()
+    // filtrado ya es reactivo, no necesita navegar, pero mantenemos URL sincronizada
+    const params = new URLSearchParams()
+    if (search) params.set('q', search)
+    if (category && category !== 'Todas') params.set('category', category)
+    if (locationFilter) params.set('location', locationFilter)
+    if (dateFilter) params.set('date', dateFilter)
+    const qs = params.toString()
+    navigate(qs ? `/explorar?${qs}` : '/explorar')
+  }
+
   return (
     <div className="min-h-[100dvh] bg-black">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
@@ -119,19 +149,85 @@ const Explore = () => {
             Descubre <span className="bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent">Talento Visual</span>
           </h1>
           <p className="mt-2 text-sm text-zinc-400 max-w-2xl">Explora fotógrafos verificados, filtra por estilo y compara propuestas sin salir de la página.</p>
-
-          <div className="mt-6 relative max-w-xl">
-            <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 110-15 7.5 7.5 0 010 15z" />
-            </svg>
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar por nombre o especialidad — ej. Moda, Retrato"
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 pl-10 pr-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-red-600/50 focus:outline-none focus:ring-2 focus:ring-red-600/20"
-            />
-          </div>
         </div>
+
+        {/* Buscador flotante Glassmorphism — movido desde Home para layout despejado */}
+        <section className="relative z-20 mt-6">
+          <div className="bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-3xl p-6 shadow-2xl">
+            <form onSubmit={handleSearchBarSubmit} className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr_1fr_1fr_auto] gap-4 items-end">
+              <div>
+                <label className="text-xs font-medium text-zinc-400 mb-1.5 block flex items-center gap-1.5"><Search className="h-3.5 w-3.5" /> Search query</label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="¿Qué tipo de fotografía estás buscando?"
+                    className="w-full rounded-xl border border-zinc-800 bg-zinc-950/60 pl-10 pr-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-red-600/40 focus:outline-none focus:ring-2 focus:ring-red-600/15 transition-all"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-zinc-400 mb-1.5 block flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5" /> Session type</label>
+                <div className="relative">
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-950/60 px-4 py-3 pr-10 text-sm text-white focus:border-red-600/40 focus:outline-none focus:ring-2 focus:ring-red-600/15 transition-all"
+                  >
+                    <option value="Todas">Tipo de sesión</option>
+                    {sessionTypes.map((t) => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                  </span>
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-zinc-400 mb-1.5 block flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Location</label>
+                <input
+                  type="text"
+                  value={locationFilter}
+                  onChange={(e) => setLocationFilter(e.target.value)}
+                  placeholder="Ubicación"
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-950/60 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-red-600/40 focus:outline-none focus:ring-2 focus:ring-red-600/15 transition-all"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-zinc-400 mb-1.5 block flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> Date</label>
+                <input
+                  type="date"
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                  placeholder="Fecha"
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-950/60 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-red-600/40 focus:outline-none focus:ring-2 focus:ring-red-600/15 transition-all [&::-webkit-calendar-picker-indicator]:opacity-40 [&::-webkit-calendar-picker-indicator]:invert"
+                />
+              </div>
+              <div className="flex">
+                <button type="submit" className="w-full lg:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-red-600/25 hover:bg-red-700 hover:shadow-xl active:scale-[0.98] transition-all whitespace-nowrap">
+                  <Search className="h-4 w-4" />
+                  Buscar fotógrafos
+                </button>
+              </div>
+            </form>
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <span className="text-xs text-zinc-500 mr-1">Búsquedas populares:</span>
+              {popularSearches.map((pill) => (
+                <button
+                  key={pill}
+                  type="button"
+                  onClick={() => handlePillClick(pill)}
+                  className="rounded-full border border-zinc-800 bg-zinc-800/50 px-3.5 py-1.5 text-xs font-medium text-zinc-300 hover:border-red-600/30 hover:bg-red-600/10 hover:text-white transition-colors"
+                >
+                  {pill}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
 
         <div className="mt-6">
           <FilterBar
