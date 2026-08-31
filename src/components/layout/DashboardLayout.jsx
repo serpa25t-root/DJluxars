@@ -79,7 +79,7 @@ const DashboardLayout = () => {
             <div className="rounded-xl border border-red-900/30 bg-gradient-to-t from-red-900/20 to-transparent p-4">
               <h3 className="text-sm font-bold text-white">Únete a LuxArts PRO</h3>
               <p className="mt-1 text-xs leading-relaxed text-zinc-400">Desbloquea 6 servicios, 30 fotos y prioridad #1 en el catálogo.</p>
-              <Link to="/dashboard/portfolio" onClick={() => setIsSidebarOpen(false)} className="mt-4 block w-full rounded-full bg-red-600 py-2.5 text-center text-sm font-semibold text-white hover:bg-red-700 transition-colors">
+              <Link to="/dashboard/pro" onClick={() => setIsSidebarOpen(false)} className="mt-4 block w-full rounded-full bg-red-600 py-2.5 text-center text-sm font-semibold text-white hover:bg-red-700 transition-colors">
                 Ver Planes PRO
               </Link>
             </div>
