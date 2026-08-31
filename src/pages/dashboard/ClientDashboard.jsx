@@ -1,9 +1,18 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 
 const ClientDashboard = () => {
   const { user } = useAuth()
+  const navigate = useNavigate()
+  const [category, setCategory] = useState("")
+  const [location, setLocation] = useState("")
   const name = user?.first_name || user?.username || user?.email?.split('@')[0] || 'Ana'
+
+  const handleSearch = (e) => {
+    e.preventDefault()
+    navigate(`/explore?category=${encodeURIComponent(category)}&location=${encodeURIComponent(location)}`)
+  }
 
   const photographers = [
     { id: 1, name: 'Elena Mora', specialty: 'Retrato • Moda', rating: 4.9, price: 'Desde $150.000', img: 'https://i.pravatar.cc/150?img=5', cover: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=400&fit=crop' },
@@ -29,22 +38,22 @@ const ClientDashboard = () => {
           </div>
 
           {/* Buscador */}
-          <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-2xl p-2 flex items-center gap-2">
+          <form onSubmit={handleSearch} className="bg-zinc-900/50 border border-zinc-800/50 rounded-2xl p-2 flex items-center gap-2">
             <div className="flex-1 flex items-center gap-2 bg-transparent px-3 py-2">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
               </svg>
-              <input placeholder="Tipo de foto" className="bg-transparent flex-1 text-sm text-white placeholder:text-zinc-500 focus:outline-none" />
+              <input placeholder="Tipo de foto" value={category} onChange={(e) => setCategory(e.target.value)} className="bg-transparent flex-1 text-sm text-white placeholder:text-zinc-500 focus:outline-none" />
             </div>
             <div className="hidden sm:flex flex-1 items-center gap-2 bg-transparent px-3 py-2 border-l border-zinc-800">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <input placeholder="Ubicación" className="bg-transparent flex-1 text-sm text-white placeholder:text-zinc-500 focus:outline-none" />
+              <input placeholder="Ubicación" value={location} onChange={(e) => setLocation(e.target.value)} className="bg-transparent flex-1 text-sm text-white placeholder:text-zinc-500 focus:outline-none" />
             </div>
-            <button className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl text-sm font-semibold shadow-md shadow-red-600/20 transition-colors">Buscar fotógrafos</button>
-          </div>
+            <button type="submit" className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl text-sm font-semibold shadow-md shadow-red-600/20 transition-colors">Buscar fotógrafos</button>
+          </form>
           <div className="flex flex-wrap gap-2 text-xs text-zinc-500">
             <span>Búsquedas populares:</span>
             <span className="px-2 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400">Boda</span>

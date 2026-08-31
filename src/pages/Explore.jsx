@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useMemo, useEffect } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import FilterBar from '../components/explore/FilterBar'
 import ComparatorModal, { CompareBar } from '../components/explore/ComparatorModal'
 import BookingModal from '../components/booking/BookingModal'
@@ -18,10 +18,18 @@ const photographers = [
 ]
 
 const Explore = () => {
+  const [searchParams] = useSearchParams()
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('Todas')
   const [price, setPrice] = useState(800000)
   const [rating, setRating] = useState(0)
+
+  useEffect(() => {
+    const cat = searchParams.get('category')
+    const loc = searchParams.get('location')
+    if (cat) setCategory(cat)
+    if (loc) setSearch(loc)
+  }, [searchParams])
   const [compare, setCompare] = useState([])
   const [showCompare, setShowCompare] = useState(false)
   const [bookingPhotographer, setBookingPhotographer] = useState(null)
@@ -54,7 +62,7 @@ const Explore = () => {
       if (category !== 'Todas' && p.category !== category) return false
       if (p.price > price) return false
       if (p.rating < rating) return false
-      if (search && !`${p.name} ${p.specialty}`.toLowerCase().includes(search.toLowerCase())) return false
+      if (search && !`${p.name} ${p.specialty} ${p.city}`.toLowerCase().includes(search.toLowerCase())) return false
       return true
     })
     if (userLocation) {
