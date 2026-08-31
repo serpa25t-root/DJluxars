@@ -11,7 +11,7 @@ const ClientDashboard = () => {
 
   const handleSearch = (e) => {
     e.preventDefault()
-    navigate(`/explore?category=${encodeURIComponent(category)}&location=${encodeURIComponent(location)}`)
+    navigate(`/explorar?category=${encodeURIComponent(category)}&location=${encodeURIComponent(location)}`)
   }
 
   const photographers = [
@@ -66,7 +66,7 @@ const ClientDashboard = () => {
           <div>
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold text-white">Fotógrafos recomendados</h2>
-              <Link to="/explorar" className="text-xs font-medium text-red-400 hover:text-red-300">Ver todos</Link>
+              <Link to="/explorar"><span className="text-red-500 text-sm flex items-center gap-1 hover:text-red-400 transition-colors">Ver todas &rarr;</span></Link>
             </div>
             <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
               {photographers.map((p) => (
@@ -110,7 +110,7 @@ const ClientDashboard = () => {
                 <span className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">Pendiente</span>
               </div>
             </div>
-            <Link to="/my-bookings" className="mt-4 block text-center text-xs font-medium text-red-400 hover:text-red-300">Ver todas →</Link>
+            <Link to="/my-bookings"><span className="text-red-500 text-sm flex items-center gap-1 hover:text-red-400 transition-colors">Ver todas &rarr;</span></Link>
           </div>
 
           <div className="bg-zinc-900/30 rounded-2xl p-6 border border-zinc-800/50">

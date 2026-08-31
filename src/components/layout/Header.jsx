@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom'
+import { ChevronDown, Bell } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 
 const publicLinks = [
@@ -22,6 +23,7 @@ const clientLinks = [
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false)
+  const [isNotifOpen, setIsNotifOpen] = useState(false)
   const { user, isAuthenticated, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
@@ -59,12 +61,14 @@ const Header = () => {
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </div>
-          <span className="font-display text-xl font-semibold tracking-tight text-white">
-            LuxArts
-          </span>
-          <span className="hidden sm:inline-flex ml-1 rounded-full border border-red-600/30 bg-red-600/10 px-2 py-0.5 text-[10px] font-semibold tracking-widest text-red-400 group-hover:bg-red-600 group-hover:text-white group-hover:border-red-600 transition-colors duration-300">
-            CINEMATIC
-          </span>
+          <div className="flex items-baseline gap-1.5">
+            <span className="font-display text-xl font-semibold tracking-tight text-white">
+              LuxArts
+            </span>
+            <span className="hidden sm:inline-flex ml-1 rounded-full border border-red-600/30 bg-red-600/10 px-2 py-0.5 text-[10px] font-semibold tracking-widest text-red-400 group-hover:bg-red-600 group-hover:text-white group-hover:border-red-600 transition-colors duration-300">
+              CINEMATIC
+            </span>
+          </div>
         </Link>
 
         <div className="hidden md:flex items-center gap-1">
@@ -98,6 +102,25 @@ const Header = () => {
         <div className="hidden md:flex items-center gap-4">
           {isAuthenticated ? (
             <div className="flex items-center gap-4">
+              <div className="relative">
+                <button onClick={() => setIsNotifOpen(!isNotifOpen)} className="relative rounded-full p-2 text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors">
+                  <Bell className="w-5 h-5" />
+                  <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-600" />
+                </button>
+                {isNotifOpen && <div className="absolute right-0 top-14 w-80 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl p-4 z-50">
+                  <p className="text-sm font-semibold text-white">Notificaciones</p>
+                  <div className="mt-3 space-y-3">
+                    <div className="rounded-xl bg-zinc-800/50 p-3 border border-zinc-800">
+                      <p className="text-sm font-medium text-white">Nueva reserva recibida</p>
+                      <p className="text-xs text-zinc-400">Elena Mora solicitó una sesión para el 12 Jun.</p>
+                    </div>
+                    <div className="rounded-xl bg-zinc-800/50 p-3 border border-zinc-800">
+                      <p className="text-sm font-medium text-white">Mensaje nuevo</p>
+                      <p className="text-xs text-zinc-400">Tienes un mensaje de Marc Dubois en el chat.</p>
+                    </div>
+                  </div>
+                </div>}
+              </div>
               <div className="flex items-center gap-2.5 rounded-full border border-zinc-800 bg-zinc-900/60 pl-1 pr-3 py-1 hover:border-red-600/30 transition-colors">
                 <div className="relative">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800 border-2 border-red-600/40 text-white text-xs font-bold">
@@ -106,6 +129,7 @@ const Header = () => {
                   <span className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-zinc-950 ${isOnline ? 'bg-emerald-500' : 'bg-red-500'}`} />
                 </div>
                 <span className="text-sm font-medium text-zinc-200 max-w-[120px] truncate">Hola, {displayName}</span>
+                <ChevronDown className="w-4 h-4 text-zinc-400" />
               </div>
               <Link
                 to="/dashboard"

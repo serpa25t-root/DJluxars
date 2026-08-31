@@ -33,7 +33,7 @@ const DashboardLayout = () => {
 
   return (
     <div className="flex h-screen bg-[#101010] text-white overflow-hidden">
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out bg-[#101010] border-r border-red-900/30 flex flex-col justify-between p-4 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out bg-zinc-950 border-r border-zinc-800 flex flex-col justify-between p-4 ${isSidebarOpen ? "translate-x-0 shadow-2xl shadow-black" : "-translate-x-full"}`}>
         <div>
           <div className="flex items-center gap-2.5 px-2 py-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-600 text-white">
@@ -98,8 +98,8 @@ const DashboardLayout = () => {
 
       {isSidebarOpen && (<div className="fixed inset-0 bg-black/50 z-40" onClick={() => setIsSidebarOpen(false)} />)}
 
-      <main className="flex-1 flex flex-col overflow-hidden">
-        <div className="sticky top-0 z-40 flex items-center justify-between px-8 py-4 backdrop-blur-md bg-[#101010]/80 border-b border-red-900/30">
+      <main className="flex-1 w-full flex flex-col h-screen overflow-hidden bg-[#101010]">
+        <div className="sticky top-0 z-40 flex items-center justify-between px-8 py-4 bg-zinc-950 border-b border-zinc-800 shadow-md">
           <div className="flex items-center gap-3">
             <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-900 hover:text-white">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
