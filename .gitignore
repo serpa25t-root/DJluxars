@@ -31,3 +31,4 @@ Thumbs.db
 # Vite
 *.local
 media/
+.vite
