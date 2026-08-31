@@ -177,18 +177,23 @@ export const AuthProvider = ({ children }) => {
   }, [])
 
   const logout = useCallback(() => {
+    // SCRUM-36: Confirmación antes de cerrar sesión — si cancela, aborta todo
+    if (typeof window !== 'undefined' && !window.confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+      return false
+    }
     localStorage.removeItem('token')
     localStorage.removeItem('access')
     localStorage.removeItem('refresh')
     localStorage.removeItem('user')
     setToken(null)
     setUser(null)
-    // Aislamiento SCRUM-32: al cerrar sesión siempre volver a landing pública
+    // Aislamiento SCRUM-32 + SCRUM-36: limpiar historial con replace:true
     if (navigate) {
-      navigate('/')
+      navigate('/', { replace: true })
     } else if (typeof window !== 'undefined') {
-      window.location.href = '/'
+      window.location.replace('/')
     }
+    return true
   }, [navigate])
 
   const value = {

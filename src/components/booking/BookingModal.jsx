@@ -191,7 +191,7 @@ const BookingModal = ({ isOpen, onClose, photographer }) => {
           {/* Footer ultra limpio — solo 2 botones */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Button type="submit" variant="primary" disabled={loading} className="w-full py-3.5 disabled:opacity-60 shadow-lg shadow-red-600/20">
-              {loading ? 'Enviando...' : `Solicitar Reserva ($${estimated.toLocaleString('es-CO')} COP)`}
+              {loading ? 'Enviando...' : 'Solicitar Reserva'}
             </Button>
             <Button
               type="button"

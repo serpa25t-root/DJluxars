@@ -92,7 +92,7 @@ const Register = () => {
     setLoading(true)
     try {
       await register({ name: name.trim(), email: email.trim(), phone: phone.trim(), departamento: departamento.trim(), ciudad: ciudad.trim(), password, role })
-      navigate('/login', { state: { registered: true, message: '¡Cuenta creada con éxito! Por favor inicia sesión.' } })
+      navigate('/login', { replace: true, state: { registered: true, message: '¡Cuenta creada con éxito! Por favor inicia sesión.' } })
       return
     } catch (err) {
       const raw = err?.message || ''

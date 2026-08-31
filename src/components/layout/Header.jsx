@@ -41,9 +41,9 @@ const Header = () => {
   }
 
   const handleLogout = () => {
-    logout()
-    navigate('/')
-    setIsOpen(false)
+    // SCRUM-36: confirmación + navigate('/', {replace:true}) dentro de logout()
+    const confirmed = logout()
+    if (confirmed) setIsOpen(false)
   }
 
   useEffect(() => setIsOpen(false), [location.pathname])

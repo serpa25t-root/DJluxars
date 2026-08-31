@@ -44,7 +44,7 @@ const Login = () => {
     try {
       await login({ email, password })
       setToast({ msg: 'Inicio de sesión exitoso', type: 'success' })
-      setTimeout(() => navigate("/dashboard"), 700)
+      setTimeout(() => navigate("/dashboard", { replace: true }), 700)
     } catch (err) {
       const msg = err?.message || 'Credenciales incorrectas.'
       setErrorMsg(msg)

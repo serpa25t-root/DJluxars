@@ -30,9 +30,9 @@ const DashboardLayout = () => {
   // SCRUM-32: logout ya navega a '/', el layout solo cierra sidebar
 
   const handleLogout = () => {
-    logout()
-    navigate('/')
-    setIsSidebarOpen(false)
+    // SCRUM-36: confirmación + navigate('/', {replace:true}) dentro de logout()
+    const confirmed = logout()
+    if (confirmed) setIsSidebarOpen(false)
   }
   const displayName = user?.username || user?.email?.split('@')[0] || 'Ana'
   const initials = displayName.slice(0, 1).toUpperCase()
