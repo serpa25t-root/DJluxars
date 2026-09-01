@@ -16,12 +16,19 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenRefreshView
+from users.serializers import LuxTokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView as SimpleJWTTokenObtainPairView
+
+
+class LuxTokenObtainPairView(SimpleJWTTokenObtainPairView):
+    serializer_class = LuxTokenObtainPairSerializer
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/users/', include('users.urls')),
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/', LuxTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/portfolio/', include('portfolio.urls')),
     path('api/works/', include('portfolio.urls')),

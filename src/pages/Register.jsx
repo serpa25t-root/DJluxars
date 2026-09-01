@@ -81,7 +81,8 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    const { name, email, phone, departamento, ciudad, password } = form
+    const { name, email, phone, departamento, ciudad } = form
+    const password = form.password.trim()
     if (!name.trim() || !email.trim() || !phone.trim() || !password.trim()) {
       setErrorMsg('Por favor completa todos los campos requeridos.')
       return

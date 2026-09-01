@@ -56,11 +56,12 @@ class LoginView(APIView):
         # Intenta autenticar por username primero
         user = authenticate(request, username=username, password=password)
 
-        # Fallback: buscar por email y autenticar con username real
-        if not user and email:
+        # Fallback: buscar el correo (insensible a mayúsculas) y autenticar con su username
+        if not user and username:
             try:
-                found = User.objects.get(email=email)
-                user = authenticate(request, username=found.username, password=password)
+                found = User.objects.filter(email__iexact=username).first()
+                if found:
+                    user = authenticate(request, username=found.username, password=password)
             except User.DoesNotExist:
                 pass
 

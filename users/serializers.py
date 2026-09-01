@@ -1,7 +1,36 @@
 from rest_framework import serializers
-from django.contrib.auth import get_user_model
+from django.contrib.auth import authenticate, get_user_model
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.exceptions import AuthenticationFailed
+from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
+
+
+class LuxTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """
+    Permite iniciar sesión con email o username (el registro de LuxArts solo pide email).
+    Búsqueda de email insensible a mayúsculas/minúsculas.
+    """
+
+    def validate(self, attrs):
+        password = attrs.get('password')
+        username = attrs.get(self.username_field)
+        request = self.context.get('request')
+
+        user = authenticate(request=request, username=username, password=password)
+        if user is None and username:
+            try:
+                found = User.objects.get(email__iexact=username)
+            except User.DoesNotExist:
+                raise AuthenticationFailed('Credenciales incorrectas.')
+            user = authenticate(request=request, username=found.username, password=password)
+
+        if user is None or not user.is_active:
+            raise AuthenticationFailed('Credenciales incorrectas.')
+
+        refresh = RefreshToken.for_user(user)
+        return {'refresh': str(refresh), 'access': str(refresh.access_token)}
 
 
 class RegisterSerializer(serializers.ModelSerializer):
