@@ -5,7 +5,7 @@ import BookingModal from '../components/booking/BookingModal'
 import Button from '../components/common/Button'
 import { getCurrentPosition, reverseGeocode, haversine } from '../services/geo'
 import { useAuth } from '../context/AuthContext'
-import { Search, MapPin, Calendar, Sparkles, DollarSign } from 'lucide-react'
+import { Search, DollarSign, Star, SlidersHorizontal } from 'lucide-react'
 import useColombiaApi from '../services/colombiaApi'
 import { getServices } from '../services/serviceStore'
 
@@ -29,10 +29,11 @@ const Explore = () => {
   const [searchParams] = useSearchParams()
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('Todas')
-  const [price, setPrice] = useState(1000000)
+  const [price, setPrice] = useState(2000000)
   const [rating, setRating] = useState(0)
   const [locationFilter, setLocationFilter] = useState('')
   const [dateFilter, setDateFilter] = useState('')
+  const [showFilters, setShowFilters] = useState(false)
   const { departments, cities, loadingDepartments, loadingCities, loadCities } = useColombiaApi()
   const [selectedDept, setSelectedDept] = useState('')
   const [selectedCity, setSelectedCity] = useState('')
@@ -101,10 +102,11 @@ const Explore = () => {
   }
 
   const filtered = useMemo(() => {
-    // SCRUM-35: filtrar SERVICIOS por Nombre, Categoría, Departamento, Municipio y Rango Precio
+    // SCRUM-35: filtrar SERVICIOS por Nombre, Categoría, Departamento, Municipio, Rango Precio y Rating
     let list = allServices.filter((s) => {
       if (category !== 'Todas' && s.category !== category) return false
       if (s.price > price) return false
+      if (rating > 0 && (s.rating || 0) < rating) return false
       if (search && !`${s.title} ${s.category}`.toLowerCase().includes(search.toLowerCase())) return false
       if (locationFilter) {
         const loc = `${s.municipio || ''} ${s.departamento || ''} ${s.city || ''}`.toLowerCase()
@@ -187,7 +189,7 @@ const Explore = () => {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-black">
+    <div className="animate-[fadeIn_300ms_ease-out]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div className="border-b border-zinc-900 pb-6">
           <h1 className="font-display text-3xl font-bold tracking-tight text-white">
@@ -198,23 +200,21 @@ const Explore = () => {
 
         {/* ÚNICA barra flotante superior con Glassmorphism — SCRUM-34/35: p-4 + selectores anidados Colombia + precio */}
         <section className="relative z-20 mt-6">
-          <div className="bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-3xl p-4 shadow-2xl">
-            <form onSubmit={handleSearchBarSubmit} className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr_1fr_auto] gap-3 items-end">
-              <div>
-                <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><Search className="h-3.5 w-3.5" /> Search query</label>
+          <div className="bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-3xl p-6 shadow-2xl">
+            <form onSubmit={handleSearchBarSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
+              <div className="lg:col-span-2">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                   <input
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="¿Qué tipo de fotografía estás buscando?"
+                    placeholder="¿Qué tipo de fotografía buscas?"
                     className="w-full rounded-xl border border-zinc-800 bg-zinc-950/60 pl-10 pr-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-red-600/40 focus:outline-none focus:ring-2 focus:ring-red-600/15 transition-all"
                   />
                 </div>
               </div>
               <div>
-                <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5" /> Session type</label>
                 <div className="relative">
                   <select
                     value={category}
@@ -232,7 +232,6 @@ const Explore = () => {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Departamento</label>
                 <div className="relative">
                   <select
                     value={selectedDept}
@@ -260,7 +259,6 @@ const Explore = () => {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Municipio</label>
                 <div className="relative">
                   <select
                     value={selectedCity}
@@ -283,7 +281,6 @@ const Explore = () => {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> Date</label>
                 <input
                   type="date"
                   value={dateFilter}
@@ -292,33 +289,65 @@ const Explore = () => {
                   className="w-full rounded-xl border border-zinc-800 bg-zinc-950/60 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-red-600/40 focus:outline-none focus:ring-2 focus:ring-red-600/15 transition-all [&::-webkit-calendar-picker-indicator]:opacity-40 [&::-webkit-calendar-picker-indicator]:invert"
                 />
               </div>
-              <div>
-                <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><DollarSign className="h-3.5 w-3.5" /> Precio COP</label>
-                <div className="relative">
-                  <select
-                    value={price}
-                    onChange={(e) => setPrice(Number(e.target.value))}
-                    className="w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-950/60 px-3 py-3 pr-8 text-sm text-white focus:border-red-600/40 focus:outline-none focus:ring-2 focus:ring-red-600/15 transition-all"
+              <div className="lg:col-span-3">
+                <label className="text-sm font-semibold text-zinc-200 mb-2 flex items-center gap-1.5"><SlidersHorizontal className="h-3.5 w-3.5" /> Filtros</label>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowFilters((v) => !v)}
+                    className={`flex-1 rounded-xl border px-4 py-3 text-sm font-medium transition-all flex items-center justify-between ${showFilters ? 'border-red-600/40 bg-red-600/10 text-red-400' : 'border-zinc-800 bg-zinc-950/60 text-zinc-300 hover:text-white'}`}
                   >
-                    <option value={1000000}>Hasta $1.000.000</option>
-                    <option value={800000}>Hasta $800.000</option>
-                    <option value={500000}>Hasta $500.000</option>
-                    <option value={350000}>Hasta $350.000</option>
-                    <option value={10000000}>Sin límite</option>
-                  </select>
-                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
-                  </span>
+                    <span>Precio y Calificación</span>
+                    <span className={`text-xs ${showFilters ? 'text-red-400' : 'text-zinc-500'}`}>{showFilters ? 'Ocultar' : 'Mostrar'}</span>
+                  </button>
+                  <button type="submit" className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-red-600/25 hover:bg-red-700 active:scale-[0.98] transition-all whitespace-nowrap">
+                    <Search className="h-4 w-4" />
+                    Buscar fotógrafos
+                  </button>
                 </div>
               </div>
-              <div className="flex">
-                <button type="submit" className="w-full lg:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-red-600/25 hover:bg-red-700 hover:shadow-xl active:scale-[0.98] transition-all whitespace-nowrap">
-                  <Search className="h-4 w-4" />
-                  Buscar fotógrafos
-                </button>
-              </div>
             </form>
-            <div className="mt-4 flex flex-wrap items-center gap-2">
+            {showFilters && (
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-medium text-zinc-400 flex items-center gap-1.5"><DollarSign className="h-3.5 w-3.5" /> Rango de Precio</label>
+                    <span className="text-xs font-bold text-white">Hasta {`$${Number(price).toLocaleString('es-CO')} COP`}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={100000}
+                    max={3000000}
+                    step={50000}
+                    value={price}
+                    onChange={(e) => setPrice(Number(e.target.value))}
+                    className="w-full h-1.5 rounded-full appearance-none bg-zinc-800 accent-red-600 cursor-pointer"
+                  />
+                  <div className="flex justify-between mt-1.5 text-[10px] text-zinc-500">
+                    <span>$100.000</span>
+                    <span>$1.5M</span>
+                    <span>$3.000.000</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-zinc-400 mb-2 flex items-center gap-1.5"><Star className="h-3.5 w-3.5" /> Calificación mínima</label>
+                  <div className="flex flex-wrap gap-2">
+                    {[0, 4, 4.5, 5].map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setRating(r)}
+                        className={`inline-flex items-center gap-1 rounded-full px-3.5 py-1.5 text-xs font-medium border transition-all ${rating === r ? 'bg-red-600 border-red-600 text-white shadow-md shadow-red-600/20' : 'border-zinc-800 bg-zinc-950/60 text-zinc-300 hover:border-zinc-700 hover:text-white'}`}
+                      >
+                        {r === 0 ? 'Todas' : <><Star className="h-3 w-3 fill-amber-400 text-amber-400" /> {r}+</>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-zinc-800/60 pt-4">
               <span className="text-xs text-zinc-500 mr-1">Búsquedas populares:</span>
               {popularSearches.map((pill) => (
                 <button
@@ -380,8 +409,8 @@ const Explore = () => {
                   {/* Precio fijo destacado */}
                   <p className="mt-4 text-lg font-bold tracking-tight text-white">{`$${Number(s.price).toLocaleString('es-CO')} COP`}</p>
                   <div className="mt-3 grid grid-cols-2 gap-2">
-                    <Link to={`/fotografos/${String(s.authorId || s.id).replace('srv_','')}`} className="inline-flex items-center justify-center rounded-full border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-medium text-zinc-300 hover:bg-zinc-900 hover:border-zinc-700 transition-colors">
-                      Ver Perfil
+                    <Link to={`/servicios/${s.id}`} className="inline-flex items-center justify-center rounded-full border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-medium text-zinc-300 hover:bg-zinc-900 hover:border-zinc-700 transition-colors">
+                      Ver Detalle
                     </Link>
                     <button
                       onClick={() => toggleCompare(s)}

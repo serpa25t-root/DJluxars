@@ -17,10 +17,9 @@ import DashboardLayout from './components/layout/DashboardLayout'
 import ArtistDashboard from './pages/dashboard/ArtistDashboard'
 import ClientDashboard from './pages/dashboard/ClientDashboard'
 import Profile from './pages/dashboard/Profile'
-import Settings from './pages/dashboard/Settings'
+import Configuracion from './pages/dashboard/Configuracion'
 import ProSubscription from './pages/dashboard/ProSubscription'
 import History from './pages/dashboard/History'
-import AppSettings from './pages/dashboard/AppSettings'
 
 const Placeholder = ({ title }) => (
   <div className="min-h-[100dvh] flex flex-col bg-black">
@@ -79,7 +78,6 @@ function AppRoutes() {
       <Route path="/" element={<HomeRoute />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/explorar" element={<Explore />} />
       <Route path="/fotografos" element={<Photographers />} />
       <Route path="/servicios" element={<Services />} />
       <Route path="/fotografos/:id" element={<ArtistProfile />} />
@@ -100,12 +98,22 @@ function AppRoutes() {
         <Route path="favorites" element={<Placeholder title="Favoritos" />} />
         <Route path="stats" element={<Placeholder title="Estadísticas" />} />
         <Route path="history" element={<History />} />
-        <Route path="settings" element={<Settings />} />
-        <Route path="configuracion" element={<Settings />} />
-        <Route path="app-settings" element={<AppSettings />} />
+        <Route path="configuracion" element={<Configuracion />} />
+        <Route path="settings" element={<Configuracion />} />
+        <Route path="app-settings" element={<Configuracion />} />
         <Route path="projects" element={<Placeholder title="Mis Proyectos" />} />
         <Route path="reviews" element={<Placeholder title="Valoraciones" />} />
         <Route path="pro" element={<ProSubscription />} />
+      </Route>
+      <Route
+        path="/explorar"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Explore />} />
       </Route>
       <Route
         path="/my-bookings"
@@ -119,10 +127,12 @@ function AppRoutes() {
         path="/chat"
         element={
           <ProtectedRoute>
-            <Chat />
+            <DashboardLayout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route index element={<Chat />} />
+      </Route>
     </Routes>
   )
 }

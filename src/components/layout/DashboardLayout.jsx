@@ -13,8 +13,6 @@ const useNotifications = () => {
 
 const userIcon = 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'
 
-const appSettingsIcon = 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4'
-
 const artistSidebarLinks = [
   { label: 'Inicio', to: '/dashboard', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', exact: true },
   { label: 'Mi Perfil', to: '/dashboard/perfil', icon: userIcon },
@@ -23,8 +21,7 @@ const artistSidebarLinks = [
   { label: 'Historial', to: '/dashboard/history', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
   { label: 'Estadísticas', to: '/dashboard/stats', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
   { label: 'Mensajes', to: '/chat', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z', badge: '3' },
-  { label: 'Configuración', to: '/dashboard/settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
-  { label: 'App Settings', to: '/dashboard/app-settings', icon: appSettingsIcon },
+  { label: 'Configuración', to: '/dashboard/configuracion', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
 ]
 
 const clientSidebarLinks = [
@@ -35,8 +32,7 @@ const clientSidebarLinks = [
   { label: 'Historial', to: '/dashboard/history', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
   { label: 'Favoritos', to: '/dashboard/favorites', icon: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z' },
   { label: 'Mensajes', to: '/chat', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z', badge: '3' },
-  { label: 'Configuración', to: '/dashboard/settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
-  { label: 'App Settings', to: '/dashboard/app-settings', icon: appSettingsIcon },
+  { label: 'Configuración', to: '/dashboard/configuracion', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
 ]
 
 const DashboardLayout = () => {
@@ -97,6 +93,27 @@ const DashboardLayout = () => {
               </svg>
             </div>
             <span className="font-display text-lg font-semibold tracking-tight">LuxArts</span>
+          </div>
+
+          <div className="md:hidden mt-4 flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900 p-3">
+            <Link to="/dashboard/perfil" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 min-w-0">
+              {avatarSrc ? (
+                <img src={avatarSrc} alt={displayName} className="h-9 w-9 rounded-full object-cover ring-2 ring-red-600/40" />
+              ) : (
+                <span className="h-9 w-9 rounded-full bg-zinc-800 border-2 border-red-600/30 flex items-center justify-center text-xs font-bold text-white">
+                  {initials}
+                </span>
+              )}
+              <span className="min-w-0 truncate text-sm font-bold text-white">{displayName}</span>
+            </Link>
+            <button className="relative rounded-full p-2 text-zinc-300 hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+              </svg>
+              {notifications.length > 0 && (
+                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-600" />
+              )}
+            </button>
           </div>
 
           <nav className="mt-6 space-y-1">
@@ -169,19 +186,19 @@ const DashboardLayout = () => {
             {!isClient && (
               <Link
                 to="/dashboard/portfolio"
-                className={`transition-colors ${location.pathname.startsWith('/dashboard/portfolio') ? 'text-white font-semibold' : 'text-zinc-400 hover:text-white'}`}
+                className={`transition-colors ${location.pathname.startsWith('/dashboard/portfolio') ? 'text-white font-semibold' : 'text-zinc-200 hover:text-white'}`}
               >
                 Portafolio
               </Link>
             )}
-            <Link to="/explorar" className="text-zinc-400 hover:text-white transition-colors">Explorar</Link>
-            <Link to="/my-bookings" className="text-zinc-400 hover:text-white transition-colors">Mis Reservas</Link>
-            <Link to="/chat" className="relative text-zinc-400 hover:text-white transition-colors">
-              Mensajes<span className="ml-2 px-2 py-0.5 rounded-full bg-red-600 text-xs">3</span>
+            <Link to="/explorar" className="text-zinc-200 hover:text-white transition-colors">Explorar</Link>
+            <Link to="/my-bookings" className="text-zinc-200 hover:text-white transition-colors">Mis Reservas</Link>
+            <Link to="/chat" className="relative text-zinc-200 hover:text-white transition-colors">
+              Mensajes<span className="ml-2 px-2 py-0.5 rounded-full bg-red-600 text-white text-xs">3</span>
             </Link>
           </nav>
 
-          <div className="flex gap-4 items-center">
+          <div className="hidden md:flex gap-4 items-center">
             <button className="relative rounded-full p-2 text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
@@ -205,7 +222,7 @@ const DashboardLayout = () => {
                     {initials}
                   </span>
                 )}
-                <span className="hidden sm:inline text-sm font-medium text-zinc-200">Hola, {displayName}</span>
+                <span className="hidden sm:inline text-sm font-bold text-white">{displayName}</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className={`h-4 w-4 text-zinc-500 hidden sm:block transition-transform duration-200 ${isUserMenuOpen ? 'rotate-180' : ''}`}
@@ -253,7 +270,7 @@ const DashboardLayout = () => {
                     <button
                       type="button"
                       role="menuitem"
-                      onClick={() => { setIsUserMenuOpen(false); navigate('/dashboard/settings') }}
+                      onClick={() => { setIsUserMenuOpen(false); navigate('/dashboard/configuracion') }}
                       className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -265,50 +282,14 @@ const DashboardLayout = () => {
                   </div>
 
                   <div className="border-t border-zinc-900 p-1.5">
-                    <p className="px-3 py-1.5 text-[10px] font-bold tracking-widest uppercase text-zinc-600">Aplicación</p>
+                    <p className="px-3 py-1.5 text-[10px] font-bold tracking-widest uppercase text-zinc-600">Preferencias</p>
                     <button
                       type="button"
                       role="menuitem"
-                      onClick={() => { setIsUserMenuOpen(false); navigate('/dashboard/app-settings') }}
+                      onClick={() => { setIsUserMenuOpen(false); navigate('/dashboard/configuracion') }}
                       className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                      </svg>
-                      Configuración de la app
-                    </button>
-                    <button
-                      type="button"
-                      role="menuitem"
-                      onClick={() => { setIsUserMenuOpen(false); navigate('/dashboard/app-settings?tab=notifications') }}
-                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-                      </svg>
-                      Notificaciones
-                    </button>
-                    <button
-                      type="button"
-                      role="menuitem"
-                      onClick={() => { setIsUserMenuOpen(false); navigate('/dashboard/app-settings?tab=privacy') }}
-                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                      </svg>
-                      Privacidad y seguridad
-                    </button>
-                    <button
-                      type="button"
-                      role="menuitem"
-                      onClick={() => { setIsUserMenuOpen(false); navigate('/dashboard/app-settings?tab=help') }}
-                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      Ayuda y soporte
+                      Configuración
                     </button>
                   </div>
 

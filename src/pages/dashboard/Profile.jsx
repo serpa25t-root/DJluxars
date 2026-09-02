@@ -282,7 +282,7 @@ const Profile = () => {
               </Link>
             ) : (
               <Link
-                to="/dashboard/settings"
+                to="/dashboard/configuracion"
                 className="rounded-full border border-zinc-800 px-5 py-2.5 text-sm font-semibold text-zinc-300 hover:border-zinc-700 hover:text-white transition-colors"
               >
                 Configuración

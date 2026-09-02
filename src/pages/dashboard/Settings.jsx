@@ -59,9 +59,8 @@ const Settings = () => {
   const initials = (form.firstName?.[0] || user?.username?.[0] || 'U').toUpperCase()
 
   return (
-    <div className="max-w-3xl mx-auto p-8 space-y-8">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-white">Configuración de Perfil</h1>
         <p className="text-sm text-zinc-400 mt-1">Actualiza tu información personal y foto de perfil.</p>
         <Link to="/dashboard/perfil" className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-red-500 hover:text-red-400 transition-colors">
           Ver mi perfil público →
@@ -72,9 +71,9 @@ const Settings = () => {
         <h2 className="text-sm font-semibold text-white mb-4">Foto de perfil</h2>
         <div className="flex items-center gap-6">
           {avatarPreview && !removed ? (
-            <img src={avatarPreview} alt={form.firstName || 'Perfil'} className="w-24 h-24 rounded-full object-cover border-2 border-red-600/30" />
+            <img src={avatarPreview} alt={form.firstName || 'Perfil'} className="w-24 h-24 rounded-full object-cover border-2 border-white/10" />
           ) : (
-            <div className="w-24 h-24 rounded-full bg-zinc-800 border-2 border-red-600/30 flex items-center justify-center text-2xl font-bold text-white">
+            <div className="w-24 h-24 rounded-full bg-zinc-800 border-2 border-white/10 flex items-center justify-center text-2xl font-bold text-white">
               {initials}
             </div>
           )}
@@ -98,20 +97,20 @@ const Settings = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <label htmlFor="firstName" className="block text-xs font-medium tracking-wide text-zinc-300">Nombre</label>
-            <input id="firstName" value={form.firstName} onChange={handleChange} placeholder="Jesús" className="w-full rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-red-600 focus:outline-none focus:ring-1 focus:ring-red-600/20" />
+            <input id="firstName" value={form.firstName} onChange={handleChange} placeholder="Jesús" className="w-full rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-white/10" />
           </div>
           <div className="space-y-1.5">
             <label htmlFor="lastName" className="block text-xs font-medium tracking-wide text-zinc-300">Apellido</label>
-            <input id="lastName" value={form.lastName} onChange={handleChange} placeholder="Serpa" className="w-full rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-red-600 focus:outline-none focus:ring-1 focus:ring-red-600/20" />
+            <input id="lastName" value={form.lastName} onChange={handleChange} placeholder="Serpa" className="w-full rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-white/10" />
           </div>
         </div>
         <div className="space-y-1.5">
           <label htmlFor="phone" className="block text-xs font-medium tracking-wide text-zinc-300">Teléfono</label>
-          <input id="phone" value={form.phone} onChange={handleChange} placeholder="+57 300 000 0000" className="w-full rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-red-600 focus:outline-none focus:ring-1 focus:ring-red-600/20" />
+          <input id="phone" value={form.phone} onChange={handleChange} placeholder="+57 300 000 0000" className="w-full rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-white/10" />
         </div>
         <div className="space-y-1.5">
           <label htmlFor="bio" className="block text-xs font-medium tracking-wide text-zinc-300">Descripción / Bio</label>
-          <textarea id="bio" value={form.bio} onChange={handleChange} rows={4} placeholder="Cuéntanos sobre ti y tu trabajo..." className="w-full rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-red-600 focus:outline-none focus:ring-1 focus:ring-red-600/20 resize-none" />
+          <textarea id="bio" value={form.bio} onChange={handleChange} rows={4} placeholder="Cuéntanos sobre ti y tu trabajo..." className="w-full rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-white/10 resize-none" />
         </div>
         <Button type="submit" variant="primary" disabled={saving} className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold shadow-md shadow-red-600/20 disabled:opacity-60">
           {saving ? 'Guardando...' : 'Guardar Cambios'}
