@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Search, MapPin, Star, Award, ArrowRight, Sparkles, Camera, Calendar } from 'lucide-react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Search, MapPin, Star, Award, ArrowRight, Camera } from 'lucide-react'
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
 import BookingModal from '../components/booking/BookingModal'
@@ -24,10 +24,12 @@ const mockPhotographers = [
 const Photographers = () => {
   const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const urlCategory = searchParams.get('category')
   const [photographers, setPhotographers] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [category, setCategory] = useState('Todas')
+  const [category, setCategory] = useState(urlCategory || 'Todas')
   const [location, setLocation] = useState('')
   const [date, setDate] = useState('')
   const [bookingPhotographer, setBookingPhotographer] = useState(null)
@@ -117,12 +119,8 @@ const Photographers = () => {
           <div className="absolute -top-40 left-1/2 -translate-x-1/2 h-[700px] w-[1100px] rounded-full bg-red-600/[0.07] blur-[120px] pointer-events-none" />
           <div className="absolute bottom-0 left-0 h-[1px] w-full bg-gradient-to-r from-transparent via-red-600/20 to-transparent" />
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-            <div className="inline-flex items-center gap-2.5 rounded-full border border-red-600/20 bg-red-600/10 px-4 py-1.5 backdrop-blur-md animate-[fadeInUp_500ms_var(--ease-out-quart)_both]">
-              <span className="h-2 w-2 rounded-full bg-red-600 animate-pulse shadow-sm shadow-red-600/50" />
-              <span className="text-[11px] font-semibold tracking-widest text-red-300 uppercase">Directorio Verificado</span>
-            </div>
             <h1 className="mt-5 font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[0.95] animate-[fadeInUp_600ms_var(--ease-out-quart)_80ms_both]">
-              Directorio de <span className="text-red-600 font-serif italic font-normal">Talento Visual</span>
+              Encuentra el <span className="text-red-600 font-serif italic font-normal">fotógrafo</span> que necesitas
             </h1>
             <p className="mt-4 max-w-2xl text-sm sm:text-[15px] leading-relaxed text-zinc-400 animate-[fadeInUp_600ms_var(--ease-out-quart)_140ms_both]">
               Descubre fotógrafos excepcionales, filtra por especialidad y ubicación, y conecta con el profesional ideal para tu historia.
@@ -137,7 +135,6 @@ const Photographers = () => {
               <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr_1fr_1fr] gap-4">
                 {/* Search query */}
                 <div>
-                  <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><Search className="h-3.5 w-3.5" /> Search query</label>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                     <input
@@ -151,7 +148,6 @@ const Photographers = () => {
                 </div>
                 {/* Session type */}
                 <div>
-                  <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5" /> Session type</label>
                   <div className="relative">
                     <select
                       value={category}
@@ -170,7 +166,6 @@ const Photographers = () => {
                 </div>
                 {/* Location */}
                 <div>
-                  <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Location</label>
                   <input
                     type="text"
                     value={location}
@@ -181,7 +176,6 @@ const Photographers = () => {
                 </div>
                 {/* Date */}
                 <div>
-                  <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> Date</label>
                   <input
                     type="date"
                     value={date}

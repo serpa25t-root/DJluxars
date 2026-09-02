@@ -22,7 +22,7 @@ html {
     @apply rounded-3xl border border-zinc-800/80 bg-zinc-900/50 backdrop-blur-2xl;
   }
   .btn-neon {
-    @apply font-semibold text-white transition-all duration-300 bg-red-600 shadow-[0_0_25px_rgba(239,68,68,0.4)] hover:bg-red-500;
+    @apply font-semibold text-white transition-all duration-300 bg-red-600 shadow-lg shadow-red-600/20 hover:bg-red-500;
   }
   .text-neon {
     @apply font-semibold text-red-500;
@@ -46,10 +46,25 @@ html {
   to { opacity: 1; transform: scale(1); }
 }
 
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 700ms var(--ease-out-quart), transform 700ms var(--ease-out-quart);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
   html { scroll-behavior: auto; }
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }

@@ -35,4 +35,6 @@ media/
 
 # Local tools / notes
 .opencode/
+opencode.json*
+AGENTS.md
 references

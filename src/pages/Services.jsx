@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { User, Heart, Package, CalendarDays, Clock, Image as ImageIcon, Award, ShieldCheck, Check, ArrowRight, Sparkles } from 'lucide-react'
+import { User, Heart, Package, CalendarDays, Clock, Image as ImageIcon, Award, ShieldCheck, Check, ArrowRight } from 'lucide-react'
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
 import BookingModal from '../components/booking/BookingModal'
@@ -85,15 +85,11 @@ const Services = () => {
           <div className="absolute -top-40 left-1/2 -translate-x-1/2 h-[700px] w-[1100px] rounded-full bg-red-600/[0.07] blur-[120px] pointer-events-none" />
           <div className="absolute bottom-0 left-0 h-[1px] w-full bg-gradient-to-r from-transparent via-red-600/20 to-transparent" />
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-            <div className="inline-flex items-center gap-2.5 rounded-full border border-red-600/20 bg-red-600/10 px-4 py-1.5 backdrop-blur-md">
-              <Sparkles className="h-3.5 w-3.5 text-red-400" />
-              <span className="text-[11px] font-semibold tracking-widest text-red-300 uppercase">Paquetes Verificados</span>
-            </div>
             <h1 className="mt-5 font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[0.95]">
               Experiencias y Paquetes de <span className="text-red-600 font-serif italic font-normal">Fotografía Profesional</span>
             </h1>
             <p className="mt-4 max-w-2xl text-sm sm:text-[15px] leading-relaxed text-zinc-400">
-              Elige la experiencia que se adapta a tu historia. Tarifas transparentes, entrega garantizada y talento verificado.
+              Elige la experiencia que se adapta a tu historia. Tarifas transparentes y entrega garantizada.
             </p>
           </div>
         </section>

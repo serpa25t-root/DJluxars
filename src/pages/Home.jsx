@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Heart, User, Sparkles, CalendarDays, Package, Mountain, ShieldCheck, Lock, CreditCard, Headphones, Award, ArrowRight, Play } from 'lucide-react'
 import Navbar from '../components/layout/Navbar'
@@ -72,11 +73,32 @@ const Home = () => {
 
   void handleBooking; void handleChat; void handleContact; void openBookingModal
 
-  // SCRUM-33 Part 2: redirección desde Home a explorar
-  const handleCategoryClick = (cat) => navigate('/explorar?category=' + encodeURIComponent(cat))
-  const handleExplore = () => navigate('/explorar')
+  // Redirección desde Home a la sección de fotógrafos
+  const handleCategoryClick = (cat) => navigate('/fotografos?category=' + encodeURIComponent(cat))
+  const handleExplore = () => navigate('/fotografos')
   void handleCategoryClick; void handleExplore
-  // ensure literals for test: navigate('/explorar?category=Boda') navigate('/explorar')
+
+  // SCRUM-33 reveal-on-scroll para secciones intermedias (respeta prefers-reduced-motion)
+  useEffect(() => {
+    const els = document.querySelectorAll('.reveal')
+    if (!('IntersectionObserver' in window) || els.length === 0) {
+      els.forEach((el) => el.classList.add('is-visible'))
+      return
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible')
+            observer.unobserve(entry.target)
+          }
+        })
+      },
+      { threshold: 0.15 }
+    )
+    els.forEach((el) => observer.observe(el))
+    return () => observer.disconnect()
+  }, [])
 
   return (
     <div className="min-h-screen flex flex-col bg-[#08080a] text-white selection:bg-red-600 selection:text-white">
@@ -87,9 +109,9 @@ const Home = () => {
         <section className="relative overflow-hidden bg-[#08080a]">
           {/* subtle crimson glows */}
           <div className="absolute inset-0 bg-[#08080a]" />
-          <div className="absolute -top-40 left-1/2 -translate-x-1/2 h-[800px] w-[1200px] rounded-full bg-red-600/[0.07] blur-[120px] pointer-events-none" />
-          <div className="absolute top-[20%] -right-48 h-[600px] w-[600px] rounded-full bg-red-900/10 blur-[120px] pointer-events-none" />
-          <div className="absolute bottom-0 left-0 h-[1px] w-full bg-gradient-to-r from-transparent via-red-600/20 to-transparent" />
+          <div className="absolute -top-40 left-1/2 -translate-x-1/2 h-[800px] w-[1200px] rounded-full bg-red-600/[0.04] blur-[140px] pointer-events-none" />
+          <div className="absolute top-[20%] -right-48 h-[600px] w-[600px] rounded-full bg-red-900/10 blur-[140px] pointer-events-none" />
+          <div className="absolute bottom-0 left-0 h-[1px] w-full bg-gradient-to-r from-transparent via-red-600/15 to-transparent" />
 
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 lg:py-16">
             <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-8">
@@ -109,7 +131,7 @@ const Home = () => {
                 <h1 className="mt-6 font-display text-5xl font-bold tracking-tight leading-[0.95] sm:text-6xl lg:text-7xl animate-[fadeInUp_600ms_var(--ease-out-quart)_80ms_both]">
                   <span className="block text-white">Tu historia</span>
                   <span className="block text-white">merece ser</span>
-                  <span className="block text-red-600 font-serif italic font-normal">extraordinaria.</span>
+                  <span className="block text-red-600 font-display italic font-normal">extraordinaria.</span>
                 </h1>
 
                 <p className="mt-5 max-w-xl mx-auto lg:mx-0 text-[15px] leading-relaxed text-zinc-400 sm:text-[17px] animate-[fadeInUp_600ms_var(--ease-out-quart)_140ms_both]">
@@ -120,7 +142,7 @@ const Home = () => {
                 <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start animate-[fadeInUp_600ms_var(--ease-out-quart)_200ms_both]">
                   <button
                     onClick={handleExplore}
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-red-600 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-red-600/25 hover:bg-red-700 hover:shadow-xl hover:shadow-red-600/30 active:scale-[0.98] transition-all duration-200 will-change-transform"
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-red-600 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-red-600/15 hover:bg-red-700 hover:shadow-lg hover:shadow-red-600/20 active:scale-[0.98] transition-all duration-200 will-change-transform"
                   >
                     Explorar fotógrafos ➔
                     <ArrowRight className="h-4 w-4" />
@@ -134,23 +156,7 @@ const Home = () => {
                   </a>
                 </div>
 
-                {/* Social proof */}
-                <div className="mt-10 flex flex-col sm:flex-row items-center gap-5 justify-center lg:justify-start animate-[fadeIn_500ms_ease-out_300ms_both]">
-                  <div className="flex -space-x-2">
-                    <img src="https://i.pravatar.cc/100?img=33" alt="Cliente 1" className="h-9 w-9 rounded-full border-2 border-[#08080a] object-cover" />
-                    <img src="https://i.pravatar.cc/100?img=14" alt="Cliente 2" className="h-9 w-9 rounded-full border-2 border-[#08080a] object-cover" />
-                    <img src="https://i.pravatar.cc/100?img=47" alt="Cliente 3" className="h-9 w-9 rounded-full border-2 border-[#08080a] object-cover" />
-                  </div>
-                  <div className="text-center sm:text-left">
-                    <p className="text-sm font-semibold text-white">+15K clientes satisfechos</p>
-                    <div className="flex items-center justify-center sm:justify-start gap-1.5 mt-1">
-                      <span className="text-red-500 text-sm tracking-widest">★★★★★</span>
-                      <span className="text-sm font-semibold text-white">4.9/5</span>
-                      <span className="text-xs text-zinc-500">(2.847 reseñas)</span>
-                    </div>
-                  </div>
                 </div>
-              </div>
 
               {/* Right — Imagen fotógrafo */}
               <div className="lg:col-span-5 relative flex justify-center lg:justify-end">
@@ -184,10 +190,33 @@ const Home = () => {
           </div>
         </section>
 
+        {/* PRUEBA SOCIAL */}
+        <section className="reveal border-b border-zinc-900">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-5 text-center sm:text-left">
+              <div className="flex -space-x-2">
+                <img src="https://i.pravatar.cc/100?img=33" alt="Cliente de LuxArts" className="h-10 w-10 rounded-full border-2 border-[#08080a] object-cover" loading="lazy" />
+                <img src="https://i.pravatar.cc/100?img=14" alt="Cliente de LuxArts" className="h-10 w-10 rounded-full border-2 border-[#08080a] object-cover" loading="lazy" />
+                <img src="https://i.pravatar.cc/100?img=47" alt="Cliente de LuxArts" className="h-10 w-10 rounded-full border-2 border-[#08080a] object-cover" loading="lazy" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-white">
+                  Miles de personas ya capturaron su mejor historia con LuxArts
+                </p>
+                <div className="flex items-center justify-center sm:justify-start gap-1.5 mt-1">
+                  <span className="text-red-500 text-sm tracking-widest" aria-hidden="true">★★★★★</span>
+                  <span className="text-sm font-semibold text-white">4.9/5</span>
+                  <span className="text-xs text-zinc-500">calificación promedio</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* CATEGORÍAS */}
         <section id="como-funciona" className="py-16 sm:py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-2xl mx-auto">
+            <div className="text-center max-w-2xl mx-auto reveal">
               <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-white">
                 Para cada momento, el fotógrafo ideal
               </h2>
@@ -239,29 +268,29 @@ const Home = () => {
         <section className="px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-6xl">
             <div className="bg-zinc-900/40 border border-zinc-800/60 rounded-3xl p-8 flex justify-between items-center text-center max-w-6xl mx-auto mt-16 hidden" aria-hidden="true" />
-            <div className="bg-zinc-900/40 border border-zinc-800/60 rounded-3xl p-8 flex flex-col sm:flex-row justify-between items-center text-center gap-8 sm:gap-4 mt-4">
+            <div className="bg-zinc-900/40 border border-zinc-800/60 rounded-3xl p-8 flex flex-col sm:flex-row justify-between items-center text-center gap-8 sm:gap-4 mt-4 reveal">
               <div className="flex-1">
-                <p className="font-display text-3xl sm:text-4xl font-bold text-white">15K<span className="text-red-600">+</span><span className="sr-only">15K+</span></p>
-                <p className="mt-1 text-xs font-medium uppercase tracking-widest text-zinc-500">Proyectos realizados</p>
-                <span className="hidden">15K+</span>
+                <p className="font-display text-3xl sm:text-4xl font-bold text-white">6<span className="text-red-600">+</span><span className="sr-only">6+</span></p>
+                <p className="mt-1 text-xs font-medium uppercase tracking-widest text-zinc-500">Categorías de fotografía</p>
+                <span className="hidden">6+</span>
               </div>
               <div className="hidden sm:block h-12 w-px bg-zinc-800" />
               <div className="flex-1">
-                <p className="font-display text-3xl sm:text-4xl font-bold text-white">8K<span className="text-red-600">+</span><span className="sr-only">8K+</span></p>
-                <p className="mt-1 text-xs font-medium uppercase tracking-widest text-zinc-500">Fotógrafos profesionales</p>
-                <span className="hidden">8K+</span>
+                <p className="font-display text-3xl sm:text-4xl font-bold text-white">4<span className="text-red-600">+</span><span className="sr-only">4+</span></p>
+                <p className="mt-1 text-xs font-medium uppercase tracking-widest text-zinc-500">Fotógrafos verificados</p>
+                <span className="hidden">4+</span>
               </div>
               <div className="hidden sm:block h-12 w-px bg-zinc-800" />
               <div className="flex-1">
-                <p className="font-display text-3xl sm:text-4xl font-bold text-white">4.9<span className="text-red-600">/5</span><span className="sr-only">4.9/5</span></p>
-                <p className="mt-1 text-xs font-medium uppercase tracking-widest text-zinc-500">Calificación promedio</p>
-                <span className="hidden">4.9/5</span>
+                <p className="font-display text-3xl sm:text-4xl font-bold text-white">4<span className="text-red-600">+</span><span className="sr-only">4+</span></p>
+                <p className="mt-1 text-xs font-medium uppercase tracking-widest text-zinc-500">Servicios disponibles</p>
+                <span className="hidden">4+</span>
               </div>
               <div className="hidden sm:block h-12 w-px bg-zinc-800" />
               <div className="flex-1">
-                <p className="font-display text-3xl sm:text-4xl font-bold text-white">98<span className="text-red-600">%</span><span className="sr-only">98%</span></p>
-                <p className="mt-1 text-xs font-medium uppercase tracking-widest text-zinc-500">Clientes satisfechos</p>
-                <span className="hidden">98%</span>
+                <p className="font-display text-3xl sm:text-4xl font-bold text-white">$350<span className="text-red-600">K</span><span className="sr-only">$350K</span></p>
+                <p className="mt-1 text-xs font-medium uppercase tracking-widest text-zinc-500">Desde por servicio (COP)</p>
+                <span className="hidden">$350K</span>
               </div>
             </div>
           </div>
@@ -283,7 +312,7 @@ const Home = () => {
                 <div className="absolute inset-0 bg-black/20" />
               </div>
 
-              <div className="relative grid lg:grid-cols-2 gap-8 p-8 sm:p-10 lg:p-12 items-center">
+              <div className="relative grid lg:grid-cols-2 gap-8 p-8 sm:p-10 lg:p-12 items-center reveal">
                 <div>
                   <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-white leading-tight">
                     ¿Listo para capturar algo increíble?
@@ -295,9 +324,9 @@ const Home = () => {
                   <div className="mt-8 flex flex-col sm:flex-row gap-3">
                     <button
                       onClick={handleExplore}
-                      className="inline-flex items-center justify-center gap-2 rounded-full bg-red-600 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-red-600/25 hover:bg-red-700 transition-colors active:scale-[0.98]"
+                      className="inline-flex items-center justify-center gap-2 rounded-full bg-red-600 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-red-600/15 hover:bg-red-700 transition-colors active:scale-[0.98]"
                     >
-                      Explorar fotógrafos
+                      Ver fotógrafos
                       <ArrowRight className="h-4 w-4" />
                     </button>
                     <Link
@@ -344,7 +373,7 @@ const Home = () => {
         {/* FOOTER DE MARCAS */}
         <section className="border-t border-zinc-900 py-10">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <p className="text-center text-[11px] font-semibold tracking-[0.2em] text-zinc-500 uppercase">
+            <p className="text-center text-[11px] font-semibold tracking-[0.2em] text-zinc-500 uppercase reveal">
               CONFÍAN EN LUXARTS
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-6 sm:gap-10 opacity-60 grayscale">
