@@ -48,12 +48,18 @@ class ErrorBoundary extends Component {
         <div className="min-h-screen bg-[#050505] text-white flex items-center justify-center p-8">
           <div className="max-w-2xl text-center">
             <h1 className="text-2xl font-bold text-red-500 mb-4">Error de Renderizado</h1>
-            <p className="text-zinc-400 mb-2 font-mono text-sm">{this.state.error?.toString()}</p>
-            <p className="text-zinc-500 mb-4 text-xs">{this.state.error?.message}</p>
-            {this.state.errorInfo?.componentStack && (
-              <pre className="text-left text-xs text-zinc-600 bg-zinc-900 p-4 rounded-lg overflow-auto max-h-48 mb-4">
-                {this.state.errorInfo.componentStack}
-              </pre>
+            {import.meta.env.PROD ? (
+              <p className="text-zinc-400 mb-2 text-sm">Ha ocurrido un error inesperado. Por favor, recarga la página.</p>
+            ) : (
+              <>
+                <p className="text-zinc-400 mb-2 font-mono text-sm">{this.state.error?.toString()}</p>
+                <p className="text-zinc-500 mb-4 text-xs">{this.state.error?.message}</p>
+                {this.state.errorInfo?.componentStack && (
+                  <pre className="text-left text-xs text-zinc-600 bg-zinc-900 p-4 rounded-lg overflow-auto max-h-48 mb-4">
+                    {this.state.errorInfo.componentStack}
+                  </pre>
+                )}
+              </>
             )}
             <button
               onClick={() => window.location.reload()}

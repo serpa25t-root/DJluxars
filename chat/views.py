@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework import permissions, status
 from django.contrib.auth import get_user_model
 from django.db.models import Q, Max, Count
+from django.utils.html import strip_tags
+import html
 from .models import Message
 from .serializers import MessageSerializer
 
@@ -118,7 +120,8 @@ class SendMessageView(APIView):
         except User.DoesNotExist:
             return Response({'detail': 'Receptor no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
 
-        msg = Message.objects.create(sender=request.user, receiver=receiver, content=content)
+        clean_content = strip_tags(html.escape(str(content)))[:2000]
+        msg = Message.objects.create(sender=request.user, receiver=receiver, content=clean_content)
         serializer = MessageSerializer(msg)
         return Response({
             'id': msg.id,

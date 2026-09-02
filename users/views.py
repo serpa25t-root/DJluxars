@@ -2,9 +2,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.throttling import AnonRateThrottle
 from django.contrib.auth import authenticate, get_user_model
 from django.db.models import Sum
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 
 from portfolio.models import PortfolioItem
 from .serializers import RegisterSerializer, UserListSerializer, ProfileSerializer
@@ -14,6 +16,7 @@ User = get_user_model()
 
 class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [AnonRateThrottle]
 
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
@@ -41,6 +44,7 @@ class RegisterView(APIView):
 
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [AnonRateThrottle]
 
     def post(self, request):
         email = request.data.get('email')
@@ -161,7 +165,7 @@ class UserPortfolioView(APIView):
 
 
 class UserListView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
         role = request.query_params.get('role')
@@ -169,5 +173,23 @@ class UserListView(APIView):
         if role:
             qs = qs.filter(role=role)
         serializer = UserListSerializer(qs[:20], many=True)
-        # Soporta paginación simple results
         return Response({'results': serializer.data})
+
+
+class LogoutView(APIView):
+    """Blacklist all outstanding refresh tokens for the authenticated user."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.data.get('refresh')
+            if refresh_token:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+            else:
+                tokens = OutstandingToken.objects.filter(user=request.user)
+                for token in tokens:
+                    BlacklistedToken.objects.get_or_create(token=token)
+        except Exception:
+            pass
+        return Response({'detail': 'Sesión cerrada correctamente.'}, status=status.HTTP_200_OK)
