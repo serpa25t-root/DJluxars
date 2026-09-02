@@ -221,13 +221,13 @@ const Profile = () => {
         ) : (
           <div className="h-full w-full bg-gradient-to-r from-zinc-900 via-zinc-950 to-black" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0b0b0d] via-black/10 to-transparent" />
+<div className="absolute inset-0 bg-gradient-to-t from-[#0b0b0d] via-black/10 to-transparent" />
       </div>
 
       {/* Cabecera de perfil estilo Instagram */}
       <section className="-mt-12 px-4 sm:px-8">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end">
-          <div className="relative h-28 w-28 shrink-0 rounded-full shadow-2xl shadow-black/60 ring-1 ring-white/15 ring-offset-4 ring-offset-[#070709]">
+<div className="relative h-28 w-28 shrink-0 rounded-full shadow-2xl shadow-black/60 ring-1 ring-white/15 ring-offset-4 ring-offset-[#070709]">
             <div className="h-full w-full overflow-hidden rounded-full bg-zinc-800">
               {data.avatar_url ? (
                 <img src={data.avatar_url} alt={displayName} className="h-full w-full object-cover" />
@@ -281,7 +281,7 @@ const Profile = () => {
               </Link>
             ) : (
               <Link
-                to="/dashboard/settings"
+                to="/dashboard/configuracion"
                 className="rounded-full border border-zinc-800 px-5 py-2.5 text-sm font-semibold text-zinc-300 hover:border-zinc-700 hover:text-white transition-colors"
               >
                 Configuración
@@ -315,7 +315,7 @@ const Profile = () => {
       </section>
 
       {/* Tabs */}
-      <div className="mt-8 flex items-center justify-center gap-10 border-t border-zinc-900">
+      <div className="mt-8 flex items-center justify-center gap-10">
         {tabs.map((t) => (
           <button
             key={t.id}

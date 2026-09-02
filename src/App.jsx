@@ -26,6 +26,7 @@ import ServiceManager from './components/dashboard/ServiceManager'
 import ServiceDetail from './pages/ServiceDetail'
 import Profile from './pages/dashboard/Profile'
 import AppSettings from './pages/dashboard/AppSettings'
+import HomeFeed from './pages/dashboard/HomeFeed'
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -95,7 +96,7 @@ const ProtectedRoute = ({ children, roles }) => {
 }
 
 const DashboardIndex = () => {
-  return <Dashboard />
+  return <HomeFeed />
 }
 
 /**
@@ -123,7 +124,6 @@ function AppRoutes() {
       <Route path="/" element={<HomeRoute />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/explorar" element={<Explore />} />
       <Route path="/fotografos" element={<Photographers />} />
       <Route path="/servicios" element={<Services />} />
       <Route path="/fotografos/:id" element={<ArtistProfile />} />
@@ -145,7 +145,7 @@ function AppRoutes() {
         <Route path="favorites" element={<Placeholder title="Favoritos" />} />
         <Route path="stats" element={<Placeholder title="Estadísticas" />} />
         <Route path="history" element={<History />} />
-        <Route path="mensajes" element={<Chat />} />
+<Route path="mensajes" element={<Chat />} />
         <Route path="settings" element={<Settings />} />
         <Route path="configuracion" element={<Settings />} />
         <Route path="app-settings" element={<AppSettings />} />
@@ -154,21 +154,35 @@ function AppRoutes() {
         <Route path="pro" element={<ProSubscription />} />
       </Route>
       <Route
+        path="/explorar"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Explore />} />
+      </Route>
+      <Route
         path="/my-bookings"
         element={
           <ProtectedRoute roles={['client']}>
-            <ClientBookings />
+            <DashboardLayout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route index element={<ClientBookings />} />
+      </Route>
       <Route
         path="/chat"
         element={
           <ProtectedRoute>
-            <Chat />
+            <DashboardLayout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route index element={<Chat />} />
+      </Route>
     </Routes>
   )
 }

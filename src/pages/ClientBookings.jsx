@@ -29,8 +29,7 @@ const ClientBookings = () => {
     <div className="min-h-[100dvh] bg-black">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div className="border-b border-zinc-900 pb-6">
-          <p className="text-xs font-semibold tracking-widest text-red-400">PANEL • CLIENTE</p>
-          <h1 className="mt-1 font-display text-3xl font-bold text-white">Reservas</h1>
+          <h1 className="mt-1 font-display text-3xl font-bold text-white">Mis Reservas</h1>
           <p className="mt-2 text-sm text-zinc-400">Revisa el estado de tus contrataciones y contacta a tu fotógrafo.</p>
         </div>
 

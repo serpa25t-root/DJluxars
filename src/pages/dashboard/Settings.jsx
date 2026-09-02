@@ -59,9 +59,8 @@ const Settings = () => {
   const initials = (form.firstName?.[0] || user?.username?.[0] || 'U').toUpperCase()
 
   return (
-    <div className="max-w-3xl mx-auto p-8 space-y-8">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-white">Configuración de Perfil</h1>
         <p className="text-sm text-zinc-400 mt-1">Actualiza tu información personal y foto de perfil.</p>
         <Link to="/dashboard/perfil" className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-red-500 hover:text-red-400 transition-colors">
           Ver mi perfil público →
@@ -72,7 +71,7 @@ const Settings = () => {
         <h2 className="text-sm font-semibold text-white mb-4">Foto de perfil</h2>
         <div className="flex items-center gap-6">
           {avatarPreview && !removed ? (
-            <img src={avatarPreview} alt={form.firstName || 'Perfil'} className="w-24 h-24 rounded-full object-cover shadow-lg shadow-black/40 ring-1 ring-white/10" />
+<img src={avatarPreview} alt={form.firstName || 'Perfil'} className="w-24 h-24 rounded-full object-cover shadow-lg shadow-black/40 ring-1 ring-white/10" />
           ) : (
             <div className="w-24 h-24 rounded-full bg-zinc-800 flex items-center justify-center text-2xl font-bold text-white/90">
               {initials}

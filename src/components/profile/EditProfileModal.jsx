@@ -6,7 +6,7 @@ import useColombiaApi from '../../services/colombiaApi'
 
 const AvatarFrame = ({ src, alt, size = 'h-24 w-24', icon = 'h-6 w-6' }) =>
   src ? (
-    <img src={src} alt={alt} className={`${size} rounded-full object-cover shadow-lg shadow-black/40 ring-1 ring-white/10`} />
+<img src={src} alt={alt} className={`${size} rounded-full object-cover shadow-lg shadow-black/40 ring-1 ring-white/10`} />
   ) : (
     <span className={`${size} rounded-full bg-zinc-800 flex items-center justify-center text-xl font-bold text-white/90`}>
       <svg xmlns="http://www.w3.org/2000/svg" className={`${icon} text-zinc-500`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}>
@@ -158,7 +158,7 @@ const EditProfileModal = ({ isOpen, onClose, profile, onSaved }) => {
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => !loading && onClose()} aria-hidden="true" />
       <div className="relative w-full max-w-xl max-h-[90vh] overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/60 flex flex-col animate-[scaleIn_250ms_var(--ease-out-expo)_both]">
-        <div className="h-[2px] w-full bg-gradient-to-r from-zinc-600 via-zinc-500 to-transparent" />
+<div className="h-[2px] w-full bg-gradient-to-r from-zinc-600 via-zinc-500 to-transparent" />
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-900">
           <h2 className="font-display text-lg font-bold text-white">Editar perfil</h2>
           <button onClick={onClose} disabled={loading} className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors disabled:opacity-50" aria-label="Cerrar">

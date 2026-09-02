@@ -5,7 +5,7 @@ import BookingModal from '../components/booking/BookingModal'
 import Button from '../components/common/Button'
 import { getCurrentPosition, reverseGeocode, haversine } from '../services/geo'
 import { useAuth } from '../context/AuthContext'
-import { Search, MapPin, Calendar, Sparkles, DollarSign, Star, SlidersHorizontal } from 'lucide-react'
+import { Search, DollarSign, Star, SlidersHorizontal } from 'lucide-react'
 import useColombiaApi from '../services/colombiaApi'
 import { getServices } from '../services/serviceStore'
 
@@ -189,7 +189,7 @@ const Explore = () => {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-black">
+    <div className="animate-[fadeIn_300ms_ease-out]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div className="border-b border-zinc-900 pb-6">
           <h1 className="font-display text-3xl font-bold tracking-tight text-white">
@@ -203,7 +203,6 @@ const Explore = () => {
           <div className="bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-3xl p-6 shadow-2xl">
             <form onSubmit={handleSearchBarSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
               <div className="lg:col-span-2">
-                <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><Search className="h-3.5 w-3.5" /> Búsqueda</label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                   <input
@@ -216,7 +215,6 @@ const Explore = () => {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5" /> Tipo de sesión</label>
                 <div className="relative">
                   <select
                     value={category}
@@ -234,7 +232,6 @@ const Explore = () => {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Departamento</label>
                 <div className="relative">
                   <select
                     value={selectedDept}
@@ -262,7 +259,6 @@ const Explore = () => {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Municipio</label>
                 <div className="relative">
                   <select
                     value={selectedCity}
@@ -285,7 +281,6 @@ const Explore = () => {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> Fecha</label>
                 <input
                   type="date"
                   value={dateFilter}
@@ -295,7 +290,6 @@ const Explore = () => {
                 />
               </div>
               <div className="lg:col-span-3">
-                <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><SlidersHorizontal className="h-3.5 w-3.5" /> Filtros</label>
                 <div className="flex flex-col sm:flex-row gap-2">
                   <button
                     type="button"
