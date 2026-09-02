@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { User, LogOut } from 'lucide-react'
+import { User, LogOut, Settings } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { getBookings } from '../../services/bookings'
 
@@ -21,7 +21,6 @@ const artistSidebarLinks = [
   { label: 'Perfil', to: '/dashboard/perfil', icon: userIcon },
   { label: 'Historial', to: '/dashboard/history', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
   { label: 'Estadísticas', to: '/dashboard/stats', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
-  { label: 'Mensajes', to: '/chat', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z', badge: '3' },
   { label: 'Configuración', to: '/dashboard/settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
 ]
 
@@ -30,9 +29,8 @@ const clientSidebarLinks = [
   { label: 'Perfil', to: '/dashboard/perfil', icon: userIcon },
   { label: 'Explorar', to: '/explorar', icon: 'M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z' },
   { label: 'Historial', to: '/dashboard/history', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
-  { label: 'Favoritos', to: '/dashboard/favorites', icon: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z' },
-  { label: 'Mensajes', to: '/chat', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z', badge: '3' },
-  { label: 'Configuración', to: '/dashboard/settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
+{ label: 'Favoritos', to: '/dashboard/favorites', icon: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z' },
+  { label: 'Configuración', to: '/dashboard/settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
   { label: 'App Settings', to: '/dashboard/app-settings', icon: appSettingsIcon },
 ]
 
@@ -94,27 +92,34 @@ const DashboardLayout = () => {
   const avatarSrc = user?.avatar_url || user?.avatar || ''
   const isProfileActive = location.pathname.startsWith('/dashboard/perfil')
 
-  const profileItems = [
-    { label: 'Ver Perfil', to: '/dashboard/perfil', icon: User },
-  ]
+  const profileItems = isClient
+    ? [
+        { label: 'Mi Cuenta', to: '/dashboard/perfil', icon: User },
+        { label: 'Configuración', to: '/dashboard/settings', icon: Settings },
+      ]
+    : [
+        { label: 'Ver Perfil Público', to: `/fotografos/${user?.id}`, icon: User },
+        { label: 'Configuración', to: '/dashboard/settings', icon: Settings },
+      ]
 
   // Role-specific top navigation links for desktop
   const topNavLinks = isClient
     ? [
         { label: 'Explorar', to: '/explorar' },
-        { label: 'Reservas', to: '/my-bookings' },
-        { label: 'Mensajes', to: '/chat' },
+        { label: 'Reservaciones', to: '/my-bookings', pill: true },
+        { label: 'Mensajes', to: '/dashboard/mensajes' },
       ]
     : [
+        { label: 'Portafolio', to: '/dashboard/portfolio' },
+        { label: 'Reservas', to: '/dashboard/bookings', pill: true },
         { label: 'Servicios', to: '/dashboard/services' },
-        { label: 'Reservas', to: '/dashboard/bookings' },
-        { label: 'Mensajes', to: '/chat' },
+        { label: 'Mensajes', to: '/dashboard/mensajes' },
       ]
 
   const isLinkActive = (to) => location.pathname === to || location.pathname.startsWith(to + '/')
 
   return (
-    <div className="flex h-screen bg-[#101010] text-white overflow-hidden">
+    <div className="flex h-screen bg-[#070709] text-white overflow-hidden">
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out bg-zinc-950 border-r border-zinc-800 flex flex-col justify-between p-4 ${isSidebarOpen ? "translate-x-0 shadow-2xl shadow-black" : "-translate-x-full"}`}>
         <div>
           <div className="flex items-center gap-2.5 px-2 py-2">
@@ -180,7 +185,7 @@ const DashboardLayout = () => {
 
       {isSidebarOpen && (<div className="fixed inset-0 bg-black/50 z-40" onClick={() => setIsSidebarOpen(false)} />)}
 
-      <main className="flex-1 w-full flex flex-col h-screen overflow-hidden bg-[#101010]">
+      <main className="flex-1 w-full flex flex-col h-screen overflow-hidden bg-[#070709]">
         <div className="sticky top-0 z-40 flex items-center justify-between px-8 py-4 bg-zinc-950 border-b border-zinc-800 shadow-md">
           <div className="flex items-center gap-3">
             <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-900 hover:text-white">
@@ -196,7 +201,7 @@ const DashboardLayout = () => {
           <nav className="hidden md:flex items-center gap-2 text-sm">
             {topNavLinks.map((link) => {
               const isActive = isLinkActive(link.to)
-              if (link.label === 'Reservas') {
+              if (link.pill) {
                 return (
                   <Link
                     key={link.label}

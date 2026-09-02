@@ -8,7 +8,11 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Playfair Display', 'serif'],
+        display: ['Playfair Display', 'ui-serif', 'Georgia', 'serif'],
+      },
+      letterSpacing: {
+        widest: '0.35em',
+        display: '-0.02em',
       },
       colors: {
         lux: {

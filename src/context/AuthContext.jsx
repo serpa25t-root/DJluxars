@@ -63,27 +63,33 @@ export const AuthProvider = ({ children }) => {
       setUser(profile)
       localStorage.setItem('user', JSON.stringify(profile))
       return profile
-    } catch {
+    } catch (error) {
+      console.error('fetchUserProfile error:', error)
       return null
     }
   }, [])
 
   useEffect(() => {
     const init = async () => {
-      const storedToken = localStorage.getItem('access') || localStorage.getItem('token')
-      const storedUser = localStorage.getItem('user')
-      if (storedToken) setToken(storedToken)
-      if (storedUser) {
-        try {
-          setUser(JSON.parse(storedUser))
-        } catch {
-          setUser({ email: storedUser })
+      try {
+        const storedToken = localStorage.getItem('access') || localStorage.getItem('token')
+        const storedUser = localStorage.getItem('user')
+        if (storedToken) setToken(storedToken)
+        if (storedUser) {
+          try {
+            setUser(JSON.parse(storedUser))
+          } catch {
+            setUser({ email: storedUser })
+          }
         }
+        if (storedToken) {
+          await fetchUserProfile()
+        }
+      } catch (error) {
+        console.error('Auth init error:', error)
+      } finally {
+        setLoading(false)
       }
-      if (storedToken) {
-        await fetchUserProfile()
-      }
-      setLoading(false)
     }
     init()
   }, [fetchUserProfile])
@@ -108,6 +114,7 @@ export const AuthProvider = ({ children }) => {
 
     if (!password || !username) throw new Error('Por favor, completa todos los campos.')
 
+    setLoading(true)
     try {
       // SimpleJWT real: POST token/ con username/email
       let res
@@ -126,6 +133,7 @@ export const AuthProvider = ({ children }) => {
       const refresh = data.refresh
       if (!access) throw new Error('Credenciales incorrectas.')
 
+      // Persist token + user in localStorage BEFORE navigation
       persistSession(access, refresh, null)
       const profile = await fetchUserProfile()
       const finalUser = profile || data.user || { email, username }
@@ -137,6 +145,8 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       const msg = spanishErrorMap(extractErrorMsg(err, 'Credenciales incorrectas.'))
       throw new Error(msg)
+    } finally {
+      setLoading(false)
     }
   }, [persistSession, fetchUserProfile])
 

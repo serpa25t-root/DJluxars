@@ -148,7 +148,7 @@ const Portfolio = () => {
           <div>
             <p className="text-xs font-semibold tracking-widest text-red-400">DASHBOARD • CREADOR {plan === 'pro' && <span className="ml-2 inline-flex items-center rounded-full bg-amber-500 text-black px-2 py-0.5 text-[10px] font-bold tracking-widest">PRO</span>}</p>
             <h1 className="mt-1 font-display text-3xl font-bold tracking-tight text-white">
-              Mi Portafolio <span className="bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent">Creador</span>
+              Portafolio <span className="bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent">Creador</span>
             </h1>
             <p className="mt-2 text-sm text-zinc-400 max-w-xl">Gestiona tus obras con acabado cinematográfico. Cada imagen cuenta una historia.</p>
           </div>

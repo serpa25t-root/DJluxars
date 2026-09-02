@@ -10,11 +10,26 @@
 
 body {
   @apply bg-black text-zinc-100 antialiased font-sans;
-  background-color: #050505;
+  background-color: #070709;
 }
 
 html {
   scroll-behavior: smooth;
+}
+
+@layer components {
+  .card-glass {
+    @apply rounded-3xl border border-zinc-800/80 bg-zinc-900/50 backdrop-blur-2xl;
+  }
+  .btn-neon {
+    @apply font-semibold text-white transition-all duration-300 bg-red-600 shadow-[0_0_25px_rgba(239,68,68,0.4)] hover:bg-red-500;
+  }
+  .text-neon {
+    @apply font-semibold text-red-500;
+  }
+  .hover-ring-neon {
+    @apply transition-all duration-300 hover:border-red-500/50 hover:shadow-[0_0_15px_rgba(239,68,68,0.15)];
+  }
 }
 
 /* Tasteful entrance */

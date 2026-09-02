@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Plus, Pencil, Trash2, X, Upload, MapPin, Tag, DollarSign, Image as ImageIcon, CheckCircle2, PauseCircle, Award } from 'lucide-react'
+import toast from 'react-hot-toast'
 import useColombiaApi from '../../services/colombiaApi'
 import api from '../../services/api'
 import { getServicesByAuthor, addService, updateService, deleteService } from '../../services/serviceStore'
@@ -229,9 +230,11 @@ const ServiceManager = () => {
     if (isEdit) {
       const next = updateService(payload.id, payload)
       setServices(next.filter((s) => String(s.authorId) === String(user?.id) || !user?.id))
+      toast.success('Servicio actualizado correctamente')
     } else {
       const next = addService(payload)
       setServices(next.filter((s) => String(s.authorId) === String(user?.id) || !user?.id))
+      toast.success('Servicio publicado exitosamente')
     }
   }
 
@@ -242,11 +245,13 @@ const ServiceManager = () => {
   const handleDelete = (id) => {
     const next = deleteService(id)
     setServices(next.filter((s) => String(s.authorId) === String(user?.id) || !user?.id))
+    toast.success('Servicio eliminado')
   }
   const handleToggleStatus = (srv) => {
     const nextStatus = srv.status === 'Activo' ? 'Pausado' : 'Activo'
     const next = updateService(srv.id, { status: nextStatus })
     setServices(next.filter((s) => String(s.authorId) === String(user?.id) || !user?.id))
+    toast.success(`Servicio ${nextStatus.toLowerCase()}`)
   }
 
   const formatCOP = (v) => `$${Number(v).toLocaleString('es-CO')} COP`
@@ -255,7 +260,7 @@ const ServiceManager = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-white">Mis Servicios</h2>
+          <h2 className="text-lg font-bold text-white">Servicios</h2>
           <p className="text-xs text-zinc-500">Gestiona tus paquetes publicados</p>
         </div>
         <button onClick={() => { setEditService(null); setIsWizardOpen(true) }} className="inline-flex items-center gap-2 rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-600/20 hover:bg-red-700 transition-colors">

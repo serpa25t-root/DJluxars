@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import { getConversations, getMessages, sendMessage, ensureConversationForContact, markAsRead } from '../services/chat'
 import { useAuth } from '../context/AuthContext'
 
@@ -100,6 +101,7 @@ const Chat = () => {
     if (!text || !selectedId) return
     await sendMessage(selectedId, text, 'me')
     setInputText('')
+    toast.success('Mensaje enviado')
     const data = await getMessages(selectedId)
     setMessages(data)
     const convs = await getConversations(user?.id)
@@ -114,9 +116,9 @@ const Chat = () => {
   })
 
   return (
-    <div className="flex h-[calc(100vh-5rem)] bg-[#101010] text-white rounded-2xl overflow-hidden border border-red-900/30 shadow-2xl shadow-black/80">
+    <div className="flex h-[calc(100vh-10rem)] min-h-[480px] bg-[#070709] text-white rounded-3xl overflow-hidden border border-zinc-800/80 shadow-2xl shadow-black/80">
       {/* Columna Izquierda */}
-      <div className="w-80 flex-shrink-0 border-r border-red-900/30 bg-zinc-950/50 flex flex-col">
+      <div className="w-full md:w-[30%] min-w-[280px] lg:max-w-sm flex-shrink-0 border-r border-zinc-800/80 bg-zinc-950/50 flex flex-col">
         <div className="p-4 border-b border-zinc-900">
           <div className="flex items-center justify-between">
             <h2 className="font-display text-lg font-bold text-white">Mensajes</h2>
@@ -183,7 +185,7 @@ const Chat = () => {
       </div>
 
       {/* Columna Derecha */}
-      <div className="flex-1 flex flex-col bg-[#101010]">
+      <div className="flex-1 flex flex-col bg-[#070709]">
         {conversation ? (
           <>
             <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-900 bg-zinc-950/50">
@@ -217,7 +219,7 @@ const Chat = () => {
                   const isMe = m.senderId === 'me'
                   return (
                     <div key={m.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                      <div className={isMe ? 'ml-auto max-w-md bg-red-600 text-white p-4 rounded-2xl rounded-tr-none shadow-md shadow-red-900/30 text-sm' : 'mr-auto max-w-md bg-zinc-800/80 text-zinc-100 p-4 rounded-2xl rounded-tl-none border border-zinc-700/50 text-sm'}>
+                      <div className={isMe ? 'ml-auto max-w-md bg-gradient-to-br from-red-600 to-red-700 text-white p-4 rounded-2xl rounded-tr-none shadow-[0_0_15px_rgba(239,68,68,0.2)] text-sm' : 'mr-auto max-w-md bg-zinc-800/80 text-zinc-100 p-4 rounded-2xl rounded-tl-none border border-zinc-700/50 text-sm'}>
                         <p>{m.text}</p>
                         <div className="mt-2 flex items-center justify-end gap-1">
                           <span className="text-[11px] opacity-70">{new Date(m.timestamp).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}</span>
@@ -244,7 +246,7 @@ const Chat = () => {
                   placeholder="Escribe un mensaje..."
                   className="flex-1 bg-transparent text-sm focus:outline-none text-white placeholder:text-zinc-500"
                 />
-                <button type="submit" className="w-9 h-9 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white shadow-lg shadow-red-600/30 transition-colors">
+                <button type="submit" className="w-9 h-9 bg-red-600 hover:bg-red-500 rounded-full flex items-center justify-center text-white shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-colors">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                   </svg>
@@ -253,7 +255,7 @@ const Chat = () => {
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center bg-[#101010]">
+          <div className="flex-1 flex items-center justify-center bg-[#070709]">
             <p className="text-sm text-zinc-500">Selecciona un chat para comenzar.</p>
           </div>
         )}

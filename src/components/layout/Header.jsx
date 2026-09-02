@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom'
-import { ChevronDown, Bell, ArrowRight } from 'lucide-react'
+import { ChevronDown, Bell, User, LogOut } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 
 const publicLinks = [
@@ -9,45 +9,44 @@ const publicLinks = [
   { label: 'Servicios', to: '/servicios', type: 'route' },
 ]
 
-const artistLinks = [
-  { label: 'Mi Portafolio', to: '/dashboard/portfolio', type: 'route' },
-  { label: 'Mis Servicios', to: '/dashboard/services', type: 'route' },
-  { label: 'Solicitudes', to: '/dashboard/bookings', type: 'route' },
+const authLinks = (isArtist) => [
+  { label: 'Servicios', to: isArtist ? '/dashboard/services' : '/servicios', type: 'route' },
+  { label: 'Reservas', to: isArtist ? '/dashboard/bookings' : '/my-bookings', type: 'route' },
+  { label: 'Mensajes', to: '/chat', type: 'route' },
+  { label: 'Portafolio', to: '/dashboard/portfolio', type: 'route' },
 ]
 
-const clientLinks = [
-  { label: 'Explorar', to: '/explorar', type: 'route' },
-  { label: 'Mis Reservas', to: '/my-bookings', type: 'route' },
-  { label: 'Chat', to: '/chat', type: 'route' },
+const profileItems = [
+  { label: 'Ver Perfil', to: '/dashboard/perfil', icon: User },
 ]
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [isNotifOpen, setIsNotifOpen] = useState(false)
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
-  const { user, isAuthenticated, logout } = useAuth()
+const { user, isAuthenticated, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const profileRef = useRef(null)
+  const notifRef = useRef(null)
+  const isLanding = location.pathname === '/' || location.pathname === '/login'
 
-  // Demo: notificaciones — vaciar array para ocultar el badge rojo
   const [notifications] = useState([
     { id: 1, title: 'Nueva reserva recibida', body: 'Elena Mora solicitó una sesión para el 12 Jun.' },
     { id: 2, title: 'Mensaje nuevo', body: 'Tienes un mensaje de Marc Dubois en el chat.' },
   ])
 
-  const displayName = user?.username || user?.email?.split('@')[0] || user?.name || user?.first_name || user?.email || 'Usuario'
+  const email = user?.email ? user.email.split('@')[0] : ''
+  const displayName = user?.username || email || user?.name || user?.first_name || email || 'Usuario'
   const initials = displayName.slice(0, 2).toUpperCase()
   const isOnline = isAuthenticated
+  const isArtist = user?.role === 'artist'
 
-  let navLinks = publicLinks
-  // SCRUM-32: Aislamiento landing '/' — nunca mostrar elementos de dashboard en landing, incluso si hay sesión
-  const isLanding = location.pathname === '/'
-  if (isAuthenticated && !isLanding) {
-    if (user?.role === 'artist') navLinks = artistLinks
-    else if (user?.role === 'client') navLinks = clientLinks
-  }
+  const navLinks = isAuthenticated ? authLinks(isArtist) : publicLinks
 
   const handleLogout = () => {
+    setIsProfileOpen(false)
     setShowLogoutModal(true)
   }
 
@@ -57,31 +56,55 @@ const Header = () => {
     setIsOpen(false)
   }
 
-  useEffect(() => setIsOpen(false), [location.pathname])
+  useEffect(() => { setIsOpen(false); setIsProfileOpen(false); setIsNotifOpen(false) }, [location.pathname])
   useEffect(() => {
     const onResize = () => { if (window.innerWidth >= 768) setIsOpen(false) }
     window.addEventListener('resize', onResize)
     return () => window.removeEventListener('resize', onResize)
   }, [])
 
+  useEffect(() => {
+    const onOutsideClick = (e) => {
+      if (profileRef.current && !profileRef.current.contains(e.target)) setIsProfileOpen(false)
+      if (notifRef.current && !notifRef.current.contains(e.target)) setIsNotifOpen(false)
+    }
+    document.addEventListener('mousedown', onOutsideClick)
+    return () => document.removeEventListener('mousedown', onOutsideClick)
+  }, [])
+
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-zinc-950/80 border-b border-red-900/20 shadow-2xl shadow-black/50">
-      <nav className="mx-auto flex h-[64px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <nav className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-600 text-white shadow-md shadow-red-600/20 group-hover:bg-red-600 group-hover:shadow-lg group-hover:shadow-red-600/40 group-hover:scale-105 transition-all duration-300 ease-out will-change-transform">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-red-600 to-red-800 text-white shadow-md shadow-red-600/30 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-red-600/40 transition-all duration-300 ease-out will-change-transform">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </div>
-          <span className="font-display text-xl font-semibold tracking-tight text-white">
-            LuxArts
-          </span>
+          <div className="leading-none">
+            <span className="font-display text-xl font-bold tracking-tight text-white">LuxArts</span>
+            <span className="block text-[9px] font-semibold tracking-[0.35em] text-red-500/80 uppercase">Photography</span>
+          </div>
         </Link>
 
         <div className="hidden md:flex items-center gap-1">
           {isAuthenticated && !isLanding ? (
-            <Link to="/dashboard" className="flex items-center gap-2 text-white hover:text-red-500 font-medium transition-colors">Panel <ArrowRight className="w-4 h-4" /></Link>
+            navLinks.map((link) => (
+              <NavLink
+                key={link.label}
+                to={link.to}
+                className={({ isActive }) =>
+                  `text-sm font-medium border-b-2 px-4 py-3 transition-colors ${
+                    isActive
+                      ? 'border-red-600 text-white'
+                      : 'border-transparent text-zinc-400 hover:text-white'
+                  }`
+                }
+              >
+                {link.label}
+              </NavLink>
+            ))
           ) : (
             navLinks.map((link) =>
               link.type === 'route' ? (
@@ -91,7 +114,7 @@ const Header = () => {
                   className={({ isActive }) =>
                     `px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ease-out ${
                       isActive
-                        ? 'bg-zinc-900 text-white border border-red-600/20 shadow-sm shadow-red-600/10'
+                        ? 'bg-red-600/10 text-red-400 border border-red-600/20 shadow-sm shadow-red-600/10'
                         : 'text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent'
                     }`
                   }
@@ -111,10 +134,10 @@ const Header = () => {
           )}
         </div>
 
-          <div className="hidden md:flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-3">
           {isAuthenticated && !isLanding ? (
-            <div className="flex items-center gap-4">
-              <div className="relative">
+            <>
+              <div className="relative" ref={notifRef}>
                 <button onClick={() => setIsNotifOpen(!isNotifOpen)} className="relative rounded-full p-2 text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors">
                   <div className="relative">
                     <Bell className="w-5 h-5 text-zinc-300 hover:text-white transition-colors" />
@@ -146,23 +169,55 @@ const Header = () => {
                   </div>
                 )}
               </div>
-              <div className="flex items-center gap-2.5 rounded-full border border-zinc-800 bg-zinc-900/60 pl-1 pr-3 py-1 hover:border-red-600/30 transition-colors">
-                <div className="relative">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800 border-2 border-red-600/40 text-white text-xs font-bold">
-                    {initials.slice(0, 2)}
+
+              <div className="relative" ref={profileRef}>
+                <button
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className="flex items-center gap-2.5 rounded-full border border-zinc-800 bg-zinc-900/60 pl-1 pr-3 py-1 hover:border-red-600/40 hover:bg-zinc-900 transition-colors"
+                >
+                  <div className="relative">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-red-600/80 to-red-900 border-2 border-red-600/40 text-white text-xs font-bold">
+                      {initials.slice(0, 2)}
+                    </div>
+                    <span className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-zinc-950 ${isOnline ? 'bg-emerald-500' : 'bg-red-500'}`} />
                   </div>
-                  <span className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-zinc-950 ${isOnline ? 'bg-emerald-500' : 'bg-red-500'}`} />
-                </div>
-                <span className="text-sm font-medium text-zinc-200 max-w-[120px] truncate">Hola, {displayName}</span>
-                <ChevronDown className="w-4 h-4 text-zinc-400" />
+                  <span className="text-sm font-medium text-zinc-200 max-w-[110px] truncate">{displayName}</span>
+                  <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isProfileOpen && (
+                  <div className="absolute right-0 top-12 w-64 overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/95 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] z-50 animate-[fadeIn_150ms_ease-out]">
+                    <div className="px-4 py-4 border-b border-zinc-800 bg-zinc-950/40">
+                      <p className="text-sm font-display font-bold text-white">{displayName}</p>
+                      <p className="mt-0.5 text-xs text-zinc-500">{isArtist ? 'Fotógrafo' : 'Cliente'} • Sesión activa</p>
+                    </div>
+                    <div className="p-1.5">
+                      {profileItems.map((item) => {
+                        const Icon = item.icon
+                        return (
+                          <Link
+                            key={item.label}
+                            to={item.to}
+                            onClick={() => setIsProfileOpen(false)}
+                            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-300 hover:text-white hover:bg-red-600/10 transition-colors"
+                          >
+                            <Icon className="h-4 w-4 text-zinc-400" /> {item.label}
+                          </Link>
+                        )
+                      })}
+                    </div>
+                    <div className="p-1.5 border-t border-zinc-800">
+                      <button
+                        onClick={handleLogout}
+                        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-400 hover:bg-red-600/10 hover:text-red-300 transition-colors"
+                      >
+                        <LogOut className="h-4 w-4" /> Cerrar Sesión
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 rounded-full border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-900 hover:border-zinc-700 transition-all text-sm font-medium"
-              >
-                Cerrar Sesión
-              </button>
-            </div>
+            </>
           ) : (
             <div className="flex items-center gap-3">
               <Link to="/login" className="px-4 py-2 rounded-full border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-900 hover:border-zinc-700 transition-all text-sm font-medium">
@@ -200,21 +255,21 @@ const Header = () => {
             {isAuthenticated && !isLanding && (
               <div className="mb-4 flex items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5">
                 <div className="relative">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-800 border-2 border-red-600/40 text-white text-sm font-bold">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-red-600/80 to-red-900 border-2 border-red-600/40 text-white text-sm font-bold">
                     {initials.slice(0, 2)}
                   </div>
                   <span className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-zinc-900 ${isOnline ? 'bg-emerald-500' : 'bg-red-500'}`} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-white truncate">Hola, {displayName}</p>
-                  <p className="text-xs text-zinc-400">Sesión activa</p>
+                  <p className="text-sm font-medium text-white truncate">{displayName}</p>
+                  <p className="text-xs text-zinc-400">{isArtist ? 'Fotógrafo' : 'Cliente'} • Sesión activa</p>
                 </div>
               </div>
             )}
 
             <div className="flex flex-col gap-1">
-              {navLinks.map((link) =>
-                link.type === 'route' ? (
+              {isAuthenticated && !isLanding ? (
+                navLinks.map((link) => (
                   <NavLink
                     key={link.label}
                     to={link.to}
@@ -225,17 +280,48 @@ const Header = () => {
                   >
                     {link.label}
                   </NavLink>
-                ) : (
-                  <a
-                    key={link.label}
-                    href={link.href}
-                    onClick={() => setIsOpen(false)}
-                    className="px-3 py-3 text-base font-medium text-zinc-300 hover:text-white hover:bg-zinc-900 rounded-lg transition-colors"
-                  >
-                    {link.label}
-                  </a>
+                ))
+              ) : (
+                navLinks.map((link) =>
+                  link.type === 'route' ? (
+                    <NavLink
+                      key={link.label}
+                      to={link.to}
+                      onClick={() => setIsOpen(false)}
+                      className={({ isActive }) =>
+                        `px-3 py-3 text-base font-medium rounded-lg transition-colors ${isActive ? 'bg-zinc-900 text-white border border-red-600/20' : 'text-zinc-300 hover:text-white hover:bg-zinc-900 border border-transparent'}`
+                      }
+                    >
+                      {link.label}
+                    </NavLink>
+                  ) : (
+                    <a
+                      key={link.label}
+                      href={link.href}
+                      onClick={() => setIsOpen(false)}
+                      className="px-3 py-3 text-base font-medium text-zinc-300 hover:text-white hover:bg-zinc-900 rounded-lg transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  )
                 )
               )}
+            </div>
+
+            <div className="mt-3 flex flex-col gap-1">
+              {isAuthenticated && !isLanding && profileItems.map((item) => {
+                const Icon = item.icon
+                return (
+                  <Link
+                    key={item.label}
+                    to={item.to}
+                    onClick={() => setIsOpen(false)}
+                    className="px-3 py-2.5 text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-900 rounded-lg transition-colors"
+                  >
+                    <Icon className="h-4 w-4 inline mr-2 -mt-0.5" /> {item.label}
+                  </Link>
+                )
+              })}
             </div>
 
             <div className="mt-4 flex flex-col gap-3 pt-4 border-t border-zinc-900">
