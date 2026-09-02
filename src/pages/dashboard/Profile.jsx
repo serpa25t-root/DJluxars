@@ -221,19 +221,18 @@ const Profile = () => {
         ) : (
           <div className="h-full w-full bg-gradient-to-r from-zinc-900 via-zinc-950 to-black" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#101010] via-[#101010]/20 to-transparent" />
-        <div className="absolute top-0 left-0 h-[2px] w-full bg-red-600/60" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0b0b0d] via-black/10 to-transparent" />
       </div>
 
       {/* Cabecera de perfil estilo Instagram */}
       <section className="-mt-12 px-4 sm:px-8">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end">
-          <div className="relative h-28 w-28 shrink-0 rounded-full bg-gradient-to-tr from-red-600 via-red-500 to-zinc-800 p-[3px] shadow-xl shadow-black/40">
-            <div className="h-full w-full rounded-full border-2 border-[#101010] bg-zinc-900 overflow-hidden">
+          <div className="relative h-28 w-28 shrink-0 rounded-full shadow-2xl shadow-black/60 ring-1 ring-white/15 ring-offset-4 ring-offset-[#070709]">
+            <div className="h-full w-full overflow-hidden rounded-full bg-zinc-800">
               {data.avatar_url ? (
                 <img src={data.avatar_url} alt={displayName} className="h-full w-full object-cover" />
               ) : (
-                <span className="flex h-full w-full items-center justify-center text-3xl font-bold text-white">{initials}</span>
+                <span className="flex h-full w-full items-center justify-center text-3xl font-semibold text-white/90">{initials}</span>
               )}
             </div>
           </div>
@@ -322,7 +321,7 @@ const Profile = () => {
             key={t.id}
             type="button"
             onClick={() => setTab(t.id)}
-            className={`-mt-px border-t-2 px-2 py-4 text-xs font-bold tracking-widest uppercase transition-colors ${activeTab === t.id ? 'border-white text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}
+            className={`-mt-px border-t-2 px-2 py-4 text-xs font-bold tracking-widest uppercase transition-colors ${activeTab === t.id ? 'border-zinc-600 text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}
           >
             {t.label}
           </button>
@@ -365,10 +364,10 @@ const Profile = () => {
             <button
               type="button"
               onClick={() => setUploadOpen(true)}
-              className="group flex aspect-square flex-col items-center justify-center gap-2 rounded-sm border border-dashed border-zinc-800 bg-zinc-950 text-zinc-500 hover:border-red-600/40 hover:text-white transition-colors"
+              className="group flex aspect-square flex-col items-center justify-center gap-2 rounded-sm border border-dashed border-zinc-800 bg-zinc-950 text-zinc-500 hover:border-zinc-600 hover:text-white transition-colors"
               aria-label="Subir nueva obra"
             >
-              <span className="flex h-12 w-12 items-center justify-center rounded-full border border-zinc-800 group-hover:border-red-600/50 group-hover:bg-red-600/10 transition-colors">
+              <span className="flex h-12 w-12 items-center justify-center rounded-full border border-zinc-800 group-hover:border-zinc-600 group-hover:bg-zinc-800 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
@@ -419,7 +418,7 @@ const Profile = () => {
       )}
 
       {toast && (
-        <div className="fixed bottom-6 left-1/2 z-[110] -translate-x-1/2 rounded-full border border-red-600/30 bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white shadow-xl animate-[fadeIn_200ms_ease-out]">
+        <div className="fixed bottom-6 left-1/2 z-[110] -translate-x-1/2 rounded-full border border-white/15 bg-zinc-800 px-5 py-2.5 text-sm font-medium text-white shadow-xl animate-[fadeIn_200ms_ease-out]">
           {toast}
         </div>
       )}

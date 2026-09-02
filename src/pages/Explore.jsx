@@ -200,23 +200,23 @@ const Explore = () => {
 
         {/* ÚNICA barra flotante superior con Glassmorphism — SCRUM-34/35: p-4 + selectores anidados Colombia + precio */}
         <section className="relative z-20 mt-6">
-          <div className="bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-3xl p-4 shadow-2xl">
-            <form onSubmit={handleSearchBarSubmit} className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr_1fr_auto] gap-3 items-end">
-              <div>
-                <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><Search className="h-3.5 w-3.5" /> Search query</label>
+          <div className="bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-3xl p-6 shadow-2xl">
+            <form onSubmit={handleSearchBarSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
+              <div className="lg:col-span-2">
+                <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><Search className="h-3.5 w-3.5" /> Búsqueda</label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                   <input
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="¿Qué tipo de fotografía estás buscando?"
+                    placeholder="¿Qué tipo de fotografía buscas?"
                     className="w-full rounded-xl border border-zinc-800 bg-zinc-950/60 pl-10 pr-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-red-600/40 focus:outline-none focus:ring-2 focus:ring-red-600/15 transition-all"
                   />
                 </div>
               </div>
               <div>
-                <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5" /> Session type</label>
+                <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5" /> Tipo de sesión</label>
                 <div className="relative">
                   <select
                     value={category}
@@ -285,7 +285,7 @@ const Explore = () => {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> Date</label>
+                <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> Fecha</label>
                 <input
                   type="date"
                   value={dateFilter}
@@ -294,27 +294,26 @@ const Explore = () => {
                   className="w-full rounded-xl border border-zinc-800 bg-zinc-950/60 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-red-600/40 focus:outline-none focus:ring-2 focus:ring-red-600/15 transition-all [&::-webkit-calendar-picker-indicator]:opacity-40 [&::-webkit-calendar-picker-indicator]:invert"
                 />
               </div>
-              <div>
+              <div className="lg:col-span-3">
                 <label className="text-xs font-medium text-zinc-400 mb-1.5 flex items-center gap-1.5"><SlidersHorizontal className="h-3.5 w-3.5" /> Filtros</label>
-                <button
-                  type="button"
-                  onClick={() => setShowFilters((v) => !v)}
-                  className={`w-full rounded-xl border px-4 py-3 text-sm font-medium transition-all flex items-center justify-between ${showFilters ? 'border-red-600/40 bg-red-600/10 text-red-400' : 'border-zinc-800 bg-zinc-950/60 text-zinc-300 hover:text-white'}`}
-                >
-                  <span>Precio y Calificación</span>
-                  <span className={`text-xs ${showFilters ? 'text-red-400' : 'text-zinc-500'}`}>{showFilters ? 'Ocultar' : 'Mostrar'}</span>
-                </button>
-              </div>
-              <div className="flex">
-                <button type="submit" className="w-full lg:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-red-600/25 hover:bg-red-700 hover:shadow-xl active:scale-[0.98] transition-all whitespace-nowrap">
-                  <Search className="h-4 w-4" />
-                  Buscar fotógrafos
-                </button>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowFilters((v) => !v)}
+                    className={`flex-1 rounded-xl border px-4 py-3 text-sm font-medium transition-all flex items-center justify-between ${showFilters ? 'border-red-600/40 bg-red-600/10 text-red-400' : 'border-zinc-800 bg-zinc-950/60 text-zinc-300 hover:text-white'}`}
+                  >
+                    <span>Precio y Calificación</span>
+                    <span className={`text-xs ${showFilters ? 'text-red-400' : 'text-zinc-500'}`}>{showFilters ? 'Ocultar' : 'Mostrar'}</span>
+                  </button>
+                  <button type="submit" className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-red-600/25 hover:bg-red-700 active:scale-[0.98] transition-all whitespace-nowrap">
+                    <Search className="h-4 w-4" />
+                    Buscar fotógrafos
+                  </button>
+                </div>
               </div>
             </form>
             {showFilters && (
-              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-5 rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-4">
-                {/* Slider de Precio */}
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5">
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <label className="text-xs font-medium text-zinc-400 flex items-center gap-1.5"><DollarSign className="h-3.5 w-3.5" /> Rango de Precio</label>
@@ -335,7 +334,6 @@ const Explore = () => {
                     <span>$3.000.000</span>
                   </div>
                 </div>
-                {/* Filtro de Estrellas */}
                 <div>
                   <label className="text-xs font-medium text-zinc-400 mb-2 flex items-center gap-1.5"><Star className="h-3.5 w-3.5" /> Calificación mínima</label>
                   <div className="flex flex-wrap gap-2">
@@ -354,7 +352,7 @@ const Explore = () => {
               </div>
             )}
 
-            <div className="mt-4 flex flex-wrap items-center gap-2">
+            <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-zinc-800/60 pt-4">
               <span className="text-xs text-zinc-500 mr-1">Búsquedas populares:</span>
               {popularSearches.map((pill) => (
                 <button

@@ -6,9 +6,9 @@ import useColombiaApi from '../../services/colombiaApi'
 
 const AvatarFrame = ({ src, alt, size = 'h-24 w-24', icon = 'h-6 w-6' }) =>
   src ? (
-    <img src={src} alt={alt} className={`${size} rounded-full object-cover ring-2 ring-red-600/40`} />
+    <img src={src} alt={alt} className={`${size} rounded-full object-cover shadow-lg shadow-black/40 ring-1 ring-white/10`} />
   ) : (
-    <span className={`${size} rounded-full bg-zinc-800 border-2 border-red-600/30 flex items-center justify-center text-xl font-bold text-white`}>
+    <span className={`${size} rounded-full bg-zinc-800 flex items-center justify-center text-xl font-bold text-white/90`}>
       <svg xmlns="http://www.w3.org/2000/svg" className={`${icon} text-zinc-500`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
       </svg>
@@ -158,7 +158,7 @@ const EditProfileModal = ({ isOpen, onClose, profile, onSaved }) => {
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => !loading && onClose()} aria-hidden="true" />
       <div className="relative w-full max-w-xl max-h-[90vh] overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/60 flex flex-col animate-[scaleIn_250ms_var(--ease-out-expo)_both]">
-        <div className="h-[2px] w-full bg-gradient-to-r from-red-600 via-red-500 to-transparent" />
+        <div className="h-[2px] w-full bg-gradient-to-r from-zinc-600 via-zinc-500 to-transparent" />
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-900">
           <h2 className="font-display text-lg font-bold text-white">Editar perfil</h2>
           <button onClick={onClose} disabled={loading} className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors disabled:opacity-50" aria-label="Cerrar">
@@ -183,12 +183,12 @@ const EditProfileModal = ({ isOpen, onClose, profile, onSaved }) => {
                   <button
                     type="button"
                     onClick={() => { setCoverFile(null); setCoverPreview(''); setRemoveCoverFlag(true) }}
-                    className="rounded-full bg-black/70 backdrop-blur-md border border-white/10 px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
+                    className="rounded-full bg-black/70 backdrop-blur-md border border-white/10 px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:bg-zinc-100 hover:text-zinc-900 hover:border-zinc-100 transition-colors"
                   >
                     Quitar
                   </button>
                 )}
-                <label className="cursor-pointer rounded-full bg-black/70 backdrop-blur-md border border-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-600 hover:border-red-600 transition-colors">
+                <label className="cursor-pointer rounded-full bg-black/70 backdrop-blur-md border border-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-zinc-100 hover:text-zinc-900 hover:border-zinc-100 transition-colors">
                   Cambiar
                   <input type="file" accept="image/*" className="hidden" onChange={(e) => { setCoverFile(e.target.files?.[0] || null); setRemoveCoverFlag(false) }} />
                 </label>
@@ -231,7 +231,7 @@ const EditProfileModal = ({ isOpen, onClose, profile, onSaved }) => {
                 value={deptId}
                 onChange={handleDepartmentChange}
                 disabled={loadingDepartments}
-                className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-white focus:border-red-600/50 focus:outline-none focus:ring-2 focus:ring-red-600/20 transition-colors disabled:opacity-60"
+                className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-white focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/10 transition-colors disabled:opacity-60"
               >
                 <option value="" className="bg-zinc-900">{loadingDepartments ? 'Cargando...' : 'Selecciona'}</option>
                 {departments.map((d) => (
@@ -246,7 +246,7 @@ const EditProfileModal = ({ isOpen, onClose, profile, onSaved }) => {
                 value={form.ciudad}
                 onChange={(e) => setForm((p) => ({ ...p, ciudad: e.target.value }))}
                 disabled={!deptId || loadingCities}
-                className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-white focus:border-red-600/50 focus:outline-none focus:ring-2 focus:ring-red-600/20 transition-colors disabled:opacity-60"
+                className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-white focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/10 transition-colors disabled:opacity-60"
               >
                 <option value="" className="bg-zinc-900">{loadingCities ? 'Cargando...' : 'Selecciona'}</option>
                 {cities.map((c) => (
@@ -265,7 +265,7 @@ const EditProfileModal = ({ isOpen, onClose, profile, onSaved }) => {
               rows={4}
               maxLength={220}
               placeholder="Cuéntales quién eres y qué historias capturas..."
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-red-600/50 focus:outline-none focus:ring-2 focus:ring-red-600/20 resize-none"
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/10 resize-none"
             />
             <p className="text-right text-[11px] text-zinc-600">{form.bio.length}/220</p>
           </div>
@@ -276,7 +276,7 @@ const EditProfileModal = ({ isOpen, onClose, profile, onSaved }) => {
         </form>
 
         {toast && (
-          <div className={`absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full border px-4 py-2 text-sm font-medium shadow-xl ${toast.type === 'success' ? 'border-red-600/30 bg-zinc-900 text-white' : 'border-amber-500/30 bg-zinc-900 text-amber-200'}`} role="alert">
+          <div className={`absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full border px-4 py-2 text-sm font-medium shadow-xl ${toast.type === 'success' ? 'border-white/15 bg-zinc-800 text-white' : 'border-white/15 bg-zinc-800 text-zinc-200'}`} role="alert">
             {toast.msg}
           </div>
         )}
