@@ -1,36 +1,24 @@
-import { useState } from 'react'
-import Settings from './Settings'
+import { Link } from 'react-router-dom'
 import AppSettings from './AppSettings'
 
-const sections = [
-  { id: 'perfil', label: 'Perfil' },
-  { id: 'app', label: 'Aplicación' },
-]
-
 const Configuracion = () => {
-  const [section, setSection] = useState('perfil')
-
   return (
     <div className="mx-auto max-w-3xl animate-[fadeIn_300ms_ease-out]">
       <div className="mb-6">
+        <Link
+          to="/dashboard/perfil"
+          className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-zinc-400 hover:text-white transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Volver a mi perfil
+        </Link>
         <h1 className="font-display text-2xl font-bold tracking-tight text-white">Configuración</h1>
-        <p className="mt-1 text-sm text-zinc-400">Administra tu perfil y personaliza tu experiencia en LuxArts.</p>
+        <p className="mt-1 text-sm text-zinc-400">Personaliza tu experiencia en LuxArts.</p>
       </div>
 
-      <div className="flex items-center gap-1 overflow-x-auto pb-1 mb-6 border-b border-zinc-900">
-        {sections.map((s) => (
-          <button
-            key={s.id}
-            type="button"
-            onClick={() => setSection(s.id)}
-            className={`whitespace-nowrap border-b-2 px-4 py-3 text-sm font-semibold transition-colors ${section === s.id ? 'border-red-600 text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}
-          >
-            {s.label}
-          </button>
-        ))}
-      </div>
-
-      {section === 'perfil' ? <Settings /> : <AppSettings />}
+      <AppSettings />
     </div>
   )
 }

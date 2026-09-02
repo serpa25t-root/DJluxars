@@ -14,12 +14,11 @@ import ArtistBookings from './pages/dashboard/ArtistBookings'
 import ClientBookings from './pages/ClientBookings'
 import Chat from './pages/Chat'
 import DashboardLayout from './components/layout/DashboardLayout'
-import ArtistDashboard from './pages/dashboard/ArtistDashboard'
-import ClientDashboard from './pages/dashboard/ClientDashboard'
 import Profile from './pages/dashboard/Profile'
 import Configuracion from './pages/dashboard/Configuracion'
 import ProSubscription from './pages/dashboard/ProSubscription'
 import History from './pages/dashboard/History'
+import HomeFeed from './pages/dashboard/HomeFeed'
 
 const Placeholder = ({ title }) => (
   <div className="min-h-[100dvh] flex flex-col bg-black">
@@ -48,9 +47,7 @@ const ProtectedRoute = ({ children, roles }) => {
 }
 
 const DashboardIndex = () => {
-  const { user } = useAuth()
-  if (user?.role === 'client') return <ClientDashboard />
-  return <ArtistDashboard />
+  return <HomeFeed />
 }
 
 /**
@@ -119,10 +116,12 @@ function AppRoutes() {
         path="/my-bookings"
         element={
           <ProtectedRoute roles={['client']}>
-            <ClientBookings />
+            <DashboardLayout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route index element={<ClientBookings />} />
+      </Route>
       <Route
         path="/chat"
         element={

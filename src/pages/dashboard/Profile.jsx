@@ -222,13 +222,12 @@ const Profile = () => {
           <div className="h-full w-full bg-gradient-to-r from-zinc-900 via-zinc-950 to-black" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-[#101010] via-[#101010]/20 to-transparent" />
-        <div className="absolute top-0 left-0 h-[2px] w-full bg-red-600/60" />
       </div>
 
       {/* Cabecera de perfil estilo Instagram */}
       <section className="-mt-12 px-4 sm:px-8">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end">
-          <div className="relative h-28 w-28 shrink-0 rounded-full bg-gradient-to-tr from-red-600 via-red-500 to-zinc-800 p-[3px] shadow-xl shadow-black/40">
+          <div className="relative h-28 w-28 shrink-0 rounded-full bg-zinc-800 p-[3px] shadow-xl shadow-black/40 ring-1 ring-white/10">
             <div className="h-full w-full rounded-full border-2 border-[#101010] bg-zinc-900 overflow-hidden">
               {data.avatar_url ? (
                 <img src={data.avatar_url} alt={displayName} className="h-full w-full object-cover" />
@@ -316,7 +315,7 @@ const Profile = () => {
       </section>
 
       {/* Tabs */}
-      <div className="mt-8 flex items-center justify-center gap-10 border-t border-zinc-900">
+      <div className="mt-8 flex items-center justify-center gap-10">
         {tabs.map((t) => (
           <button
             key={t.id}
