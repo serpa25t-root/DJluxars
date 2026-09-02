@@ -2,15 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { User, LogOut, Settings } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import { usePreferences } from '../../context/AppPreferencesContext'
+import NotificationBell from './NotificationBell'
 import { getBookings } from '../../services/bookings'
-
-const useNotifications = () => {
-  const [notifications] = useState([
-    { id: 1, title: 'Nueva reserva recibida', body: 'Elena Mora solicitó una sesión para el 12 Jun.' },
-    { id: 2, title: 'Mensaje nuevo', body: 'Tienes un mensaje de Marc Dubois en el chat.' },
-  ])
-  return notifications
-}
 
 const userIcon = 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'
 
@@ -33,6 +27,7 @@ const clientSidebarLinks = [
 
 const DashboardLayout = () => {
   const { user, logout } = useAuth()
+  const { t } = usePreferences()
   const location = useLocation()
   const navigate = useNavigate()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -40,7 +35,6 @@ const DashboardLayout = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [pendingBookings, setPendingBookings] = useState(0)
   const userMenuRef = useRef(null)
-  const notifications = useNotifications()
 
   useEffect(() => {
     if (!isUserMenuOpen) return
@@ -91,12 +85,12 @@ const DashboardLayout = () => {
 
   const profileItems = isClient
     ? [
-        { label: 'Mi Cuenta', to: '/dashboard/perfil', icon: User },
-        { label: 'Configuración', to: '/dashboard/settings', icon: Settings },
+        { label: t('sidebar_profile'), to: '/dashboard/perfil', icon: User },
+        { label: t('sidebar_settings'), to: '/dashboard/settings', icon: Settings },
       ]
     : [
         { label: 'Ver Perfil Público', to: `/fotografos/${user?.id}`, icon: User },
-        { label: 'Configuración', to: '/dashboard/settings', icon: Settings },
+        { label: t('sidebar_settings'), to: '/dashboard/settings', icon: Settings },
       ]
 
   // Role-specific top navigation links for desktop
@@ -142,19 +136,24 @@ const DashboardLayout = () => {
               )}
               <span className="min-w-0 truncate text-sm font-bold text-white">{displayName}</span>
             </Link>
-            <button className="relative rounded-full p-2 text-zinc-300 hover:text-white transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-              </svg>
-              {notifications.length > 0 && (
-                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-600" />
-              )}
-            </button>
+            <NotificationBell />
           </div>
 
           <nav className="mt-6 space-y-1">
             {sidebarLinks.map((link) => {
               const isActive = link.exact ? location.pathname === link.to : location.pathname === link.to || location.pathname.startsWith(link.to + '/')
+              const labelKey = {
+                'Inicio': 'sidebar_home',
+                'Perfil': 'sidebar_profile',
+                'Explorar': 'sidebar_explore',
+                'Historial': 'sidebar_history',
+                'Estadísticas': 'sidebar_stats',
+                'Configuración': 'sidebar_settings',
+                'Portafolio': 'sidebar_portfolio',
+                'Servicios': 'sidebar_services',
+                'Favoritos': 'sidebar_favorites',
+              }[link.label]
+              const label = labelKey ? t(labelKey) : link.label
               return (
                 <Link
                   key={link.label}
@@ -165,7 +164,7 @@ const DashboardLayout = () => {
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.7}>
                     <path strokeLinecap="round" strokeLinejoin="round" d={link.icon} />
                   </svg>
-                  <span className="flex-1">{link.label}</span>
+                  <span className="flex-1">{label}</span>
                   {link.badge && <span className="rounded-full bg-red-600 text-white text-xs font-bold px-2 py-0.5">{link.badge}</span>}
                 </Link>
               )
@@ -174,20 +173,20 @@ const DashboardLayout = () => {
         </div>
 
         <div className="space-y-4">
-          {isClient ? (
+              {isClient ? (
             <div className="rounded-xl border border-red-900/30 bg-gradient-to-t from-red-900/20 to-transparent p-4">
-              <h3 className="text-sm font-bold text-white">¿Eres fotógrafo?</h3>
-              <p className="mt-1 text-xs leading-relaxed text-zinc-400">Únete a LuxArts y muestra tu talento al mundo.</p>
+              <h3 className="text-sm font-bold text-white">{t('sidebar_client_cta')}</h3>
+              <p className="mt-1 text-xs leading-relaxed text-zinc-400">{t('sidebar_client_desc')}</p>
               <Link to="/register" onClick={() => setIsSidebarOpen(false)} className="mt-4 block w-full rounded-full border border-red-900/30 bg-transparent py-2.5 text-center text-sm font-semibold text-white hover:bg-red-600 hover:border-red-600 hover:text-white transition-colors">
-                Registrarme como fotógrafo
+                {t('sidebar_client_btn')}
               </Link>
             </div>
           ) : (
             <div className="rounded-xl border border-red-900/30 bg-gradient-to-t from-red-900/20 to-transparent p-4">
-              <h3 className="text-sm font-bold text-white">Únete a LuxArts PRO</h3>
-              <p className="mt-1 text-xs leading-relaxed text-zinc-400">Desbloquea 6 servicios, 30 fotos y prioridad #1 en el catálogo.</p>
+              <h3 className="text-sm font-bold text-white">{t('sidebar_pro')}</h3>
+              <p className="mt-1 text-xs leading-relaxed text-zinc-400">{t('sidebar_pro_desc')}</p>
               <Link to="/dashboard/pro" onClick={() => setIsSidebarOpen(false)} className="mt-4 block w-full rounded-full bg-red-600 py-2.5 text-center text-sm font-semibold text-white hover:bg-red-700 transition-colors">
-                Ver Planes PRO
+                {t('sidebar_pro_btn')}
               </Link>
             </div>
           )}
@@ -198,7 +197,7 @@ const DashboardLayout = () => {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-            Cerrar Sesión
+            {t('sidebar_logout')}
           </button>
         </div>
       </aside>
@@ -221,6 +220,16 @@ const DashboardLayout = () => {
 <nav className="hidden md:flex items-center gap-2 text-sm">
             {topNavLinks.map((link) => {
               const isActive = link.noActive ? false : isLinkActive(link.to)
+              const lblKey = {
+                'Inicio': 'sidebar_home',
+                'Explorar': 'sidebar_explore',
+                'Reservaciones': 'sidebar_bookings',
+                'Reservas': 'sidebar_bookings_artist',
+                'Mensajes': 'sidebar_messages',
+                'Portafolio': 'sidebar_portfolio',
+                'Servicios': 'sidebar_services',
+              }[link.label]
+              const label = lblKey ? t(lblKey) : link.label
               if (link.pill) {
                 return (
                   <Link
@@ -235,7 +244,7 @@ const DashboardLayout = () => {
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    {link.label}
+                    {label}
                     {pendingBookings > 0 && (
                       <span className="inline-flex items-center justify-center rounded-full bg-white px-1.5 py-0.5 text-[11px] font-bold text-red-600 leading-none">
                         {pendingBookings}
@@ -250,21 +259,14 @@ const DashboardLayout = () => {
                   to={link.to}
                   className={`px-3 py-2 rounded-full transition-colors ${isActive ? 'text-white font-semibold' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}
                 >
-                  {link.label}
+                  {label}
                 </Link>
               )
             })}
           </nav>
 
           <div className="hidden md:flex gap-4 items-center">
-            <button className="relative rounded-full p-2 text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-              </svg>
-              {notifications.length > 0 && (
-                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-600" />
-              )}
-            </button>
+            <NotificationBell />
             <div className="relative" ref={userMenuRef}>
               <button
                 type="button"
