@@ -5,7 +5,7 @@ import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
 import BookingModal from '../components/booking/BookingModal'
 import { useAuth } from '../context/AuthContext'
-import api from '../services/api'
+import apiClient from '../services/apiClient'
 
 const categories = ['Todas', 'Boda', 'Bodas', 'Retrato', 'Moda', 'Eventos', 'Editorial', 'Producto', 'Paisajes', 'Familia']
 const popularSearches = ['Boda', 'Retrato', 'Eventos', 'Producto', 'Moda', 'Paisajes']
@@ -59,7 +59,7 @@ const Photographers = () => {
   useEffect(() => {
     const fetchPhotographers = async () => {
       try {
-        const res = await api.get('users/?role=artist')
+        const res = await apiClient.get('users/?role=artist')
         const data = res.data.results || res.data
         if (Array.isArray(data) && data.length > 0) {
           setPhotographers(data)

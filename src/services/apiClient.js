@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const api = axios.create({
+const apiClient = axios.create({
   baseURL: 'http://127.0.0.1:8000/api/',
   headers: {
     'Content-Type': 'application/json',
@@ -9,7 +9,7 @@ const api = axios.create({
 })
 
 // Inyecta Authorization: Bearer <access_token>
-api.interceptors.request.use(
+apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('access') || localStorage.getItem('token')
     if (token) {
@@ -35,7 +35,7 @@ const processQueue = (error, token = null) => {
   failedQueue = []
 }
 
-api.interceptors.response.use(
+apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config
@@ -47,7 +47,7 @@ api.interceptors.response.use(
         })
           .then((token) => {
             originalRequest.headers.Authorization = `Bearer ${token}`
-            return api(originalRequest)
+            return apiClient(originalRequest)
           })
           .catch((err) => Promise.reject(err))
       }
@@ -68,10 +68,10 @@ api.interceptors.response.use(
         localStorage.setItem('access', newAccess)
         localStorage.setItem('token', newAccess)
         if (newRefresh) localStorage.setItem('refresh', newRefresh)
-        api.defaults.headers.common.Authorization = `Bearer ${newAccess}`
+        apiClient.defaults.headers.common.Authorization = `Bearer ${newAccess}`
         processQueue(null, newAccess)
         originalRequest.headers.Authorization = `Bearer ${newAccess}`
-        return api(originalRequest)
+        return apiClient(originalRequest)
       } catch (refreshError) {
         processQueue(refreshError, null)
         localStorage.removeItem('access')
@@ -88,4 +88,4 @@ api.interceptors.response.use(
   }
 )
 
-export default api
+export default apiClient

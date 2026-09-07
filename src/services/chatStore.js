@@ -1,7 +1,7 @@
-import api from './api'
+import apiClient from './apiClient'
 
-const CONV_KEY = 'luxarts_conversations'
-const MSG_PREFIX = 'luxarts_messages_'
+const CONVERSATIONS_STORAGE_KEY = 'luxarts_conversations'
+const MESSAGES_STORAGE_PREFIX = 'luxarts_messages_'
 
 const seedConversations = [
   {
@@ -33,10 +33,10 @@ const seedMessages = {
 }
 
 const ensureSeed = () => {
-  if (!localStorage.getItem(CONV_KEY)) {
-    localStorage.setItem(CONV_KEY, JSON.stringify(seedConversations))
+  if (!localStorage.getItem(CONVERSATIONS_STORAGE_KEY)) {
+    localStorage.setItem(CONVERSATIONS_STORAGE_KEY, JSON.stringify(seedConversations))
     Object.entries(seedMessages).forEach(([cid, msgs]) => {
-      localStorage.setItem(MSG_PREFIX + cid, JSON.stringify(msgs))
+      localStorage.setItem(MESSAGES_STORAGE_PREFIX + cid, JSON.stringify(msgs))
     })
   }
 }
@@ -45,7 +45,7 @@ const ensureSeed = () => {
 const getLocalConversations = () => {
   ensureSeed()
   try {
-    const raw = localStorage.getItem(CONV_KEY)
+    const raw = localStorage.getItem(CONVERSATIONS_STORAGE_KEY)
     return raw ? JSON.parse(raw) : []
   } catch {
     return []
@@ -55,7 +55,7 @@ const getLocalConversations = () => {
 const getLocalMessages = (cid) => {
   ensureSeed()
   try {
-    const raw = localStorage.getItem(MSG_PREFIX + cid)
+    const raw = localStorage.getItem(MESSAGES_STORAGE_PREFIX + cid)
     return raw ? JSON.parse(raw) : []
   } catch {
     return []
@@ -65,7 +65,7 @@ const getLocalMessages = (cid) => {
 // Real API con fallback
 export const getConversations = async (userId) => {
   try {
-    const res = await api.get('chat/conversations/')
+    const res = await apiClient.get('chat/conversations/')
     // Backend ya retorna formato compatible
     if (Array.isArray(res.data) && res.data.length > 0) return res.data
     // Si backend retorna vacío pero tenemos seed local, úsalo
@@ -79,7 +79,7 @@ export const getConversations = async (userId) => {
 export const getMessages = async (conversationId) => {
   try {
     // conversationId es userId del contacto en modo real
-    const res = await api.get(`chat/messages/${conversationId}/`)
+    const res = await apiClient.get(`chat/messages/${conversationId}/`)
     if (Array.isArray(res.data)) return res.data
     return res.data
   } catch {
@@ -89,17 +89,17 @@ export const getMessages = async (conversationId) => {
 
 export const sendMessage = async (conversationId, text, senderId = 'me') => {
   try {
-    const res = await api.post('chat/messages/', { receiver_id: conversationId, content: text })
+    const res = await apiClient.post('chat/messages/', { receiver_id: conversationId, content: text })
     return res.data
   } catch {
     // Fallback local
-    const msg = { id: `m${Date.now()}`, senderId, text, timestamp: new Date().toISOString() }
-    const key = MSG_PREFIX + conversationId
+    const message = { id: `m${Date.now()}`, senderId, text, timestamp: new Date().toISOString() }
+    const key = MESSAGES_STORAGE_PREFIX + conversationId
     const raw = localStorage.getItem(key)
     const list = raw ? JSON.parse(raw) : []
     const next = [...list, msg]
     localStorage.setItem(key, JSON.stringify(next))
-    const convsRaw = localStorage.getItem(CONV_KEY)
+    const convsRaw = localStorage.getItem(CONVERSATIONS_STORAGE_KEY)
     const convs = convsRaw ? JSON.parse(convsRaw) : []
     const updated = convs.map((c) => {
       if (c.id === String(conversationId) || c.contact.id === String(conversationId)) {
@@ -107,7 +107,7 @@ export const sendMessage = async (conversationId, text, senderId = 'me') => {
       }
       return c
     })
-    localStorage.setItem(CONV_KEY, JSON.stringify(updated))
+    localStorage.setItem(CONVERSATIONS_STORAGE_KEY, JSON.stringify(updated))
     return msg
   }
 }
@@ -121,7 +121,7 @@ export const ensureConversationForContact = async (contactId, contactName, avata
   } catch {}
   // Fallback local
   ensureSeed()
-  const raw = localStorage.getItem(CONV_KEY)
+  const raw = localStorage.getItem(CONVERSATIONS_STORAGE_KEY)
   let list = raw ? JSON.parse(raw) : []
   let conv = list.find((c) => c.contact.id === String(contactId))
   if (conv) return conv.id
@@ -140,21 +140,21 @@ export const ensureConversationForContact = async (contactId, contactName, avata
     updatedAt: new Date().toISOString(),
   }
   list = [newConv, ...list]
-  localStorage.setItem(CONV_KEY, JSON.stringify(list))
-  localStorage.setItem(MSG_PREFIX + newId, JSON.stringify([]))
+  localStorage.setItem(CONVERSATIONS_STORAGE_KEY, JSON.stringify(list))
+  localStorage.setItem(MESSAGES_STORAGE_PREFIX + newId, JSON.stringify([]))
   return newId
 }
 
 export const markAsRead = async (conversationId) => {
   try {
     // Backend marca al hacer GET, no necesita POST
-    await api.get(`chat/messages/${conversationId}/`)
+    await apiClient.get(`chat/messages/${conversationId}/`)
   } catch {}
-  const raw = localStorage.getItem(CONV_KEY)
+  const raw = localStorage.getItem(CONVERSATIONS_STORAGE_KEY)
   if (!raw) return
   try {
     const list = JSON.parse(raw)
     const next = list.map((c) => (c.id === String(conversationId) || c.contact.id === String(conversationId) ? { ...c, unread: 0 } : c))
-    localStorage.setItem(CONV_KEY, JSON.stringify(next))
+    localStorage.setItem(CONVERSATIONS_STORAGE_KEY, JSON.stringify(next))
   } catch {}
 }

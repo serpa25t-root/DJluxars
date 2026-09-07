@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { fetchArtistBookings, fetchClientBookings, seedIfEmpty } from '../../services/bookings'
+import { fetchArtistBookings, fetchClientBookings, seedIfEmpty } from '../../services/bookingsStore'
 
 const statusBadge = {
   Pendiente: 'border-amber-500/30 bg-amber-500/10 text-amber-300',

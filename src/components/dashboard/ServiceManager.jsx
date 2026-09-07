@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Plus, Pencil, Trash2, X, Upload, MapPin, Tag, DollarSign, Image as ImageIcon, CheckCircle2, PauseCircle, Award } from 'lucide-react'
 import toast from 'react-hot-toast'
-import useColombiaApi from '../../services/colombiaApi'
-import api from '../../services/api'
-import { getServicesByAuthor, addService, updateService, deleteService } from '../../services/serviceStore'
+import useColombiaApi from '../../services/colombiaData'
+import apiClient from '../../services/apiClient'
+import { getServicesByAuthor, addService, updateService, deleteService } from '../../services/servicesStore'
 import { useAuth } from '../../context/AuthContext'
 
 const categories = ['Retrato', 'Bodas', 'Moda', 'Producto', 'Eventos', 'Editorial', 'Familia', 'Paisajes']
@@ -103,7 +103,7 @@ const ServiceWizard = ({ isOpen, onClose, onSave, editData, user }) => {
     }
     try {
       // Intento API real
-      await api.post('portfolio/', {
+      await apiClient.post('portfolio/', {
         title: payload.title,
         category: payload.category,
         price: payload.price,

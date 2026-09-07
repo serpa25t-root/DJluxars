@@ -177,4 +177,4 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Custom User Model - SCRUM-5
 # https://docs.djangoproject.com/en/6.1/topics/auth/customizing/#substituting-a-custom-user-model
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = 'users.LuxUser'

@@ -1,4 +1,4 @@
-const KEY = 'luxarts_services'
+const SERVICES_STORAGE_KEY = 'luxarts_services'
 
 const seedServices = [
   {
@@ -65,22 +65,22 @@ const seedServices = [
 
 export const getServices = () => {
   try {
-    const raw = localStorage.getItem(KEY)
+    const raw = localStorage.getItem(SERVICES_STORAGE_KEY)
     if (raw) {
       const parsed = JSON.parse(raw)
       if (Array.isArray(parsed) && parsed.length > 0) return parsed
     }
   } catch {}
   // seed if empty
-  localStorage.setItem(KEY, JSON.stringify(seedServices))
+  localStorage.setItem(SERVICES_STORAGE_KEY, JSON.stringify(seedServices))
   return seedServices
 }
 
 export const saveServices = (list) => {
-  localStorage.setItem(KEY, JSON.stringify(list))
+  localStorage.setItem(SERVICES_STORAGE_KEY, JSON.stringify(list))
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new Event('luxarts_services_updated'))
-    window.dispatchEvent(new StorageEvent('storage', { key: KEY }))
+    window.dispatchEvent(new StorageEvent('storage', { key: SERVICES_STORAGE_KEY }))
   }
 }
 

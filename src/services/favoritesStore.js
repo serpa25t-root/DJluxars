@@ -1,4 +1,4 @@
-const KEY = (userId) => `luxarts_favorites_${userId || 'anon'}`
+const favoritesStorageKey = (userId) => `luxarts_favorites_${userId || 'anon'}`
 
 const seedFavorites = [
   {
@@ -30,9 +30,9 @@ const seedFavorites = [
   },
 ]
 
-const read = (userId) => {
+const readFavorites = (userId) => {
   try {
-    const raw = localStorage.getItem(KEY(userId))
+    const raw = localStorage.getItem(favoritesStorageKey(userId))
     if (!raw) return null
     const parsed = JSON.parse(raw)
     return Array.isArray(parsed) ? parsed : null
@@ -41,27 +41,27 @@ const read = (userId) => {
   }
 }
 
-const write = (userId, list) => {
+const writeFavorites = (userId, list) => {
   try {
-    localStorage.setItem(KEY(userId), JSON.stringify(list))
+    localStorage.setItem(favoritesStorageKey(userId), JSON.stringify(list))
   } catch {}
   return list
 }
 
 export const getFavorites = (userId) => {
-  const stored = read(userId)
+  const stored = readFavorites(userId)
   if (stored) return stored
-  return write(userId, seedFavorites)
+  return writeFavorites(userId, seedFavorites)
 }
 
 export const toggleFavorite = (userId, item) => {
   const list = getFavorites(userId)
   const exists = list.some((f) => String(f.id) === String(item.id))
   const next = exists ? list.filter((f) => String(f.id) !== String(item.id)) : [item, ...list]
-  return { list: write(userId, next), added: !exists }
+  return { list: writeFavorites(userId, next), added: !exists }
 }
 
 export const removeFavorite = (userId, id) => {
   const next = getFavorites(userId).filter((f) => String(f.id) !== String(id))
-  return write(userId, next)
+  return writeFavorites(userId, next)
 }

@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react'
 import Button from '../../components/common/Button'
 import UploadModal from '../../components/portfolio/UploadModal'
 import UpgradeModal from '../../components/subscription/UpgradeModal'
-import { getUsage, getLimits, getPlan, incrementUsage, upgradeToPro, setUsage as setSubUsage } from '../../services/subscription'
+import { getUsage, getLimits, getPlan, incrementUsage, upgradeToPro, setUsage as setSubUsage } from '../../services/subscriptionStore'
 import { useAuth } from '../../context/AuthContext'
-import { getPortfolio, deletePortfolioItem } from '../../services/portfolio'
+import { getPortfolio, deletePortfolioItem } from '../../services/portfolioApi'
 
 const mockFallback = [
   {

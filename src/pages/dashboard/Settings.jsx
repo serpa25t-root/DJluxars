@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import Button from '../../components/common/Button'
-import { updateProfile } from '../../services/users'
+import { updateProfile } from '../../services/userApi'
 
 const Settings = () => {
   const { user, updateUser } = useAuth()

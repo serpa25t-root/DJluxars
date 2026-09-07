@@ -31,7 +31,6 @@ urlpatterns = [
     path('api/token/', LuxTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/portfolio/', include('portfolio.urls')),
-    path('api/works/', include('portfolio.urls')),
     path('api/bookings/', include('bookings.urls')),
     path('api/chat/', include('chat.urls')),
 ]

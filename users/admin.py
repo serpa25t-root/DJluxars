@@ -1,13 +1,13 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import User
+from .models import LuxUser
 
 
-@admin.register(User)
-class UserAdmin(BaseUserAdmin):
+@admin.register(LuxUser)
+class LuxUserAdmin(BaseUserAdmin):
     """
-    Admin para el User custom de LuxArts.
+    Admin para el LuxUser custom de LuxArts.
     Extiende UserAdmin para mostrar campo 'role' y mantener gestión de permisos.
     """
     fieldsets = BaseUserAdmin.fieldsets + (

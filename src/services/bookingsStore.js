@@ -1,14 +1,14 @@
-import api from './api'
+import apiClient from './apiClient'
 
-const KEY = 'luxarts_bookings'
+const BOOKINGS_STORAGE_KEY = 'luxarts_bookings'
 
 export const getBookings = () => {
   try {
-    const raw = localStorage.getItem(KEY)
+    const raw = localStorage.getItem(BOOKINGS_STORAGE_KEY)
     const list = raw ? JSON.parse(raw) : []
     let migrated = false
-    const fixed = list.map((b) => {
-      let nb = { ...b }
+    const updatedBookings = list.map((b) => {
+      let normalizedBooking = { ...b }
       if (typeof b.price === 'number' && b.price < 10000) {
         nb.price = b.price * 1000
         migrated = true
@@ -26,17 +26,17 @@ export const getBookings = () => {
         nb.artist_payout = base - nb.platform_fee
         migrated = true
       }
-      return nb
+      return normalizedBooking
     })
-    if (migrated) saveBookings(fixed)
-    return migrated ? fixed : fixed
+    if (migrated) saveBookings(updatedBookings)
+    return migrated ? updatedBookings : updatedBookings
   } catch {
     return []
   }
 }
 
 export const saveBookings = (list) => {
-  localStorage.setItem(KEY, JSON.stringify(list))
+  localStorage.setItem(BOOKINGS_STORAGE_KEY, JSON.stringify(list))
 }
 
 export const addBooking = (booking) => {
@@ -100,7 +100,7 @@ export const seedIfEmpty = () => {
 // --- Endpoints reales DRF (con fallback localStorage para demo) ---
 export const fetchClientBookings = async () => {
   try {
-    const res = await api.get('bookings/as-client/')
+    const res = await apiClient.get('bookings/as-client/')
     const data = Array.isArray(res.data) ? res.data : res.data.results || []
     // Normaliza a formato local para UI
     return data.map(normalizeBooking)
@@ -111,7 +111,7 @@ export const fetchClientBookings = async () => {
 
 export const fetchArtistBookings = async () => {
   try {
-    const res = await api.get('bookings/as-artist/')
+    const res = await apiClient.get('bookings/as-artist/')
     const data = Array.isArray(res.data) ? res.data : res.data.results || []
     return data.map(normalizeBooking)
   } catch {
@@ -121,7 +121,7 @@ export const fetchArtistBookings = async () => {
 
 export const createBooking = async (payload) => {
   try {
-    const res = await api.post('bookings/', payload)
+    const res = await apiClient.post('bookings/', payload)
     const created = normalizeBooking(res.data)
     addBooking(created)
     return created
@@ -156,7 +156,7 @@ export const createBooking = async (payload) => {
 
 export const acceptBooking = async (id) => {
   try {
-    const res = await api.patch(`bookings/${id}/accept/`)
+    const res = await apiClient.patch(`bookings/${id}/accept/`)
     const updated = normalizeBooking(res.data)
     updateBookingStatus(id, 'Confirmada')
     return updated
@@ -168,7 +168,7 @@ export const acceptBooking = async (id) => {
 
 export const rejectBooking = async (id) => {
   try {
-    const res = await api.patch(`bookings/${id}/reject/`)
+    const res = await apiClient.patch(`bookings/${id}/reject/`)
     const updated = normalizeBooking(res.data)
     updateBookingStatus(id, 'Rechazada')
     return updated

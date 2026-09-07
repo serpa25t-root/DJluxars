@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Button from '../components/common/Button'
-import { fetchClientBookings, seedIfEmpty } from '../services/bookings'
+import { fetchClientBookings, seedIfEmpty } from '../services/bookingsStore'
 
 const statusBadge = {
   Pendiente: 'border-amber-500/30 bg-amber-500/10 text-amber-300',

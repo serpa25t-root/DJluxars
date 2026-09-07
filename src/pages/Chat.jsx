@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { getConversations, getMessages, sendMessage, ensureConversationForContact, markAsRead } from '../services/chat'
+import { getConversations, getMessages, sendMessage, ensureConversationForContact, markAsRead } from '../services/chatStore'
 import { useAuth } from '../context/AuthContext'
 
 const Chat = () => {

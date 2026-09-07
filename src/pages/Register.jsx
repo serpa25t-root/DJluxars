@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import AuthLayout from '../components/common/AuthLayout'
 import Input from '../components/common/Input'
 import Button from '../components/common/Button'
-import useColombiaApi from '../services/colombiaApi'
+import useColombiaApi from '../services/colombiaData'
 
 const roles = [
   {

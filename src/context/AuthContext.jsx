@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import api from '../services/api'
+import apiClient from '../services/apiClient'
 
 const AuthContext = createContext(null)
 
@@ -10,7 +10,7 @@ export const useAuth = () => {
   return ctx
 }
 
-const extractErrorMsg = (error, fallback) => {
+const extractApiErrorMessage = (error, fallback) => {
   if (!error?.response) {
     if (error?.code === 'ERR_NETWORK' || error?.message === 'Network Error' || !navigator.onLine) {
       return 'No se encontró el servicio en el servidor. Verifica las rutas de la API.'
@@ -35,7 +35,7 @@ const extractErrorMsg = (error, fallback) => {
   return fallback
 }
 
-const spanishErrorMap = (msg) => {
+const mapSpanishError = (msg) => {
   const low = msg.toLowerCase()
   if (low.includes('already exists') || low.includes('ya existe') || (low.includes('email') && low.includes('exists'))) return 'Este correo electrónico ya se encuentra registrado. Inicia sesión o utiliza otro.'
   if (low.includes('invalid') || low.includes('incorrect') || low.includes('no active') || low.includes('unable to log')) return 'Credenciales incorrectas.'
@@ -56,15 +56,15 @@ export const AuthProvider = ({ children }) => {
     navigate = null
   }
 
-  const fetchUserProfile = useCallback(async () => {
+  const fetchCurrentUserProfile = useCallback(async () => {
     try {
-      const res = await api.get('users/me/')
+      const res = await apiClient.get('users/me/')
       const profile = res.data
       setUser(profile)
       localStorage.setItem('user', JSON.stringify(profile))
       return profile
     } catch (error) {
-      console.error('fetchUserProfile error:', error)
+      console.error('fetchCurrentUserProfile error:', error)
       return null
     }
   }, [])
@@ -83,7 +83,7 @@ export const AuthProvider = ({ children }) => {
           }
         }
         if (storedToken) {
-          await fetchUserProfile()
+          await fetchCurrentUserProfile()
         }
       } catch (error) {
         console.error('Auth init error:', error)
@@ -92,9 +92,9 @@ export const AuthProvider = ({ children }) => {
       }
     }
     init()
-  }, [fetchUserProfile])
+  }, [fetchCurrentUserProfile])
 
-  const persistSession = useCallback((access, refresh, newUser) => {
+  const persistAuthSession = useCallback((access, refresh, newUser) => {
     if (access) {
       localStorage.setItem('access', access)
       localStorage.setItem('token', access)
@@ -119,11 +119,11 @@ export const AuthProvider = ({ children }) => {
       // SimpleJWT real: POST token/ con username/email
       let res
       try {
-        res = await api.post('token/', { username, password })
+        res = await apiClient.post('token/', { username, password })
       } catch (e) {
         if (e.response?.status === 400 || e.response?.status === 401) {
           // Fallback a users/login/ si token/ no acepta email
-          res = await api.post('users/login/', { email, username, password })
+          res = await apiClient.post('users/login/', { email, username, password })
         } else {
           throw e
         }
@@ -134,8 +134,8 @@ export const AuthProvider = ({ children }) => {
       if (!access) throw new Error('Credenciales incorrectas.')
 
       // Persist token + user in localStorage BEFORE navigation
-      persistSession(access, refresh, null)
-      const profile = await fetchUserProfile()
+      persistAuthSession(access, refresh, null)
+      const profile = await fetchCurrentUserProfile()
       const finalUser = profile || data.user || { email, username }
       if (!profile && data.user) {
         setUser(data.user)
@@ -143,12 +143,12 @@ export const AuthProvider = ({ children }) => {
       }
       return { token: access, user: finalUser, raw: data }
     } catch (err) {
-      const msg = spanishErrorMap(extractErrorMsg(err, 'Credenciales incorrectas.'))
+      const msg = mapSpanishError(extractApiErrorMessage(err, 'Credenciales incorrectas.'))
       throw new Error(msg)
     } finally {
       setLoading(false)
     }
-  }, [persistSession, fetchUserProfile])
+  }, [persistAuthSession, fetchCurrentUserProfile])
 
   const register = useCallback(async (userData) => {
     const email = userData.email?.trim()
@@ -177,10 +177,10 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      const res = await api.post('users/register/', payload)
+      const res = await apiClient.post('users/register/', payload)
       return res.data
     } catch (err) {
-      const msg = spanishErrorMap(extractErrorMsg(err, 'No se pudo crear la cuenta. Verifica los datos.'))
+      const msg = mapSpanishError(extractApiErrorMessage(err, 'No se pudo crear la cuenta. Verifica los datos.'))
       if (msg.toLowerCase().includes('email') && msg.toLowerCase().includes('exist')) throw new Error('Este correo electrónico ya se encuentra registrado. Inicia sesión o utiliza otro.')
       throw new Error(msg)
     }
@@ -221,7 +221,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    fetchUserProfile,
+    fetchCurrentUserProfile,
     updateUser,
   }
 

@@ -6,7 +6,7 @@ import {
   ArrowLeft, Star, MapPin, Check, Share2, Heart, Calendar, Clock, ShieldCheck, Award, MessageSquare, X, ChevronLeft, ChevronRight
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { getServices } from '../services/serviceStore'
+import { getServices } from '../services/servicesStore'
 import BookingModal from '../components/booking/BookingModal'
 
 const categoryImages = {

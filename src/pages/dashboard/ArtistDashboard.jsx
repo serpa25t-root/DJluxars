@@ -6,7 +6,7 @@ import {
   Calendar, DollarSign, Percent, ArrowRight, MessageSquare, Check, X, Loader2, Package, Star, ChevronUp, ChevronDown, Sparkles, TrendingUp, Camera, CalendarCheck2
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
-import { fetchArtistBookings, acceptBooking, rejectBooking } from '../../services/bookings'
+import { fetchArtistBookings, acceptBooking, rejectBooking } from '../../services/bookingsStore'
 import ServiceManager from '../../components/dashboard/ServiceManager'
 
 const TABS = [

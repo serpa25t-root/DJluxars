@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-class User(AbstractUser):
+class LuxUser(AbstractUser):
     """
     Modelo de usuario personalizado para LuxArts.
     Extiende AbstractUser para permitir futura personalización:

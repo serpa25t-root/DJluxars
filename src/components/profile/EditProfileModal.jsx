@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import Button from '../common/Button'
 import Input from '../common/Input'
-import { updateProfile } from '../../services/users'
-import useColombiaApi from '../../services/colombiaApi'
+import { updateProfile } from '../../services/userApi'
+import useColombiaApi from '../../services/colombiaData'
 
 const AvatarFrame = ({ src, alt, size = 'h-24 w-24', icon = 'h-6 w-6' }) =>
   src ? (

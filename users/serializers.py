@@ -4,7 +4,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken
 
-User = get_user_model()
+LuxUser = get_user_model()
 
 
 class LuxTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -21,8 +21,8 @@ class LuxTokenObtainPairSerializer(TokenObtainPairSerializer):
         user = authenticate(request=request, username=username, password=password)
         if user is None and username:
             try:
-                found = User.objects.get(email__iexact=username)
-            except User.DoesNotExist:
+                found = LuxUser.objects.get(email__iexact=username)
+            except LuxUser.DoesNotExist:
                 raise AuthenticationFailed('Credenciales incorrectas.')
             user = authenticate(request=request, username=found.username, password=password)
 
@@ -40,7 +40,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     ciudad = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
-        model = User
+        model = LuxUser
         fields = ['id', 'username', 'email', 'password', 'role', 'phone_number', 'first_name', 'last_name', 'departamento', 'ciudad']
         extra_kwargs = {
             'email': {'required': True},
@@ -48,18 +48,18 @@ class RegisterSerializer(serializers.ModelSerializer):
         }
 
     def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
+        if LuxUser.objects.filter(email=value).exists():
             raise serializers.ValidationError('El correo ya está registrado.')
         return value
 
     def validate_username(self, value):
-        if User.objects.filter(username=value).exists():
+        if LuxUser.objects.filter(username=value).exists():
             raise serializers.ValidationError('El nombre de usuario ya está en uso.')
         return value
 
     def create(self, validated_data):
         password = validated_data.pop('password')
-        user = User(**validated_data)
+        user = LuxUser(**validated_data)
         user.set_password(password)
         user.save()
         return user
@@ -72,7 +72,7 @@ class UserListSerializer(serializers.ModelSerializer):
     avatar = serializers.SerializerMethodField()
 
     class Meta:
-        model = User
+        model = LuxUser
         fields = ['id', 'username', 'first_name', 'last_name', 'name', 'email', 'role', 'category', 'profile_picture', 'avatar', 'departamento', 'ciudad']
 
     def get_name(self, obj):
@@ -98,7 +98,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     cover_url = serializers.SerializerMethodField()
 
     class Meta:
-        model = User
+        model = LuxUser
         fields = [
             'id', 'username', 'email', 'role', 'first_name', 'last_name', 'name',
             'phone_number', 'bio', 'departamento', 'ciudad', 'website',
@@ -146,7 +146,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             return image.url
 
     def validate_username(self, value):
-        qs = User.objects.filter(username=value)
+        qs = LuxUser.objects.filter(username=value)
         if self.instance:
             qs = qs.exclude(pk=self.instance.pk)
         if qs.exists():

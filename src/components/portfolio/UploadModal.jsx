@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import Button from '../common/Button'
 import Input from '../common/Input'
-import api from '../../services/api'
+import apiClient from '../../services/apiClient'
 import { useAuth } from '../../context/AuthContext'
-import { checkCanUpload } from '../../services/subscription'
-import { createPortfolioItem } from '../../services/portfolio'
+import { checkCanUpload } from '../../services/subscriptionStore'
+import { createPortfolioItem } from '../../services/portfolioApi'
 
 const categories = ['Retrato', 'Editorial', 'Eventos', 'Moda', 'Arquitectura']
 
@@ -95,7 +95,7 @@ const UploadModal = ({ isOpen, onClose, onPublished, onLimitReached }) => {
         await createPortfolioItem(fd)
       } catch (err) {
         if (err?.response?.status === 404) {
-          await api.post('works/', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+          await apiClient.post('works/', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
         } else {
           throw err
         }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
-import { upgradeToPro, getPlan } from '../../services/subscription'
+import { upgradeToPro, getPlan } from '../../services/subscriptionStore'
 
 const ProSubscription = () => {
   const { user } = useAuth()

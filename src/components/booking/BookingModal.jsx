@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { MessageSquare } from 'lucide-react'
 import Button from '../common/Button'
 import Input from '../common/Input'
-import api from '../../services/api'
+import apiClient from '../../services/apiClient'
 import { useAuth } from '../../context/AuthContext'
-import { addBooking } from '../../services/bookings'
+import { addBooking } from '../../services/bookingsStore'
 
 const services = [
   { value: 'Sesión Studio', factor: 1 },
@@ -90,7 +90,7 @@ const BookingModal = ({ isOpen, onClose, photographer }) => {
       artist_payout: artistPayout,
     }
     try {
-      await api.post('bookings/', payload)
+      await apiClient.post('bookings/', payload)
       setToast({ msg: 'Solicitud enviada con éxito.', type: 'success' })
     } catch (err) {
       // Mock exitoso si 404/red

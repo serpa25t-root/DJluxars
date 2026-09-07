@@ -1,4 +1,4 @@
-import api from './api'
+import apiClient from './apiClient'
 
 const unwrap = (res) => {
   const data = res?.data
@@ -11,7 +11,7 @@ const unwrap = (res) => {
  * Perfil del usuario autenticado (incluye avatar_url, cover_url, bio, ubicación)
  */
 export const getMe = async () => {
-  const res = await api.get('users/me/')
+  const res = await apiClient.get('users/me/')
   return res.data
 }
 
@@ -22,13 +22,13 @@ export const getMe = async () => {
 export const updateProfile = async (payload) => {
   const isFormData = typeof FormData !== 'undefined' && payload instanceof FormData
   const res = isFormData
-    ? await api.patch('users/me/', payload)
-    : await api.patch('users/me/', payload)
+    ? await apiClient.patch('users/me/', payload)
+    : await apiClient.patch('users/me/', payload)
   return res.data
 }
 
 export const removeAvatar = async () => {
-  const res = await api.patch('users/me/', { avatar: null, cover: null })
+  const res = await apiClient.patch('users/me/', { avatar: null, cover: null })
   return res.data
 }
 
@@ -36,7 +36,7 @@ export const removeAvatar = async () => {
  * Perfil público de cualquier usuario + stats (works, likes, views)
  */
 export const getPublicProfile = async (id) => {
-  const res = await api.get(`users/${id}/profile/`)
+  const res = await apiClient.get(`users/${id}/profile/`)
   return res.data
 }
 
@@ -44,6 +44,6 @@ export const getPublicProfile = async (id) => {
  * Obras públicas de un usuario
  */
 export const getUserPortfolio = async (id) => {
-  const res = await api.get(`users/${id}/portfolio/`)
+  const res = await apiClient.get(`users/${id}/portfolio/`)
   return unwrap(res)
 }

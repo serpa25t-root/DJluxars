@@ -3,11 +3,11 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import ComparatorModal, { CompareBar } from '../components/explore/ComparatorModal'
 import BookingModal from '../components/booking/BookingModal'
 import Button from '../components/common/Button'
-import { getCurrentPosition, reverseGeocode, haversine } from '../services/geo'
+import { getCurrentPosition, reverseGeocode, haversine } from '../services/geoUtils'
 import { useAuth } from '../context/AuthContext'
 import { Search, DollarSign, Star, SlidersHorizontal } from 'lucide-react'
-import useColombiaApi from '../services/colombiaApi'
-import { getServices } from '../services/serviceStore'
+import useColombiaApi from '../services/colombiaData'
+import { getServices } from '../services/servicesStore'
 
 const photographers = [
   { id: 1, name: 'Elena Mora', specialty: 'Retrato', avatar: 'https://i.pravatar.cc/150?img=5', rating: 4.9, reviews: 128, price: 350000, delivery: '3 días', category: 'Retrato', lat: 4.711, lng: -74.0721, city: 'Bogotá', is_pro: true },

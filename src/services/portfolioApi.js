@@ -1,7 +1,7 @@
-import api from './api'
+import apiClient from './apiClient'
 
 export const getPortfolio = async () => {
-  const res = await api.get('portfolio/')
+  const res = await apiClient.get('portfolio/')
   // DRF puede retornar paginado {results: []} o lista directa
   if (Array.isArray(res.data)) return res.data
   if (Array.isArray(res.data.results)) return res.data.results
@@ -10,13 +10,13 @@ export const getPortfolio = async () => {
 
 export const createPortfolioItem = async (formData) => {
   // formData debe incluir title, description, category, file o media_type
-  const res = await api.post('portfolio/', formData, {
+  const res = await apiClient.post('portfolio/', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   })
   return res.data
 }
 
 export const deletePortfolioItem = async (id) => {
-  const res = await api.delete(`portfolio/${id}/`)
+  const res = await apiClient.delete(`portfolio/${id}/`)
   return res.data
 }

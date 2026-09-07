@@ -9,7 +9,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from portfolio.models import PortfolioItem
 from .serializers import RegisterSerializer, UserListSerializer, ProfileSerializer
 
-User = get_user_model()
+LuxUser = get_user_model()
 
 
 class RegisterView(APIView):
@@ -59,10 +59,10 @@ class LoginView(APIView):
         # Fallback: buscar el correo (insensible a mayúsculas) y autenticar con su username
         if not user and username:
             try:
-                found = User.objects.filter(email__iexact=username).first()
+                found = LuxUser.objects.filter(email__iexact=username).first()
                 if found:
                     user = authenticate(request, username=found.username, password=password)
-            except User.DoesNotExist:
+            except LuxUser.DoesNotExist:
                 pass
 
         if not user:
@@ -128,8 +128,8 @@ class PublicProfileView(APIView):
 
     def get(self, request, pk):
         try:
-            user = User.objects.get(pk=pk)
-        except User.DoesNotExist:
+            user = LuxUser.objects.get(pk=pk)
+        except LuxUser.DoesNotExist:
             return Response({'detail': 'Perfil no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
 
         profile = ProfileSerializer(user, context={'request': request}).data
@@ -143,7 +143,7 @@ class PublicProfileView(APIView):
             'likes': aggregates.get('likes') or 0,
             'views': aggregates.get('views') or 0,
         }
-        profile['is_artist'] = getattr(user, 'is_artist', user.role == User.Role.ARTIST)
+        profile['is_artist'] = getattr(user, 'is_artist', user.role == LuxUser.Role.ARTIST)
         return Response(profile)
 
 
@@ -165,7 +165,7 @@ class UserListView(APIView):
 
     def get(self, request):
         role = request.query_params.get('role')
-        qs = User.objects.all()
+        qs = LuxUser.objects.all()
         if role:
             qs = qs.filter(role=role)
         serializer = UserListSerializer(qs[:20], many=True)

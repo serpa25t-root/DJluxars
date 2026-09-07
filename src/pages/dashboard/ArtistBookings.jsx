@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Button from '../../components/common/Button'
 import UpgradeModal from '../../components/subscription/UpgradeModal'
-import { fetchArtistBookings, acceptBooking, rejectBooking, seedIfEmpty } from '../../services/bookings'
+import { fetchArtistBookings, acceptBooking, rejectBooking, seedIfEmpty } from '../../services/bookingsStore'
 import { useAuth } from '../../context/AuthContext'
-import { checkCanAcceptBooking, getUsage, setUsage, upgradeToPro } from '../../services/subscription'
+import { checkCanAcceptBooking, getUsage, setUsage, upgradeToPro } from '../../services/subscriptionStore'
 
 const statusBadge = {
   Pendiente: 'border-amber-500/30 bg-amber-500/10 text-amber-300',

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { User, LogOut, Settings } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
-import { getBookings } from '../../services/bookings'
+import { getBookings } from '../../services/bookingsStore'
 
 const useNotifications = () => {
   const [notifications] = useState([

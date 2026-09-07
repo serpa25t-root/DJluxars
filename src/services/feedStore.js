@@ -42,7 +42,7 @@ const seedPosts = [
   },
 ]
 
-const load = () => {
+const loadFeedPosts = () => {
   try {
     const raw = localStorage.getItem(POSTS_KEY)
     if (raw) {
@@ -54,15 +54,15 @@ const load = () => {
   return seedPosts
 }
 
-const persist = (posts) => {
+const saveFeedPosts = (posts) => {
   localStorage.setItem(POSTS_KEY, JSON.stringify(posts))
   window.dispatchEvent(new CustomEvent('luxarts_feed_updated'))
 }
 
-export const getFeedPosts = () => load()
+export const getFeedPosts = () => loadFeedPosts()
 
 export const addPost = ({ image, caption, author }) => {
-  const posts = load()
+  const posts = loadFeedPosts()
   const newPost = {
     id: `post_${Date.now()}`,
     authorId: author?.id || 0,
@@ -76,27 +76,27 @@ export const addPost = ({ image, caption, author }) => {
     createdAt: Date.now(),
   }
   const next = [newPost, ...posts]
-  persist(next)
+  saveFeedPosts(next)
   return newPost
 }
 
 export const toggleLike = (postId, userId) => {
-  const posts = load()
+  const posts = loadFeedPosts()
   const next = posts.map((p) => {
     if (p.id !== postId) return p
     const has = Array.isArray(p.likes) && p.likes.includes(userId)
     return { ...p, likes: has ? p.likes.filter((u) => u !== userId) : [...(p.likes || []), userId] }
   })
-  persist(next)
+  saveFeedPosts(next)
 }
 
 export const addComment = (postId, { author, avatar, text }) => {
-  const posts = load()
+  const posts = loadFeedPosts()
   const next = posts.map((p) => {
     if (p.id !== postId) return p
     const comment = { id: `c_${Date.now()}`, author, avatar, text }
     return { ...p, comments: [...(p.comments || []), comment] }
   })
-  persist(next)
+  saveFeedPosts(next)
   return next.find((p) => p.id === postId)
 }

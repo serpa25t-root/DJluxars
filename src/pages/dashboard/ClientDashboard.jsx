@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Sparkles, Calendar, MapPin, Camera, ArrowRight, MessageSquare, Search } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
-import useColombiaApi from '../../services/colombiaApi'
-import { fetchClientBookings } from '../../services/bookings'
+import useColombiaApi from '../../services/colombiaData'
+import { fetchClientBookings } from '../../services/bookingsStore'
 
 const SESSION_TYPES = ['Retrato', 'Bodas', 'Moda', 'Producto', 'Eventos', 'Editorial', 'Familia', 'Paisajes']
 

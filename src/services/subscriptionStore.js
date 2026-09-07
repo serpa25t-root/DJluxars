@@ -1,5 +1,5 @@
-const PLAN_KEY = (id) => `luxarts_plan_${id || 'anon'}`
-const USAGE_KEY = (id) => {
+const PLAN_STORAGE_KEY = (id) => `luxarts_plan_${id || 'anon'}`
+const USAGE_STORAGE_KEY = (id) => {
   const month = new Date().toISOString().slice(0, 7)
   return `luxarts_usage_${id || 'anon'}_${month}`
 }
