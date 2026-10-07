@@ -8,9 +8,79 @@
   --ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
-body {
-  @apply bg-black text-zinc-100 antialiased font-sans;
-  background-color: #070709;
+html.light {
+  color-scheme: light;
+}
+html.light body {
+  background-color: #f8f8f8;
+  color: #18181b;
+}
+html.light .bg-\[\#070709\] {
+  background-color: #f8f8f8 !important;
+}
+html.light .bg-zinc-950 {
+  background-color: #ffffff !important;
+}
+html.light .bg-zinc-900\/50, html.light .bg-zinc-900\/60, html.light .bg-zinc-900 {
+  background-color: #f4f4f5 !important;
+}
+html.light .bg-zinc-800\/50, html.light .bg-zinc-800 {
+  background-color: #e4e4e7 !important;
+}
+html.light .bg-zinc-900\/80 {
+  background-color: rgba(255,255,255,0.8) !important;
+}
+html.light .text-white {
+  color: #18181b !important;
+}
+html.light .text-zinc-100, html.light .text-zinc-200 {
+  color: #3f3f46 !important;
+}
+html.light .text-zinc-300 {
+  color: #52525b !important;
+}
+html.light .text-zinc-400 {
+  color: #71717a !important;
+}
+html.light .text-zinc-500 {
+  color: #a1a1aa !important;
+}
+html.light .text-zinc-600 {
+  color: #a1a1aa !important;
+}
+html.light .border-zinc-800, html.light .border-zinc-800\/80 {
+  border-color: #e4e4e7 !important;
+}
+html.light .border-zinc-900 {
+  border-color: #e4e4e7 !important;
+}
+html.light .border-zinc-700 {
+  border-color: #d4d4d8 !important;
+}
+html.light .shadow-2xl, html.light .shadow-\[0_10px_40px_rgba\(0\,0\,0\,0\.8\)\] {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
+}
+html.light .shadow-md, html.light .shadow-lg {
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06) !important;
+}
+html.light .shadow-black\/50, html.light .shadow-black\/40, html.light .shadow-black\/20 {
+  box-shadow: none !important;
+}
+html.light .backdrop-blur-xl, html.light .backdrop-blur-2xl {
+  background-color: rgba(255,255,255,0.9) !important;
+}
+html.light .card-glass {
+  background-color: #ffffff !important;
+  border-color: #e4e4e7 !important;
+}
+html.light .placeholder\:text-zinc-500::placeholder {
+  color: #a1a1aa !important;
+}
+html.light .bg-zinc-800\/50 {
+  background-color: #f4f4f5 !important;
+}
+html.light .ring-white\/10 {
+  --tw-ring-color: rgba(0,0,0,0.05) !important;
 }
 
 html {

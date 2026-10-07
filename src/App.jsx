@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Component } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { AppPreferencesProvider } from './context/AppPreferencesContext'
 import ScrollToTop from './components/common/ScrollToTop'
 import BackToTop from './components/common/BackToTop'
 import ToastProvider from './components/common/ToastProvider'
@@ -19,7 +20,6 @@ import DashboardLayout from './components/layout/DashboardLayout'
 import Dashboard from './pages/Dashboard'
 import ArtistDashboard from './pages/dashboard/ArtistDashboard'
 import ClientDashboard from './pages/dashboard/ClientDashboard'
-import Settings from './pages/dashboard/Settings'
 import ProSubscription from './pages/dashboard/ProSubscription'
 import History from './pages/dashboard/History'
 import ServiceManager from './components/dashboard/ServiceManager'
@@ -146,9 +146,8 @@ function AppRoutes() {
         <Route path="stats" element={<Placeholder title="Estadísticas" />} />
         <Route path="history" element={<History />} />
 <Route path="mensajes" element={<Chat />} />
-        <Route path="settings" element={<Settings />} />
-        <Route path="configuracion" element={<Settings />} />
-        <Route path="app-settings" element={<AppSettings />} />
+        <Route path="settings" element={<AppSettings />} />
+        <Route path="configuracion" element={<AppSettings />} />
         <Route path="projects" element={<Placeholder title="Mis Proyectos" />} />
         <Route path="reviews" element={<Placeholder title="Valoraciones" />} />
         <Route path="pro" element={<ProSubscription />} />
@@ -192,10 +191,12 @@ function App() {
     <ErrorBoundary>
       <BrowserRouter>
         <AuthProvider>
-          <ScrollToTop />
-          <AppRoutes />
-          <BackToTop />
-          <ToastProvider />
+          <AppPreferencesProvider>
+            <ScrollToTop />
+            <AppRoutes />
+            <BackToTop />
+            <ToastProvider />
+          </AppPreferencesProvider>
         </AuthProvider>
       </BrowserRouter>
     </ErrorBoundary>
