@@ -34,7 +34,7 @@ class LuxTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=8)
+    password = serializers.CharField(write_only=True, min_length=10)
     phone_number = serializers.CharField(required=False, allow_blank=True)
     departamento = serializers.CharField(required=False, allow_blank=True)
     ciudad = serializers.CharField(required=False, allow_blank=True)

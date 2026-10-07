@@ -198,20 +198,26 @@ export const AuthProvider = ({ children }) => {
     })
   }, [])
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try {
+      const refresh = localStorage.getItem('refresh')
+      if (refresh && token) {
+        await api.post('users/logout/', { refresh }).catch(() => {})
+      }
+    } catch {
+      // Logout best-effort — limpiar estado local siempre
+    }
     localStorage.removeItem('token')
     localStorage.removeItem('access')
     localStorage.removeItem('refresh')
     localStorage.removeItem('user')
     setToken(null)
     setUser(null)
-    // Forzar recarga completa para limpiar estado en memoria y evitar
-    // que el navegador restaure la sesión desde bfcache al usar "Atrás"
     if (typeof window !== 'undefined') {
       window.location.replace('/')
     }
     return true
-  }, [])
+  }, [token])
 
   const value = {
     user,
