@@ -133,7 +133,7 @@ const BookingModal = ({ isOpen, onClose, photographer }) => {
       photographerName: photographer.name,
       photographerAvatar: photographer.avatar,
       specialty: photographer.specialty,
-      clientName: user?.username || user?.email?.split('@')[0] || 'Cliente LuxArts',
+      clientName: user?.username || user?.email?.split('@')[0] || 'Cliente LuxArs',
       clientEmail: user?.email || 'cliente@luxarts.com',
       date: form.date,
       service: form.service,

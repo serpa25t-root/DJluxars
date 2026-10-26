@@ -20,3 +20,11 @@ export const deletePortfolioItem = async (id) => {
   const res = await apiClient.delete(`portfolio/${id}/`)
   return res.data
 }
+
+export const updatePortfolioItem = async (id, payload) => {
+  const isFormData = typeof FormData !== 'undefined' && payload instanceof FormData
+  const res = isFormData
+    ? await api.patch(`portfolio/${id}/`, payload)
+    : await api.patch(`portfolio/${id}/`, payload)
+  return res.data
+}

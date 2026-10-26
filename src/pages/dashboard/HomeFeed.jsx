@@ -89,6 +89,29 @@ const Composer = ({ open, setOpen, onAdd, saving }) => {
   )
 }
 
+const CommentInput = ({ onSubmit }) => {
+  const [text, setText] = useState('')
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault()
+        if (!text.trim()) return
+        onSubmit(text)
+        setText('')
+      }}
+      className="flex items-center gap-2 border-t border-zinc-900 pt-3"
+    >
+      <input
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Añade un comentario..."
+        className="flex-1 bg-transparent text-sm text-white placeholder:text-zinc-600 focus:outline-none"
+      />
+      <button type="submit" disabled={!text.trim()} className="text-sm font-semibold text-red-500 hover:text-red-400 disabled:opacity-30 transition-colors">Publicar</button>
+    </form>
+  )
+}
+
 const HomeFeed = () => {
   const { user } = useAuth()
   const isArtist = user?.role === 'artist'
@@ -136,28 +159,6 @@ const HomeFeed = () => {
     refresh()
   }
 
-  const CommentInput = ({ postId }) => {
-    const [text, setText] = useState('')
-    return (
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          handleComment(postId, text)
-          setText('')
-        }}
-        className="flex items-center gap-2 border-t border-zinc-900 pt-3"
-      >
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Añade un comentario..."
-          className="flex-1 bg-transparent text-sm text-white placeholder:text-zinc-600 focus:outline-none"
-        />
-        <button type="submit" disabled={!text.trim()} className="text-sm font-semibold text-red-500 hover:text-red-400 disabled:opacity-30 transition-colors">Publicar</button>
-      </form>
-    )
-  }
-
   return (
     <div className="mx-auto max-w-2xl animate-[fadeIn_300ms_ease-out]">
       <div className="mb-6 flex items-center justify-between">
@@ -174,7 +175,7 @@ const HomeFeed = () => {
             >
               <Camera className="h-4 w-4" />
             </motion.span>
-            <h1 className="font-display text-2xl font-bold tracking-tight text-white">LuxArts</h1>
+            <h1 className="font-display text-2xl font-bold tracking-tight text-white">LuxArs</h1>
           </div>
           <p className="text-sm text-zinc-400 mt-1">Descubre el trabajo de la comunidad.</p>
         </motion.div>
@@ -195,7 +196,7 @@ const HomeFeed = () => {
         {sorted.map((post, i) => {
           const liked = Array.isArray(post.likes) && post.likes.includes(userId)
           const likes = post.likes?.length || 0
-          const comments = post.comments?.length || 0
+          const commentsCount = post.comments?.length || 0
           return (
             <motion.article
               key={post.id}
@@ -252,7 +253,7 @@ const HomeFeed = () => {
                   className="inline-flex items-center gap-1.5 text-sm font-medium text-zinc-400 hover:text-white transition-colors"
                 >
                   <MessageCircle className="h-6 w-6" />
-                  {comments > 0 && <span>{comments}</span>}
+                  {commentsCount > 0 && <span>{commentsCount}</span>}
                 </button>
               </div>
 
@@ -276,11 +277,11 @@ const HomeFeed = () => {
                     transition={{ duration: 0.2 }}
                     className="overflow-hidden px-4 pb-3"
                   >
-                    {comments.length === 0 ? (
+                    {(post.comments?.length || 0) === 0 ? (
                       <p className="text-sm text-zinc-600 pt-1">Sin comentarios todavía. Sé el primero.</p>
                     ) : (
                       <div className="space-y-2 pt-1">
-                        {comments.map((c) => (
+                        {(post.comments || []).map((c) => (
                           <div key={c.id} className="flex items-start gap-2">
                             <img src={c.avatar || `https://i.pravatar.cc/150`} alt={c.author} className="h-6 w-6 rounded-full object-cover ring-1 ring-white/10" />
                             <p className="text-sm text-zinc-300">
@@ -291,7 +292,7 @@ const HomeFeed = () => {
                         ))}
                       </div>
                     )}
-                    <CommentInput postId={post.id} />
+                    <CommentInput onSubmit={(text) => handleComment(post.id, text)} />
                   </motion.div>
                 )}
               </AnimatePresence>

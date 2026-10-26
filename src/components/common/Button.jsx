@@ -1,7 +1,7 @@
 import React from 'react'
 
 /**
- * Botón reutilizable LuxArts — Cinematic Crimson
+ * Botón reutilizable LuxArs — Cinematic Crimson
  * @param {'primary' | 'secondary' | 'text'} variant
  */
 const Button = ({

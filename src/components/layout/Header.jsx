@@ -83,7 +83,7 @@ const { user, isAuthenticated, logout } = useAuth()
             </svg>
           </div>
           <div className="leading-none">
-            <span className="font-display text-xl font-bold tracking-tight text-white">LuxArts</span>
+            <span className="font-display text-xl font-bold tracking-tight text-white">LuxArs</span>
             <span className="block text-[9px] font-semibold tracking-[0.35em] text-red-500/80 uppercase">Photography</span>
           </div>
         </Link>

@@ -3,33 +3,10 @@ import apiClient from './apiClient'
 const CONVERSATIONS_STORAGE_KEY = 'luxarts_conversations'
 const MESSAGES_STORAGE_PREFIX = 'luxarts_messages_'
 
-const seedConversations = [
-  {
-    id: '1',
-    contact: { id: '1', name: 'Elena Mora', avatar: 'https://i.pravatar.cc/150?img=5', specialty: 'Retrato', online: true },
-    lastMessage: '¿Podemos agendar la sesión para el jueves?',
-    unread: 2,
-    updatedAt: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
-  },
-  {
-    id: '2',
-    contact: { id: '2', name: 'Marc Dubois', avatar: 'https://i.pravatar.cc/150?img=15', specialty: 'Moda', online: false },
-    lastMessage: 'Te envié la cotización actualizada.',
-    unread: 1,
-    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(),
-  },
-]
-
-const seedMessages = {
-  1: [
-    { id: 'm1', senderId: '1', text: 'Hola, vi tu portafolio y me encanta tu estilo editorial.', timestamp: new Date(Date.now() - 1000 * 60 * 60).toISOString() },
-    { id: 'm2', senderId: 'me', text: '¡Gracias! Cuéntame sobre tu proyecto.', timestamp: new Date(Date.now() - 1000 * 60 * 50).toISOString() },
-    { id: 'm3', senderId: '1', text: '¿Podemos agendar la sesión para el jueves?', timestamp: new Date(Date.now() - 1000 * 60 * 12).toISOString() },
-  ],
-  2: [
-    { id: 'm4', senderId: 'me', text: 'Hola Marc, ¿disponible para evento en Bogotá?', timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString() },
-    { id: 'm5', senderId: '2', text: 'Te envié la cotización actualizada.', timestamp: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString() },
-  ],
+const normalizeList = (data) => {
+  if (Array.isArray(data)) return data
+  if (Array.isArray(data?.results)) return data.results
+  return []
 }
 
 const ensureSeed = () => {
@@ -77,6 +54,7 @@ export const getConversations = async (userId) => {
 }
 
 export const getMessages = async (conversationId) => {
+  if (!conversationId) return []
   try {
     // conversationId es userId del contacto en modo real
     const res = await apiClient.get(`chat/messages/${conversationId}/`)
@@ -145,7 +123,9 @@ export const ensureConversationForContact = async (contactId, contactName, avata
   return newId
 }
 
+/** El GET de mensajes ya marca como leídos los mensajes recibidos. */
 export const markAsRead = async (conversationId) => {
+  if (!conversationId) return
   try {
     // Backend marca al hacer GET, no necesita POST
     await apiClient.get(`chat/messages/${conversationId}/`)

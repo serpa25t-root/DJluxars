@@ -15,67 +15,62 @@ class ConversationsView(APIView):
 
     def get(self, request):
         user = request.user
-        # Obtiene todos los usuarios con los que hay mensajes
-        messages = Message.objects.filter(Q(sender=user) | Q(receiver=user)).order_by('timestamp')
-        # Agrupa por contacto
+        # Último mensaje de cada conversación (más reciente primero)
+        messages = (
+            Message.objects
+            .filter(Q(sender=user) | Q(receiver=user))
+            .select_related('sender', 'receiver')
+            .order_by('-timestamp')
+        )
+
         contacts = {}
         for m in messages:
-            other = m.receiver if m.sender == user else m.sender
-            if other.id not in contacts:
-                contacts[other.id] = {
-                    'contact': {
-                        'id': str(other.id),
-                        'name': other.username,
-                        'avatar': f'https://i.pravatar.cc/150?img={(other.id % 70) + 1}',
-                        'specialty': getattr(other, 'role', 'General'),
-                        'online': True,
-                    },
-                    'lastMessage': m.content,
-                    'unread': 0,
-                    'updatedAt': m.timestamp.isoformat(),
-                }
-            # Actualiza último mensaje y unread
-            contacts[other.id]['lastMessage'] = m.content
-            contacts[other.id]['updatedAt'] = m.timestamp.isoformat()
-
-        # Cuenta no leídos
-        unread_qs = Message.objects.filter(receiver=user, is_read=False).values('sender').annotate(cnt=Count('id'))
-        for entry in unread_qs:
-            sid = entry['sender']
-            if sid in contacts:
-                contacts[sid]['unread'] = entry['cnt']
-
-        # Si no hay conversaciones, devuelve mock de ejemplo para demo (2 contactos)
-        if not contacts:
-            return Response([
-                {
-                    'id': '1',
-                    'contact': {'id': '1', 'name': 'Elena Mora', 'avatar': 'https://i.pravatar.cc/150?img=5', 'specialty': 'Retrato', 'online': True},
-                    'lastMessage': '¿Podemos agendar la sesión para el jueves?',
-                    'unread': 2,
-                    'updatedAt': m.timestamp.isoformat() if messages else ''
+            other = m.receiver if m.sender_id == user.id else m.sender
+            if other.id in contacts:
+                continue  # ya tenemos el mensaje más reciente de ese contacto
+            contacts[other.id] = {
+                'profile': {
+                    'id': str(other.id),
+                    'name': other.get_full_name() or other.username,
+                    'avatar': _avatar_url(other, request),
+                    'specialty': other.get_role_display(),
+                    'online': other.is_active,
                 },
-                {
-                    'id': '2',
-                    'contact': {'id': '2', 'name': 'Marc Dubois', 'avatar': 'https://i.pravatar.cc/150?img=15', 'specialty': 'Moda', 'online': False},
-                    'lastMessage': 'Te envié la cotización actualizada.',
-                    'unread': 1,
-                    'updatedAt': m.timestamp.isoformat() if messages else ''
-                },
-            ])
+                'lastMessage': m.content,
+                'updatedAt': m.timestamp.isoformat(),
+            }
+
+        # Conteo de no leídos por contacto
+        unread_qs = (
+            Message.objects
+            .filter(receiver=user, is_read=False)
+            .values('sender')
+            .annotate(cnt=Count('id'))
+        )
+        unread_map = {entry['sender']: entry['cnt'] for entry in unread_qs}
 
         result = []
         for cid, data in contacts.items():
             result.append({
                 'id': str(cid),
-                'contact': data['contact'],
+                'contact': data['profile'],
                 'lastMessage': data['lastMessage'],
-                'unread': data['unread'],
+                'unread': unread_map.get(int(cid), 0),
                 'updatedAt': data['updatedAt'],
             })
-        # Ordena por actualizado
         result.sort(key=lambda x: x['updatedAt'], reverse=True)
         return Response(result)
+
+
+def _avatar_url(user, request):
+    """Avatar real del usuario (con URL absoluta) o placeholder determinista."""
+    avatar = getattr(user, 'avatar', None)
+    if avatar:
+        try:
+            return request.build_absolute_uri(avatar.url) if request else avatar.url
+        except Exception:
+            return avatar.url
+    return f'https://i.pravatar.cc/150?img={(user.id % 70) + 1}'
 
 
 class MessagesView(APIView):
@@ -122,6 +117,13 @@ class SendMessageView(APIView):
 
         clean_content = strip_tags(html.escape(str(content)))[:2000]
         msg = Message.objects.create(sender=request.user, receiver=receiver, content=clean_content)
+
+        # Notificación in-app para el receptor (aparece en la campana del dashboard)
+        try:
+            from notifications.services import notify_new_message
+            notify_new_message(msg)
+        except Exception:
+            pass
         serializer = MessageSerializer(msg)
         return Response({
             'id': msg.id,

@@ -153,6 +153,7 @@ const Profile = () => {
   }, [lightbox])
 
   const data = profile || user || {}
+  const isSuspended = !!(data.is_suspended)
   const displayName = data.name || [data.first_name, data.last_name].filter(Boolean).join(' ') || data.username || 'Usuario'
   const username = data.username || data.email?.split('@')[0] || 'usuario'
   const initials = displayName.slice(0, 1).toUpperCase()
@@ -185,6 +186,7 @@ const Profile = () => {
   }
 
   const handleSaved = (updated) => {
+    // Respuesta real del PATCH: se fusiona en estado + localStorage
     setProfile((prev) => ({ ...(prev || {}), ...updated }))
     updateUser(updated)
     showToast('Perfil actualizado')
@@ -202,7 +204,7 @@ const Profile = () => {
       await deletePortfolioItem(item.id)
       setWorks((prev) => prev.filter((w) => w.id !== item.id))
     } catch {
-      setWorks((prev) => prev.filter((w) => w.id !== item.id))
+      // Si el servidor no la borra, la mantenemos visible
     } finally {
       setDeletingId(null)
     }
@@ -293,6 +295,12 @@ const Profile = () => {
         <div className="mt-6 space-y-1.5">
           <p className="text-sm font-semibold text-white">{displayName}</p>
           {data.bio && <p className="max-w-2xl text-sm leading-relaxed text-zinc-300">{data.bio}</p>}
+          {(data.specialty || data.price > 0) && (
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-zinc-400 mt-2">
+              {data.specialty && <span className="font-medium text-zinc-300">{data.specialty}</span>}
+              {data.price > 0 && <span className="font-bold text-white">${Number(data.price).toLocaleString('es-CO')} COP / sesión</span>}
+            </div>
+          )}
           <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-zinc-500">
             {[data.ciudad, data.departamento].filter(Boolean).length > 0 && (
               <span className="inline-flex items-center gap-1.5">
@@ -312,6 +320,13 @@ const Profile = () => {
           </div>
         </div>
       </section>
+
+      {isSuspended && (
+        <div className="mt-6 rounded-2xl border border-red-600/40 bg-red-600/10 px-5 py-4">
+          <p className="text-sm font-semibold text-red-300">Cuenta suspendida</p>
+          <p className="mt-1 text-xs text-zinc-400">Tu cuenta ha sido suspendida por el administrador. Tu perfil y portafolio ya no son visibles públicamente.</p>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="mt-8 flex items-center justify-center gap-10">

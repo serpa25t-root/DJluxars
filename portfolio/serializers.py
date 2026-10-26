@@ -10,8 +10,8 @@ class PortfolioItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PortfolioItem
-        fields = ['id', 'title', 'description', 'category', 'media_type', 'image', 'file', 'video_url', 'equipment', 'likes', 'views', 'created_at', 'file_url', 'image_url']
-        read_only_fields = ['id', 'likes', 'views', 'created_at']
+        fields = ['id', 'title', 'description', 'category', 'media_type', 'image', 'file', 'video_url', 'equipment', 'likes', 'views', 'created_at', 'file_url', 'image_url', 'status', 'moderation_reason']
+        read_only_fields = ['id', 'likes', 'views', 'created_at', 'status', 'moderation_reason']
         extra_kwargs = {
             'image': {'required': False, 'allow_null': True},
             'file': {'required': False, 'allow_null': True},

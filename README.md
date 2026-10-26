@@ -103,7 +103,61 @@ npm run lint     # revisa errores de código
 | `Could not resolve ../../services/bookings` | Importa desde `../../services/bookingsStore` y `../../services/chatStore` (así se llaman ahora, no `bookings` / `chat` solos). |
 | Django pide migraciones raras en `users` | No crees archivos `0002/0003` viejos. El modelo actual es `users.LuxUser` y ya trae todo en `0001_initial`. `makemigrations --check` debe decir `No changes detected`. |
 
-## 7. Notas técnicas cortas
+## 7. Correo electrónico
+
+El backend envía notificaciones por correo con SMTP (Gmail usando una contraseña de aplicación):
+
+- Al **fotógrafo** cuando un cliente crea una reserva.
+- Al **cliente** cuando el fotógrafo acepta o rechaza su reserva.
+
+Genera una contraseña de aplicación en [Google → Contraseñas de aplicación](https://myaccount.google.com/apppasswords) y añade estas variables al `.env`:
+
+```
+EMAIL_HOST_USER=tu_correo@gmail.com
+EMAIL_HOST_PASSWORD=tu_contraseña_de_aplicacion
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+DEFAULT_FROM_EMAIL=tu_correo@gmail.com
+```
+
+Si dejas `EMAIL_HOST_USER` vacío, los correos no se envían por SMTP: se imprimen en la consola del servidor (útil para desarrollo).
+
+## 8. Usuario Administrador
+
+El comando `crear_admin` crea (o corrige) el usuario administrador de la plataforma, con acceso al panel `/admin/` para gestionar clientes y fotógrafos registrados y moderar sus obras:
+
+```bash
+python manage.py crear_admin
+```
+
+Lee las credenciales del `.env`:
+
+```
+ADMIN_USER=admin
+ADMIN_EMAIL=admin@luxars.com
+ADMIN_PASSWORD=tu_contraseña_de_administrador
+```
+
+Si no existe, se crea el usuario y se muestra la contraseña; si ya existe, se le garantizan los permisos de administrador (`role=admin`, superuser activo) sin tocar la contraseña. Para forzar un cambio de contraseña:
+
+```bash
+python manage.py crear_admin --set-password
+```
+
+También acepta `--username`, `--email` y `--password`.
+
+## 9. Moderación de contenido
+
+Cada obra del portafolio tiene un estado de moderación: `aprobado`, `pendiente` o `rechazado`.
+
+- Las obras se publican **aprobadas** (no se rompe nada al subirlas).
+- En `/admin/` → **Obras** el administrador puede buscar por fotógrafo, filtrar por estado y aplicar acciones en lote: *aprobar*, *rechazar por contenido +18* o *marcar pendiente*.
+- Las obras **rechazadas** desaparecen de los perfiles públicos y de las estadísticas, aunque el artista sigue viéndolas en su panel (el serializer devuelve `status` y `moderation_reason`).
+
+En `/admin/` → **Usuarios** hay acciones en lote para activar/suspender cuentas y asignar roles (cliente, artista, administrador).
+
+## 10. Notas técnicas cortas
 
 - Login: `POST /api/token/` con `{username|email, password}`. El token se guarda en `localStorage` y se envía como `Authorization: Bearer <access>`. Se refresca solo en `src/services/apiClient.js`.
 - Registro: `POST /api/users/register/`, perfil: `GET /api/users/me/`. Más rutas: `/api/portfolio/`, `/api/bookings/`, `/api/chat/`.

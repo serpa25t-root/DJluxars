@@ -25,6 +25,12 @@ const clientSidebarLinks = [
   { label: 'Configuración', to: '/dashboard/settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
 ]
 
+const adminSidebarLinks = [
+  { label: 'Panel Admin', to: '/dashboard/admin', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', exact: true },
+  { label: 'Perfil', to: '/dashboard/perfil', icon: userIcon },
+  { label: 'Configuración', to: '/dashboard/settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
+]
+
 const DashboardLayout = () => {
   const { user, logout } = useAuth()
   const { t } = usePreferences()
@@ -79,7 +85,8 @@ const DashboardLayout = () => {
   const initials = displayName.slice(0, 1).toUpperCase()
   const isClient = user?.role === 'client' || user?.role === 'both'
   const isArtist = user?.role === 'artist' || user?.role === 'both'
-  const sidebarLinks = (isClient ? clientSidebarLinks : []).concat(isArtist ? artistSidebarLinks : [])
+  const isAdmin = user?.role === 'admin'
+  const sidebarLinks = isAdmin ? adminSidebarLinks : (isClient ? clientSidebarLinks : []).concat(isArtist ? artistSidebarLinks : [])
 
   const avatarSrc = user?.avatar_url || user?.avatar || ''
   const isProfileActive = location.pathname.startsWith('/dashboard/perfil')
@@ -129,7 +136,7 @@ const DashboardLayout = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             </div>
-            <span className="font-display text-lg font-semibold tracking-tight">LuxArts</span>
+            <span className="font-display text-lg font-semibold tracking-tight">LuxArs</span>
           </div>
 
           <div className="md:hidden mt-4 flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900 p-3">
@@ -220,7 +227,7 @@ const DashboardLayout = () => {
               </svg>
             </button>
             <Link to="/" className="flex items-center gap-2">
-              <span className="font-display text-lg font-semibold tracking-tight text-white">LuxArts</span>
+              <span className="font-display text-lg font-semibold tracking-tight text-white">LuxArs</span>
             </Link>
           </div>
 

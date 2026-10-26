@@ -83,6 +83,9 @@ INSTALLED_APPS = [
     'portfolio',
     'bookings',
     'chat',
+    'notifications',
+    'payments',
+    'adminpanel',
 ]
 
 MIDDLEWARE = [
@@ -194,8 +197,23 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
+# SMTP con contraseña de aplicación (Gmail). Si no se define EMAIL_HOST_USER,
+# se usa el backend de consola (los correos se imprimen en la terminal).
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+if EMAIL_HOST_USER:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+    EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+    EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+    EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+    DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    DEFAULT_FROM_EMAIL = 'no-reply@luxars.com'
+
+# URL del frontend para armar enlaces (recuperación de contraseña, etc.)
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
 
 # Custom User Model - SCRUM-5
 # https://docs.djangoproject.com/en/6.1/topics/auth/customizing/#substituting-a-custom-user-model

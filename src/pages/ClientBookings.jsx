@@ -12,18 +12,35 @@ const statusBadge = {
 
 const ClientBookings = () => {
   const [bookings, setBookings] = useState([])
+  const [payments, setPayments] = useState({})
+  const [payingBooking, setPayingBooking] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const load = async () => {
-      setLoading(true)
-      seedIfEmpty()
-      const data = await fetchClientBookings()
-      setBookings(data)
-      setLoading(false)
+  const load = async () => {
+    setLoading(true)
+    const [bs, ps] = await Promise.all([fetchClientBookings(), getMyPayments()])
+    setBookings(bs)
+    const map = {}
+    ps.forEach((p) => { map[p.booking] = p })
+    setPayments(map)
+    setLoading(false)
+  }
+
+  useEffect(() => { load() }, [])
+
+  const rateBooking = async (bookingId) => {
+    const input = window.prompt('Califica la sesión de 1 a 5 estrellas:')
+    const rating = Number(input)
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5) return
+    try {
+      await saveBookingRating(bookingId, rating)
+      setBookings((current) => current.map((booking) => (
+        booking.id === bookingId ? { ...booking, rating } : booking
+      )))
+    } catch (error) {
+      window.alert(error?.response?.data?.detail || error.message || 'No se pudo guardar la calificación.')
     }
-    load()
-  }, [])
+  }
 
   return (
     <div className="min-h-[100dvh] bg-black">
@@ -59,11 +76,21 @@ const ClientBookings = () => {
                       <div className="flex justify-between"><span className="text-zinc-500">Fecha</span><span className="text-white">{b.date}</span></div>
                       <div className="flex justify-between"><span className="text-zinc-500">Ubicación</span><span className="text-white truncate ml-4">{b.location}</span></div>
                       <div className="flex justify-between"><span className="text-zinc-500">Total a pagar</span><span className="font-bold text-white">${(b.price ?? b.base_price ?? 0).toLocaleString('es-CO')} COP</span></div>
+                      <div className="flex justify-between"><span className="text-zinc-500">Pago</span><span className={`font-semibold ${payments[b.id] ? 'text-emerald-400' : 'text-amber-300'}`}>{payments[b.id] ? `Pagado (${String(payments[b.id].transaction_id).slice(0,8).toUpperCase()})` : 'Pendiente'}</span></div>
                     </div>
 
                     <p className="mt-3 text-xs leading-relaxed text-zinc-400 line-clamp-2">{b.message}</p>
 
                     <div className="mt-4 flex gap-2">
+                      {b.status === 'Confirmada' && !payments[b.id] && (
+                        <button
+                          type="button"
+                          onClick={() => setPayingBooking(b)}
+                          className="flex-1 rounded-xl bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors"
+                        >
+                          Pagar ahora
+                        </button>
+                      )}
                       <Link to={`/chat?contactId=${b.photographerId}&name=${encodeURIComponent(b.photographerName)}`} className="flex-1">
                         <Button variant="secondary" className="w-full text-sm py-2 border-zinc-800">Contactar Fotógrafo</Button>
                       </Link>
@@ -71,6 +98,15 @@ const ClientBookings = () => {
                         <Button variant="primary" className="w-full text-sm py-2">Ver Perfil</Button>
                       </Link>
                     </div>
+                    {b.status === 'Finalizada' && (
+                      <button
+                        type="button"
+                        onClick={() => rateBooking(b.id)}
+                        className="mt-3 text-xs font-semibold text-amber-300 hover:text-amber-200"
+                      >
+                        {b.rating ? `Calificación guardada: ${b.rating}/5` : 'Calificar sesión'}
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -84,6 +120,17 @@ const ClientBookings = () => {
           </>
         )}
       </div>
+      <PaymentModal
+        isOpen={!!payingBooking}
+        onClose={() => setPayingBooking(null)}
+        booking={payingBooking}
+        onPaid={(payment) => {
+          if (payingBooking) {
+            setPayments((prev) => ({ ...prev, [payingBooking.id]: payment }))
+          }
+          setPayingBooking(null)
+        }}
+      />
     </div>
   )
 }

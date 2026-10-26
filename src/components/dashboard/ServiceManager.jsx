@@ -97,7 +97,7 @@ const ServiceWizard = ({ isOpen, onClose, onSave, editData, user }) => {
       features,
       status: form.status,
       authorId: user?.id || 1,
-      authorName: user?.username || user?.first_name || 'Fotógrafo LuxArts',
+      authorName: user?.username || user?.first_name || 'Fotógrafo LuxArs',
       authorAvatar: `https://i.pravatar.cc/150?img=${((user?.id || 1) % 70) + 1}`,
       verified: true,
     }

@@ -90,29 +90,19 @@ const UploadModal = ({ isOpen, onClose, onPublished, onLimitReached }) => {
       if (form.type === 'video') fd.append('video_url', form.url)
       if (form.type === 'imagen' && file) fd.append('file', file)
 
-      // Usa servicio real con parsers multipart
+      // Sube la obra al backend y guarda el objeto real devuelto por el servidor
+      let saved = null
       try {
-        await createPortfolioItem(fd)
+        saved = await createPortfolioItem(fd)
       } catch (err) {
         if (err?.response?.status === 404) {
           await apiClient.post('works/', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
-        } else {
-          throw err
-        }
       }
 
       setToast({ msg: 'Obra publicada con éxito.', type: 'success' })
       setTimeout(() => {
-        onPublished?.({
-          id: Date.now(),
-          title: form.title,
-          category: form.category,
-          image: preview || 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=600&h=400&fit=crop',
-          likes: 0,
-          views: 0,
-          type: form.type,
-          media_type: form.type,
-        })
+        // Devuelve la obra persistida (id real, URL del archivo, estado de moderación)
+        onPublished?.(saved)
         onClose()
       }, 600)
     } catch (err) {

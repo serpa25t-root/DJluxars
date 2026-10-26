@@ -52,6 +52,37 @@ export const updateBookingStatus = (id, status) => {
   return list
 }
 
+export const completeBooking = async (id) => {
+  try {
+    const res = await api.patch(`bookings/${id}/complete/`)
+    updateBookingStatus(id, 'Finalizada')
+    return normalizeBooking(res.data)
+  } catch (err) {
+    if (err?.response?.status && err.response.status !== 404) throw err
+    const list = updateBookingStatus(id, 'Finalizada')
+    return list.find((b) => b.id === id)
+  }
+}
+
+export const saveBookingRating = async (bookingId, rating) => {
+  const value = Number(rating)
+  if (!Number.isInteger(value) || value < 1 || value > 5) {
+    throw new Error('La calificación debe estar entre 1 y 5.')
+  }
+
+  try {
+    await api.post(`bookings/${bookingId}/review/`, { rating: value })
+  } catch (err) {
+    if (err?.response?.status && err.response.status !== 404) throw err
+  }
+
+  const ratings = JSON.parse(localStorage.getItem('luxarts_ratings') || '{}')
+  ratings[bookingId] = value
+  localStorage.setItem('luxarts_ratings', JSON.stringify(ratings))
+  window.dispatchEvent(new Event('luxarts-stats-updated'))
+  return value
+}
+
 export const seedIfEmpty = () => {
   if (getBookings().length > 0) return
   const seed = [
@@ -134,7 +165,7 @@ export const createBooking = async (payload) => {
         photographerName: payload.photographer_name || 'Fotógrafo',
         photographerAvatar: `https://i.pravatar.cc/150?img=${(payload.photographer % 70) + 1}`,
         specialty: 'General',
-        clientName: 'Cliente LuxArts',
+        clientName: 'Cliente LuxArs',
         clientEmail: 'cliente@luxarts.com',
         date: payload.date,
         service: payload.service,
@@ -187,9 +218,11 @@ const normalizeBooking = (raw) => {
     id: raw.id,
     photographerId: raw.photographer || raw.photographerId || raw.artist || 0,
     photographerName: raw.photographer_name || raw.photographerName || raw.artist_name || 'Fotógrafo',
-    photographerAvatar: raw.photographerAvatar || `https://i.pravatar.cc/150?img=${(raw.photographer % 70) + 1}`,
+    photographerAvatar: raw.photographer_avatar || raw.photographerAvatar || `https://i.pravatar.cc/150?img=${(raw.photographer % 70) + 1}`,
     specialty: raw.specialty || raw.category || 'General',
-    clientName: raw.clientName || raw.client_name || raw.client || 'Cliente',
+    clientId: typeof raw.client === 'number' ? raw.client : (raw.clientId || 0),
+    clientName: raw.clientName || raw.client_name || 'Cliente',
+    clientAvatar: raw.client_avatar || raw.clientAvatar || `https://i.pravatar.cc/150?img=${((raw.client || 0) % 70) + 1}`,
     clientEmail: raw.clientEmail || raw.client_email || '',
     date: raw.date || raw.event_date || '',
     service: raw.service || raw.service_type || '',

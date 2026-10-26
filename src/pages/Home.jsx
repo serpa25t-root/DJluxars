@@ -1,84 +1,140 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Heart, User, Sparkles, CalendarDays, Package, Mountain, ShieldCheck, Lock, CreditCard, Headphones, Award, ArrowRight, Play } from 'lucide-react'
+import { ArrowRight, Camera, Aperture, Award, ShieldCheck, Clock, Star, ChevronRight } from 'lucide-react'
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
 import { useAuth } from '../context/AuthContext'
+import { getPlatformStats } from '../services/platformStats'
 
-const categories = [
+const portfolioItems = [
+  {
+    id: 1,
+    src: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=80&fm=webp&fit=crop',
+    title: 'Boda Campestre',
+    category: 'Bodas',
+    layout: 'tall-left',
+  },
+  {
+    id: 2,
+    src: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&q=80&fm=webp&fit=crop',
+    title: 'Retrato Editorial',
+    category: 'Retrato',
+    layout: 'horizontal-top',
+  },
+  {
+    id: 3,
+    src: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&q=80&fm=webp&fit=crop',
+    title: 'Moda Urbana',
+    category: 'Moda',
+    layout: 'tall-right',
+  },
+  {
+    id: 4,
+    src: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=600&q=80&fm=webp&fit=crop',
+    title: 'Evento Corporativo',
+    category: 'Eventos',
+    layout: 'horizontal-bottom-left',
+  },
+  {
+    id: 5,
+    src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80&fm=webp&fit=crop',
+    title: 'Producto Premium',
+    category: 'Producto',
+    layout: 'tall-middle',
+  },
+  {
+    id: 6,
+    src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80&fm=webp&fit=crop',
+    title: 'Paisaje Andino',
+    category: 'Paisajes',
+    layout: 'horizontal-bottom-right',
+  },
+]
+
+const services = [
+  {
+    id: 'sesion',
+    icon: Camera,
+    title: 'Sesión Fotográfica',
+    desc: 'Retratos, book profesional o sesión personal con dirección creativa completa.',
+    price: 'Desde $350.000',
+    features: ['2-3 horas de sesión', '25 fotos editadas', 'Galería privada online'],
+  },
   {
     id: 'bodas',
-    title: 'Bodas',
-    desc: 'Amor eterno capturado',
-    icon: Heart,
-    image: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=800&fit=crop',
+    icon: Aperture,
+    title: 'Cobertura de Bodas',
+    desc: 'Cobertura cinematográfica completa del día más importante de tu vida.',
+    price: 'Desde $850.000',
+    features: ['8 horas de cobertura', '120 fotos editadas', 'Álbum digital + teaser'],
   },
   {
-    id: 'retrato',
-    title: 'Retrato',
-    desc: 'Tu esencia revelada',
-    icon: User,
-    image: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&h=800&fit=crop',
+    id: 'comercial',
+    icon: Award,
+    title: 'Fotografía Comercial',
+    desc: 'Catálogo de producto, campañas y contenido visual para tu marca.',
+    price: 'Desde $420.000',
+    features: ['4 horas en estudio', '40 fotos HD', 'Retoque premium'],
+  },
+]
+
+const heroSlides = [
+  {
+    src: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=1280&q=65&fm=webp&fit=crop',
+    alt: 'Pareja durante una sesión fotográfica profesional',
   },
   {
-    id: 'moda',
-    title: 'Moda',
-    desc: 'Estilo y vanguardia',
-    icon: Sparkles,
-    image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&h=800&fit=crop',
+    src: 'https://images.unsplash.com/photo-1554048612-b6a482bc67e5?w=1280&q=65&fm=webp&fit=crop',
+    alt: 'Fotógrafo preparando una sesión profesional',
   },
   {
-    id: 'eventos',
-    title: 'Eventos',
-    desc: 'Momentos inolvidables',
-    icon: CalendarDays,
-    image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=600&h=800&fit=crop',
+    src: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=1280&q=65&fm=webp&fit=crop',
+    alt: 'Cámara profesional en una sesión fotográfica',
   },
   {
-    id: 'producto',
-    title: 'Producto',
-    desc: 'Tu marca, impecable',
-    icon: Package,
-    image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=800&fit=crop',
-  },
-  {
-    id: 'paisajes',
-    title: 'Paisajes',
-    desc: 'La naturaleza sublime',
-    icon: Mountain,
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=800&fit=crop',
+    src: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=1280&q=65&fm=webp&fit=crop',
+    alt: 'Sesión fotográfica al aire libre',
   },
 ]
 
 const Home = () => {
   const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
+  const [activeHeroSlide, setActiveHeroSlide] = useState(0)
+  const [platformStats, setPlatformStats] = useState({
+    sessions: 0,
+    rating: 0,
+    satisfaction: 0,
+    supportHours: 0,
+  })
 
-  // SCRUM-32 Part 2: protección acciones públicas — redirige a /login si no autenticado
-  const handleBooking = (photographer) => {
-    if (!isAuthenticated) {
-      navigate('/login')
-      return
-    }
+  const loadStats = () => {
+    getPlatformStats().then(setPlatformStats)
   }
-  const handleChat = (photographerId) => {
-    if (!isAuthenticated) {
-      navigate('/login')
-      return
-    }
-    navigate(`/chat?photographer=${photographerId}`)
-  }
-  const handleContact = handleChat
-  const openBookingModal = handleBooking
 
-  void handleBooking; void handleChat; void handleContact; void openBookingModal
+  useEffect(() => {
+    loadStats()
+    window.addEventListener('luxarts-stats-updated', loadStats)
+    return () => window.removeEventListener('luxarts-stats-updated', loadStats)
+  }, [])
 
-  // Redirección desde Home a la sección de fotógrafos
-  const handleCategoryClick = (cat) => navigate('/fotografos?category=' + encodeURIComponent(cat))
   const handleExplore = () => navigate('/fotografos')
-  void handleCategoryClick; void handleExplore
+  const handleBooking = () => {
+    if (!isAuthenticated) {
+      navigate('/login')
+      return
+    }
+    navigate('/fotografos')
+  }
 
-  // SCRUM-33 reveal-on-scroll para secciones intermedias (respeta prefers-reduced-motion)
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setActiveHeroSlide((current) => (current + 1) % heroSlides.length)
+    }, 6500)
+
+    return () => window.clearInterval(interval)
+  }, [])
+
   useEffect(() => {
     const els = document.querySelectorAll('.reveal')
     if (!('IntersectionObserver' in window) || els.length === 0) {
@@ -94,298 +150,390 @@ const Home = () => {
           }
         })
       },
-      { threshold: 0.15 }
+      { threshold: 0.12 }
     )
     els.forEach((el) => observer.observe(el))
     return () => observer.disconnect()
   }, [])
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#08080a] text-white selection:bg-red-600 selection:text-white">
+    <div className="min-h-screen flex flex-col bg-lux-dark text-white selection:bg-lux-accent selection:text-white">
       <Navbar />
 
       <main className="flex-1">
-        {/* HERO SECTION */}
-        <section className="relative overflow-hidden bg-[#08080a]">
-          {/* subtle crimson glows */}
-          <div className="absolute inset-0 bg-[#08080a]" />
-          <div className="absolute -top-40 left-1/2 -translate-x-1/2 h-[800px] w-[1200px] rounded-full bg-red-600/[0.04] blur-[140px] pointer-events-none" />
-          <div className="absolute top-[20%] -right-48 h-[600px] w-[600px] rounded-full bg-red-900/10 blur-[140px] pointer-events-none" />
-          <div className="absolute bottom-0 left-0 h-[1px] w-full bg-gradient-to-r from-transparent via-red-600/15 to-transparent" />
+        {/* ══════════════════════════════════════════════════════════════
+            HERO — Estudio cinematográfico
+        ══════════════════════════════════════════════════════════════ */}
+        <section className="relative min-h-[100svh] flex items-center overflow-hidden">
+          {/* Carrusel de imágenes cinematográficas */}
+          <div className="absolute inset-0">
+            {heroSlides.map((slide, index) => (
+              <img
+                key={slide.src}
+                src={slide.src}
+                srcSet={`${slide.src.replace('w=1280', 'w=640')} 640w, ${slide.src} 1280w`}
+                sizes="100vw"
+                width="1280"
+                height="853"
+                alt={slide.alt}
+                aria-hidden={index !== activeHeroSlide}
+                fetchPriority={index === 0 ? 'high' : 'auto'}
+                loading={index === 0 ? 'eager' : 'lazy'}
+                decoding="async"
+                className={`absolute inset-0 h-full w-full object-cover ${
+                  index === 0 && activeHeroSlide === 0
+                    ? 'opacity-100'
+                    : `transition-opacity duration-[1400ms] ease-in-out ${
+                        index === activeHeroSlide ? 'opacity-100' : 'opacity-0'
+                      }`
+                }`}
+              />
+            ))}
+            <div className="absolute inset-0 bg-gradient-to-r from-lux-dark via-lux-dark/80 to-lux-dark/30" />
+            <div className="absolute inset-0 bg-gradient-to-t from-lux-dark via-transparent to-lux-dark/60" />
+            {/* Viñeta cinematográfica */}
+            <div className="absolute inset-0 shadow-[inset_0_0_200px_rgba(0,0,0,0.8)]" />
+          </div>
 
-          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 lg:py-16">
-            <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-8">
-              {/* Left */}
-              <div className="lg:col-span-7 text-center lg:text-left">
-                {/* Badge */}
-                <div className="flex justify-center lg:justify-start animate-[fadeInUp_600ms_var(--ease-out-quart)_both]">
-                  <div className="inline-flex items-center gap-2.5 rounded-full border border-red-600/20 bg-red-600/10 px-4 py-1.5 backdrop-blur-md">
-                    <span className="h-2 w-2 rounded-full bg-red-600 animate-pulse shadow-sm shadow-red-600/50" />
-                    <span className="text-[11px] font-semibold tracking-widest text-red-300 uppercase">
-                      LA PLATAFORMA Nº1 PARA FOTOGRAFÍA PROFESIONAL
-                    </span>
-                  </div>
-                </div>
+          {/* Contenido */}
+          <div className="relative mx-auto max-w-7xl px-6 sm:px-8 lg:px-12 py-24 lg:py-32">
+            <div className="max-w-2xl">
+              {/* Badge */}
+              <div className="animate-[fadeInUp_700ms_var(--ease-out-quart)_both]">
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 backdrop-blur-md">
+                  <span className="h-1.5 w-1.5 rounded-full bg-lux-accent animate-pulse" />
+                  <span className="text-[11px] font-semibold tracking-[0.25em] text-zinc-300 uppercase">
+                    Estudio de Fotografía
+                  </span>
+                </span>
+              </div>
 
-                {/* Título */}
-                <h1 className="mt-6 font-display text-5xl font-bold tracking-tight leading-[0.95] sm:text-6xl lg:text-7xl animate-[fadeInUp_600ms_var(--ease-out-quart)_80ms_both]">
-                  <span className="block text-white">Tu historia</span>
-                  <span className="block text-white">merece ser</span>
-                  <span className="block text-red-600 font-display italic font-normal">extraordinaria.</span>
-                </h1>
+              {/* Título principal */}
+              <h1 className="mt-8 font-display text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold leading-[0.92] tracking-tight animate-[fadeInUp_700ms_var(--ease-out-quart)_100ms_both]">
+                <span className="block text-white">Capturamos</span>
+                <span className="block text-white">tu esencia,</span>
+                <span className="block font-display italic font-normal text-lux-accent">creamos arte.</span>
+              </h1>
 
-                <p className="mt-5 max-w-xl mx-auto lg:mx-0 text-[15px] leading-relaxed text-zinc-400 sm:text-[17px] animate-[fadeInUp_600ms_var(--ease-out-quart)_140ms_both]">
-                  Conectamos tu visión con fotógrafos excepcionales. Cada imagen cuenta una historia, cada historia merece ser inmortalizada.
-                </p>
+              {/* Descripción */}
+              <p className="mt-6 max-w-lg text-base sm:text-lg leading-relaxed text-zinc-400 animate-[fadeInUp_700ms_var(--ease-out-quart)_200ms_both]">
+                Conectamos tu visión con fotógrafos excepcionales. Cada imagen cuenta una historia, cada historia merece ser inmortalizada.
+              </p>
 
-                {/* Botones */}
-                <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start animate-[fadeInUp_600ms_var(--ease-out-quart)_200ms_both]">
-                  <button
-                    onClick={handleExplore}
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-red-600 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-red-600/15 hover:bg-red-700 hover:shadow-lg hover:shadow-red-600/20 active:scale-[0.98] transition-all duration-200 will-change-transform"
-                  >
-                    Explorar fotógrafos ➔
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
-                  <a
-                    href="#como-funciona"
-                    className="inline-flex items-center justify-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/50 px-7 py-3.5 text-sm font-semibold text-white hover:bg-zinc-800 hover:border-zinc-700 active:scale-[0.98] transition-all duration-200"
-                  >
-                    Cómo funciona ▷
-                    <Play className="h-3.5 w-3.5 fill-white" />
-                  </a>
-                </div>
+              {/* CTAs */}
+              <div className="mt-10 flex flex-col sm:flex-row gap-4 animate-[fadeInUp_700ms_var(--ease-out-quart)_300ms_both]">
+                <button
+                  onClick={handleExplore}
+                  className="group inline-flex items-center justify-center gap-2.5 rounded-full bg-lux-accent px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-lux-accent/25 hover:bg-lux-accentHover hover:shadow-lux-accent/40 active:scale-[0.98] transition-all duration-300"
+                >
+                  Explorar fotógrafos
+                  <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                </button>
+                <a
+                  href="#portafolio"
+                  className="inline-flex items-center justify-center gap-2.5 rounded-full border border-white/15 bg-white/5 px-8 py-4 text-sm font-semibold text-white backdrop-blur-md hover:bg-white/10 hover:border-white/25 active:scale-[0.98] transition-all duration-300"
+                >
+                  Ver portafolio
+                </a>
+              </div>
 
-                </div>
-
-              {/* Right — Imagen fotógrafo */}
-              <div className="lg:col-span-5 relative flex justify-center lg:justify-end">
-                <div className="relative w-full max-w-[420px] animate-[scaleIn_700ms_var(--ease-out-expo)_180ms_both] will-change-transform">
-                  <div className="relative overflow-hidden rounded-[28px] border border-zinc-800/60 bg-zinc-900 aspect-[4/5] shadow-2xl shadow-black/50">
+              {/* Stats inline */}
+              <div className="mt-14 flex items-center gap-8 animate-[fadeInUp_700ms_var(--ease-out-quart)_400ms_both]">
+                <div className="flex -space-x-2.5">
+                  {[33, 14, 47, 25].map((img) => (
                     <img
-                      src="https://images.unsplash.com/photo-1554048612-b6a482bc67e5?auto=format&fit=crop&w=1000&q=80"
-                      alt="Fotógrafo profesional sosteniendo cámara"
-                      className="object-cover w-full h-full"
-                      loading="eager"
+                      key={img}
+                      src={`https://i.pravatar.cc/80?img=${img}`}
+                      alt="Cliente LuxArs"
+                      className="h-9 w-9 rounded-full border-2 border-lux-dark object-cover"
+                      loading="lazy"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                  ))}
+                </div>
+                <div>
+                  <div className="flex items-center gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`h-3.5 w-3.5 ${
+                          i < Math.round(platformStats.rating)
+                            ? 'fill-amber-400 text-amber-400'
+                            : 'text-zinc-600'
+                        }`}
+                      />
+                    ))}
+                    <span className="ml-1.5 text-sm font-bold text-white">{platformStats.rating.toFixed(1)}</span>
                   </div>
-
-                  {/* Badge flotante circular CALIDAD VERIFICADA */}
-                  <div className="absolute -bottom-4 -left-4 sm:-left-6 flex items-center gap-3 rounded-full border border-zinc-800/80 bg-zinc-900/90 backdrop-blur-xl pl-2 pr-5 py-2 shadow-xl shadow-black/40 animate-[fadeInUp_500ms_var(--ease-out-quart)_600ms_both]">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500 text-white shadow-md">
-                      <Award className="h-5 w-5" />
-                    </div>
-                    <div className="text-left">
-                      <p className="text-xs font-bold tracking-widest text-white leading-none">CALIDAD VERIFICADA</p>
-                      <p className="text-[11px] text-zinc-400 leading-none mt-1">Fotógrafos certificados</p>
-                    </div>
-                  </div>
-
-                  {/* Decor glow */}
-                  <div className="absolute -z-10 -bottom-6 -right-6 h-32 w-32 rounded-full bg-red-600/20 blur-2xl pointer-events-none" />
+                  <p className="text-xs text-zinc-500 mt-0.5">{platformStats.sessions} sesiones realizadas</p>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Indicador scroll */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-[fadeIn_1000ms_var(--ease-out-quart)_800ms_both]">
+            <span className="text-[10px] tracking-[0.3em] text-zinc-500 uppercase">Scroll</span>
+            <div className="h-8 w-px bg-gradient-to-b from-zinc-500 to-transparent" />
+          </div>
+
+          <div className="absolute bottom-8 right-6 flex items-center gap-2 sm:right-8 lg:right-12">
+            {heroSlides.map((slide, index) => (
+              <button
+                key={slide.src}
+                type="button"
+                aria-label={`Ver imagen ${index + 1} del carrusel`}
+                aria-current={index === activeHeroSlide ? 'true' : undefined}
+                onClick={() => setActiveHeroSlide(index)}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  index === activeHeroSlide
+                    ? 'w-8 bg-lux-accent'
+                    : 'w-1.5 bg-white/40 hover:bg-white/70'
+                }`}
+              />
+            ))}
+          </div>
         </section>
 
-        {/* PRUEBA SOCIAL */}
-        <section className="reveal border-b border-zinc-900">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-5 text-center sm:text-left">
-              <div className="flex -space-x-2">
-                <img src="https://i.pravatar.cc/100?img=33" alt="Cliente de LuxArts" className="h-10 w-10 rounded-full border-2 border-[#08080a] object-cover" loading="lazy" />
-                <img src="https://i.pravatar.cc/100?img=14" alt="Cliente de LuxArts" className="h-10 w-10 rounded-full border-2 border-[#08080a] object-cover" loading="lazy" />
-                <img src="https://i.pravatar.cc/100?img=47" alt="Cliente de LuxArts" className="h-10 w-10 rounded-full border-2 border-[#08080a] object-cover" loading="lazy" />
-              </div>
+        {/* ══════════════════════════════════════════════════════════════
+            PORTAFOLIO — Galería editorial
+        ══════════════════════════════════════════════════════════════ */}
+        <section id="portafolio" className="py-24 sm:py-32">
+          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+            {/* Encabezado */}
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 reveal">
               <div>
-                <p className="text-sm font-semibold text-white">
-                  Miles de personas ya capturaron su mejor historia con LuxArts
-                </p>
-                <div className="flex items-center justify-center sm:justify-start gap-1.5 mt-1">
-                  <span className="text-red-500 text-sm tracking-widest" aria-hidden="true">★★★★★</span>
-                  <span className="text-sm font-semibold text-white">4.9/5</span>
-                  <span className="text-xs text-zinc-500">calificación promedio</span>
-                </div>
+                <span className="text-[11px] font-semibold tracking-[0.3em] text-lux-accent uppercase">
+                  Portafolio
+                </span>
+                <h2 className="mt-3 font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-tight">
+                  Trabajos que
+                  <span className="font-display italic font-normal text-lux-accent"> inspiran</span>
+                </h2>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* CATEGORÍAS */}
-        <section id="como-funciona" className="py-16 sm:py-20">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-2xl mx-auto reveal">
-              <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-white">
-                Para cada momento, el fotógrafo ideal
-              </h2>
-              <p className="mt-3 text-sm sm:text-[15px] leading-relaxed text-zinc-400">
-                Desde bodas íntimas hasta campañas editoriales, encuentra al profesional perfecto para tu visión.
+              <p className="max-w-sm text-sm leading-relaxed text-zinc-500">
+                Una selección de nuestros mejores trabajos. Cada proyecto refleja la visión única de nuestros fotógrafos.
               </p>
             </div>
 
-            <div className="mt-10 grid grid-cols-2 lg:grid-cols-6 gap-4">
-              {categories.map((cat) => {
-                const Icon = cat.icon
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => handleCategoryClick(cat.title)}
-                    className="aspect-[3/4] relative rounded-3xl overflow-hidden group border border-zinc-800/60 bg-zinc-900 hover:border-red-600/30 hover:shadow-xl hover:shadow-red-600/10 transition-all duration-300 will-change-transform text-left w-full cursor-pointer"
-                  >
-                    <img
-                      src={cat.image}
-                      alt={cat.title}
-                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 will-change-transform"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-                    <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors duration-300" />
+            {/* Grid masonry */}
+            <div className="mt-12 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+              {portfolioItems.map((item, idx) => (
+                <div
+                  key={item.id}
+                  className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-zinc-800/50 bg-zinc-900 cursor-pointer reveal"
+                  style={{ transitionDelay: `${idx * 80}ms` }}
+                >
+                  <img
+                    src={item.src}
+                    alt={item.title}
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                    loading="lazy"
+                  />
+                  {/* Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-90 transition-opacity duration-500" />
+                  {/* Info */}
+                  <div className="absolute bottom-0 left-0 right-0 p-5 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+                    <span className="text-[10px] font-semibold tracking-[0.2em] text-lux-accent uppercase">
+                      {item.category}
+                    </span>
+                    <h3 className="mt-1 font-display text-lg font-bold text-white">
+                      {item.title}
+                    </h3>
+                  </div>
+                  {/* Hover border */}
+                  <div className="absolute inset-0 rounded-2xl border-2 border-lux-accent/0 group-hover:border-lux-accent/40 transition-colors duration-500" />
+                </div>
+              ))}
+            </div>
 
-                    {/* Icon */}
-                    <div className="absolute top-4 left-4 flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 backdrop-blur-md border border-white/15 text-white group-hover:bg-red-600 group-hover:border-red-600 transition-colors duration-300">
+            {/* CTA ver más */}
+            <div className="mt-10 text-center reveal">
+              <button
+                onClick={handleExplore}
+                className="group inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/50 px-7 py-3 text-sm font-semibold text-white hover:border-lux-accent/40 hover:bg-zinc-900 transition-all duration-300"
+              >
+                Ver todo el portafolio
+                <ChevronRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════════════════════
+            SERVICIOS — Tarjetas elegantes
+        ══════════════════════════════════════════════════════════════ */}
+        <section id="servicios" className="py-24 sm:py-32 bg-lux-surface">
+          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+            {/* Encabezado */}
+            <div className="text-center max-w-2xl mx-auto reveal">
+              <span className="text-[11px] font-semibold tracking-[0.3em] text-lux-accent uppercase">
+                Servicios
+              </span>
+              <h2 className="mt-3 font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-tight">
+                Experiencias
+                <span className="font-display italic font-normal text-lux-accent"> fotográficas</span>
+              </h2>
+              <p className="mt-4 text-sm sm:text-base leading-relaxed text-zinc-500">
+                Elige la experiencia que se adapta a tu historia. Tarifas transparentes y entrega garantizada.
+              </p>
+            </div>
+
+            {/* Grid de servicios */}
+            <div className="mt-14 grid grid-cols-1 md:grid-cols-3 gap-6">
+              {services.map((service, idx) => {
+                const Icon = service.icon
+                return (
+                  <div
+                    key={service.id}
+                    className="group relative rounded-2xl border border-zinc-800/60 bg-lux-dark p-8 hover:border-lux-accent/30 hover:shadow-xl hover:shadow-lux-accent/5 transition-all duration-500 reveal"
+                    style={{ transitionDelay: `${idx * 100}ms` }}
+                  >
+                    {/* Icono */}
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-lux-accent/10 border border-lux-accent/20 text-lux-accent group-hover:bg-lux-accent group-hover:text-white transition-all duration-500">
                       <Icon className="h-5 w-5" />
                     </div>
 
-                    {/* Text */}
-                    <div className="absolute bottom-0 left-0 right-0 p-4">
-                      <h3 className="font-semibold text-white text-sm">{cat.title}</h3>
-                      <p className="text-xs text-zinc-300 mt-0.5 line-clamp-1">{cat.desc}</p>
-                      <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-white/80 group-hover:text-white transition-colors">
-                        Explorar
-                        <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
+                    {/* Contenido */}
+                    <h3 className="mt-6 font-display text-xl font-bold text-white">
+                      {service.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+                      {service.desc}
+                    </p>
+
+                    {/* Features */}
+                    <ul className="mt-5 space-y-2">
+                      {service.features.map((f) => (
+                        <li key={f} className="flex items-center gap-2 text-xs text-zinc-400">
+                          <span className="h-1 w-1 rounded-full bg-lux-accent" />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* Precio + CTA */}
+                    <div className="mt-8 flex items-center justify-between">
+                      <span className="font-display text-lg font-bold text-white">
+                        {service.price}
                       </span>
+                      <button
+                        onClick={handleBooking}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-zinc-800 px-4 py-2 text-xs font-semibold text-white hover:bg-lux-accent hover:border-lux-accent transition-all duration-300"
+                      >
+                        Reservar
+                        <ArrowRight className="h-3 w-3" />
+                      </button>
                     </div>
-                  </button>
+                  </div>
                 )
               })}
             </div>
           </div>
         </section>
 
-        {/* BANNER ESTADÍSTICAS */}
-        <section className="px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-6xl">
-            <div className="bg-zinc-900/40 border border-zinc-800/60 rounded-3xl p-8 flex justify-between items-center text-center max-w-6xl mx-auto mt-16 hidden" aria-hidden="true" />
-            <div className="bg-zinc-900/40 border border-zinc-800/60 rounded-3xl p-8 flex flex-col sm:flex-row justify-between items-center text-center gap-8 sm:gap-4 mt-4 reveal">
-              <div className="flex-1">
-                <p className="font-display text-3xl sm:text-4xl font-bold text-white">6<span className="text-red-600">+</span><span className="sr-only">6+</span></p>
-                <p className="mt-1 text-xs font-medium uppercase tracking-widest text-zinc-500">Categorías de fotografía</p>
-                <span className="hidden">6+</span>
+        {/* ══════════════════════════════════════════════════════════════
+            RESERVA — CTA cinematográfico
+        ══════════════════════════════════════════════════════════════ */}
+        <section id="reserva" className="relative py-24 sm:py-32 overflow-hidden">
+          {/* Fondo */}
+          <div className="absolute inset-0">
+            <img
+              src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=1000&q=80&fm=webp&fit=crop"
+              alt="Cámara en estudio"
+              className="h-full w-full object-cover"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-lux-dark/85" />
+            <div className="absolute inset-0 bg-gradient-to-b from-lux-dark via-transparent to-lux-dark" />
+          </div>
+
+          <div className="relative mx-auto max-w-4xl px-6 sm:px-8 text-center">
+            <div className="reveal">
+              <span className="text-[11px] font-semibold tracking-[0.3em] text-lux-accent uppercase">
+                Reserva tu sesión
+              </span>
+              <h2 className="mt-4 font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-tight">
+                ¿Listo para capturar
+                <span className="font-display italic font-normal text-lux-accent"> algo increíble?</span>
+              </h2>
+              <p className="mt-5 max-w-xl mx-auto text-sm sm:text-base leading-relaxed text-zinc-400">
+                Únete a miles de clientes que ya encontraron a su fotógrafo ideal. Tu próxima gran historia está a un clic de distancia.
+              </p>
+
+              <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button
+                  onClick={handleBooking}
+                  className="group inline-flex items-center justify-center gap-2.5 rounded-full bg-lux-accent px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-lux-accent/25 hover:bg-lux-accentHover hover:shadow-lux-accent/40 active:scale-[0.98] transition-all duration-300"
+                >
+                  Reservar ahora
+                  <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                </button>
+                <Link
+                  to="/register"
+                  className="inline-flex items-center justify-center gap-2.5 rounded-full border border-white/15 bg-white/5 px-8 py-4 text-sm font-semibold text-white backdrop-blur-md hover:bg-white/10 hover:border-white/25 active:scale-[0.98] transition-all duration-300"
+                >
+                  Crear cuenta
+                </Link>
               </div>
-              <div className="hidden sm:block h-12 w-px bg-zinc-800" />
-              <div className="flex-1">
-                <p className="font-display text-3xl sm:text-4xl font-bold text-white">4<span className="text-red-600">+</span><span className="sr-only">4+</span></p>
-                <p className="mt-1 text-xs font-medium uppercase tracking-widest text-zinc-500">Fotógrafos verificados</p>
-                <span className="hidden">4+</span>
-              </div>
-              <div className="hidden sm:block h-12 w-px bg-zinc-800" />
-              <div className="flex-1">
-                <p className="font-display text-3xl sm:text-4xl font-bold text-white">4<span className="text-red-600">+</span><span className="sr-only">4+</span></p>
-                <p className="mt-1 text-xs font-medium uppercase tracking-widest text-zinc-500">Servicios disponibles</p>
-                <span className="hidden">4+</span>
-              </div>
-              <div className="hidden sm:block h-12 w-px bg-zinc-800" />
-              <div className="flex-1">
-                <p className="font-display text-3xl sm:text-4xl font-bold text-white">$350<span className="text-red-600">K</span><span className="sr-only">$350K</span></p>
-                <p className="mt-1 text-xs font-medium uppercase tracking-widest text-zinc-500">Desde por servicio (COP)</p>
-                <span className="hidden">$350K</span>
+
+              {/* Badges de confianza */}
+              <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-zinc-500">
+                <span className="inline-flex items-center gap-2 text-xs">
+                  <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                  Reservas seguras
+                </span>
+                <span className="inline-flex items-center gap-2 text-xs">
+                  <Clock className="h-4 w-4" />
+                  Entrega garantizada
+                </span>
+                <span className="inline-flex items-center gap-2 text-xs">
+                  <Award className="h-4 w-4 text-amber-500" />
+                  Calidad verificada
+                </span>
               </div>
             </div>
           </div>
         </section>
 
-        {/* CALL TO ACTION */}
-        <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
-          <div className="mx-auto max-w-6xl">
-            <div className="relative overflow-hidden rounded-[32px] border border-zinc-800 bg-zinc-900">
-              {/* Background lens image right */}
-              <div className="absolute inset-0">
-                <img
-                  src="https://images.unsplash.com/photo-1452780212940-6f5c84d207f1?w=1600&h=900&fit=crop"
-                  alt="Lente de cámara de alta gama"
-                  className="h-full w-full object-cover"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-950/90 to-zinc-950/60 sm:to-zinc-950/30" />
-                <div className="absolute inset-0 bg-black/20" />
-              </div>
-
-              <div className="relative grid lg:grid-cols-2 gap-8 p-8 sm:p-10 lg:p-12 items-center reveal">
-                <div>
-                  <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-white leading-tight">
-                    ¿Listo para capturar algo increíble?
-                  </h2>
-                  <p className="mt-3 text-sm sm:text-[15px] leading-relaxed text-zinc-300 max-w-xl">
-                    Únete a miles de clientes que ya encontraron a su fotógrafo ideal. Tu próxima gran historia está a un clic de distancia.
+        {/* ══════════════════════════════════════════════════════════════
+            STATS — Barra de estadísticas
+        ══════════════════════════════════════════════════════════════ */}
+        <section className="border-y border-zinc-800/50 bg-lux-surface">
+          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12 py-12">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+              {[
+                { value: platformStats.sessions, label: 'Sesiones realizadas' },
+                { value: platformStats.rating.toFixed(1), label: 'Calificación promedio' },
+                { value: `${platformStats.satisfaction}%`, label: 'Clientes satisfechos' },
+                { value: `${platformStats.supportHours}h`, label: 'Soporte disponible' },
+              ].map((stat, idx) => (
+                <div key={stat.label} className="text-center reveal" style={{ transitionDelay: `${idx * 80}ms` }}>
+                  <p className="font-display text-3xl sm:text-4xl font-bold text-white">
+                    {stat.value}
                   </p>
-
-                  <div className="mt-8 flex flex-col sm:flex-row gap-3">
-                    <button
-                      onClick={handleExplore}
-                      className="inline-flex items-center justify-center gap-2 rounded-full bg-red-600 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-red-600/15 hover:bg-red-700 transition-colors active:scale-[0.98]"
-                    >
-                      Ver fotógrafos
-                      <ArrowRight className="h-4 w-4" />
-                    </button>
-                    <Link
-                      to="/register"
-                      className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 backdrop-blur-md px-7 py-3.5 text-sm font-semibold text-white hover:bg-white hover:text-zinc-900 transition-colors active:scale-[0.98]"
-                    >
-                      Publica tu proyecto
-                      <span className="text-lg leading-none">+</span>
-                    </Link>
-                  </div>
-
-                  {/* Badges confianza */}
-                  <div className="mt-8 flex flex-wrap gap-3">
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md px-3 py-1.5 text-xs font-medium text-zinc-200">
-                      <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-                      Reservas seguras
-                    </span>
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md px-3 py-1.5 text-xs font-medium text-zinc-200">
-                      <CreditCard className="h-3.5 w-3.5 text-zinc-400" />
-                      Pago simulado
-                    </span>
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md px-3 py-1.5 text-xs font-medium text-zinc-200">
-                      <Headphones className="h-3.5 w-3.5 text-zinc-400" />
-                      Soporte 24/7
-                    </span>
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md px-3 py-1.5 text-xs font-medium text-zinc-200">
-                      <Award className="h-3.5 w-3.5 text-amber-400" />
-                      Calidad garantizada
-                    </span>
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md px-3 py-1.5 text-xs font-medium text-zinc-200 hidden sm:inline-flex">
-                      <Lock className="h-3.5 w-3.5 text-zinc-400" />
-                      Datos protegidos
-                    </span>
-                  </div>
+                  <p className="mt-1 text-[11px] font-medium tracking-[0.15em] text-zinc-500 uppercase">
+                    {stat.label}
+                  </p>
                 </div>
-
-                {/* Spacer for image visibility on desktop */}
-                <div className="hidden lg:block" />
-              </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* FOOTER DE MARCAS */}
-        <section className="border-t border-zinc-900 py-10">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <p className="text-center text-[11px] font-semibold tracking-[0.2em] text-zinc-500 uppercase reveal">
-              CONFÍAN EN LUXARTS
+        {/* ══════════════════════════════════════════════════════════════
+            MARCAS — Footer de confianza
+        ══════════════════════════════════════════════════════════════ */}
+        <section className="py-16">
+          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+            <p className="text-center text-[11px] font-semibold tracking-[0.3em] text-zinc-600 uppercase reveal">
+              Equipo profesional recomendado
             </p>
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-6 sm:gap-10 opacity-60 grayscale">
-              <span className="font-display text-lg sm:text-xl font-bold tracking-widest text-zinc-400">Canon</span>
-              <span className="font-display text-lg sm:text-xl font-bold tracking-widest text-zinc-400">Sony</span>
-              <span className="font-display text-lg sm:text-xl font-bold tracking-widest text-zinc-400">Nikon</span>
-              <span className="font-display text-lg sm:text-xl font-bold tracking-widest text-zinc-400">Fujifilm</span>
-              <span className="font-display text-lg sm:text-xl font-bold tracking-widest text-zinc-400">DJI</span>
-              <span className="font-display text-lg sm:text-xl font-bold tracking-widest text-zinc-400">Profoto</span>
-              <span className="font-display text-lg sm:text-xl font-bold tracking-widest text-zinc-400">Tamron</span>
-              {/* Hidden variants for case-sensitive checks */}
-              <span className="hidden">Canon Sony Nikon Fujifilm DJI Profoto Tamron SONY FUJIFILM TAMRON</span>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-8 sm:gap-12 opacity-40 grayscale reveal">
+              {['Canon', 'Sony', 'Nikon', 'Fujifilm', 'DJI', 'Profoto'].map((brand) => (
+                <span key={brand} className="font-display text-lg sm:text-xl font-bold tracking-widest text-zinc-500">
+                  {brand}
+                </span>
+              ))}
             </div>
           </div>
         </section>

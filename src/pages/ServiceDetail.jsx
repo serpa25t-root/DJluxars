@@ -218,7 +218,7 @@ const ServiceDetail = () => {
                 <li className="flex items-center gap-2"><Clock className="h-3.5 w-3.5 text-zinc-500" /> Entrega estimada en 3-7 días hábiles según complejidad.</li>
                 <li className="flex items-center gap-2"><Calendar className="h-3.5 w-3.5 text-zinc-500" /> La fecha debe confirmarse mínimo con 48h de anticipación.</li>
                 <li className="flex items-center gap-2"><Award className="h-3.5 w-3.5 text-zinc-500" /> Calidad garantizada o reembolso del 50%.</li>
-                <li className="flex items-center gap-2"><ShieldCheck className="h-3.5 w-3.5 text-zinc-500" /> Pago seguro escrow a través de LuxArts.</li>
+                <li className="flex items-center gap-2"><ShieldCheck className="h-3.5 w-3.5 text-zinc-500" /> Pago seguro escrow a través de LuxArs.</li>
               </ul>
             </div>
           </div>

@@ -4,6 +4,11 @@ from rest_framework import status, permissions
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.throttling import AnonRateThrottle
 from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.core.mail import send_mail
+from django.conf import settings
 from django.db.models import Sum
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
@@ -138,10 +143,16 @@ class PublicProfileView(APIView):
 
         profile = ProfileSerializer(user, context={'request': request}).data
 
-        aggregates = PortfolioItem.objects.filter(owner=user).aggregate(
+        # Cuenta suspendida: no se exponen métricas ni obras públicas
+        if getattr(user, 'is_suspended', False):
+            profile['stats'] = {'works': 0, 'likes': 0, 'views': 0}
+            profile['is_suspended'] = True
+            return Response(profile)
+
+        aggregates = PortfolioItem.objects.public().filter(owner=user).aggregate(
             works=Sum('likes'), likes=Sum('likes'), views=Sum('views')
         )
-        works_qs = PortfolioItem.objects.filter(owner=user)
+        works_qs = PortfolioItem.objects.public().filter(owner=user)
         profile['stats'] = {
             'works': works_qs.count(),
             'likes': aggregates.get('likes') or 0,
@@ -158,8 +169,13 @@ class UserPortfolioView(APIView):
 
     def get(self, request, pk):
         from portfolio.serializers import PortfolioItemSerializer
-
-        items = PortfolioItem.objects.filter(owner_id=pk)
+        try:
+            user = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return Response({'detail': 'Perfil no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+        if getattr(user, 'is_suspended', False):
+            return Response([])
+        items = PortfolioItem.objects.public().filter(owner_id=pk)
         serializer = PortfolioItemSerializer(items, many=True, context={'request': request})
         return Response(serializer.data)
 

@@ -17,7 +17,7 @@ const AuthLayout = ({ title, subtitle, children, footer }) => {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             </div>
-            <span className="font-display text-lg font-semibold tracking-tight text-white">LuxArts</span>
+            <span className="font-display text-lg font-semibold tracking-tight text-white">LuxArs</span>
             <span className="hidden sm:inline-flex rounded-full border border-red-600/30 bg-red-600/10 px-2 py-0.5 text-[10px] font-semibold tracking-widest text-red-400">CINEMATIC</span>
           </Link>
         </div>

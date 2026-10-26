@@ -56,7 +56,7 @@ const ProSubscription = () => {
 
         <div className="relative bg-zinc-900 border-2 border-red-600 rounded-3xl p-8 shadow-[0_0_30px_rgba(220,38,38,0.15)] overflow-hidden flex flex-col">
           <span className="absolute top-0 right-0 bg-red-600 text-white text-[10px] px-3 py-1 rounded-bl-lg font-bold tracking-widest">RECOMENDADO</span>
-          <h3 className="text-lg font-bold text-white">LuxArts PRO</h3>
+          <h3 className="text-lg font-bold text-white">LuxArs PRO</h3>
           <p className="text-3xl font-bold text-white mt-2">{price}</p>
           <p className="text-sm text-zinc-400">{subPrice}</p>
           <ul className="mt-6 space-y-3 flex-1">

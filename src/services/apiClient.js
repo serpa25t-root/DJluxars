@@ -18,6 +18,8 @@ apiClient.interceptors.request.use(
     }
     if (config.data instanceof FormData) {
       delete config.headers['Content-Type']
+      // Subida de imágenes/videos: más margen que el timeout genérico
+      config.timeout = 60000
     }
     return config
   },

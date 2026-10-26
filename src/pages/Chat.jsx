@@ -1,13 +1,16 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, Fragment } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { getConversations, getMessages, sendMessage, ensureConversationForContact, markAsRead } from '../services/chatStore'
 import { useAuth } from '../context/AuthContext'
+import { useNotifications } from '../context/NotificationsContext'
+import { dayKey, formatDayLabel, formatShortWhen, formatTime } from '../utils/datetime'
 
 const Chat = () => {
   const { user } = useAuth()
   const [searchParams] = useSearchParams()
   const [conversations, setConversations] = useState([])
+  const [extraConv, setExtraConv] = useState(null)
   const [selectedId, setSelectedId] = useState(null)
   const [messages, setMessages] = useState([])
   const [showListOnMobile, setShowListOnMobile] = useState(true)
@@ -19,10 +22,12 @@ const Chat = () => {
   const pollingRef = useRef(null)
 
   const reloadConversations = async () => {
-    const data = await getConversations(user?.id)
+    const data = await getConversations()
     setConversations(data)
     return data
   }
+
+  const notifCtx = useNotifications()
 
   const loadMessages = async (cid) => {
     if (!cid) return
@@ -31,8 +36,13 @@ const Chat = () => {
       const data = await getMessages(cid)
       setMessages(data)
       await markAsRead(cid)
-      const updated = await getConversations(user?.id)
-      setConversations(updated)
+      const updated = await reloadConversations()
+      // Al abrir el chat también se marcan como leídas sus notificaciones
+      const ids = (notifCtx?.items || [])
+        .filter((n) => n.type === 'mensaje' && !n.is_read && String(n.actor?.id) === String(cid))
+        .map((n) => n.id)
+      if (ids.length) notifCtx.markRead(ids)
+      return updated
     } finally {
       setLoadingMsgs(false)
     }
@@ -47,23 +57,53 @@ const Chat = () => {
     const init = async () => {
       setLoadingConvs(true)
       const contactId = searchParams.get('contactId')
-      if (contactId) {
-        const name = searchParams.get('name') || `Contacto ${contactId}`
-        const cid = await ensureConversationForContact(contactId, name)
-        if (!mounted) return
-        setSelectedId(cid)
-        setShowListOnMobile(false)
-        await loadMessages(cid)
-      } else {
-        const convs = await getConversations(user?.id)
-        if (!mounted) return
-        setConversations(convs)
-        if (convs.length > 0 && !selectedId) {
-          setSelectedId(convs[0].id)
-          await loadMessages(convs[0].id)
+      try {
+        if (contactId) {
+          // Vínculo desde una reserva o desde un perfil: abre ese chat
+          const name = searchParams.get('name') || `Contacto ${contactId}`
+          const avatar = searchParams.get('avatar') || ''
+          const cid = await ensureConversationForContact(contactId, name)
+          if (!mounted) return
+          setSelectedId(cid)
+          setShowListOnMobile(false)
+          const convs = await getConversations()
+          if (!mounted) return
+          setConversations(convs)
+          const found = convs.find(
+            (c) => String(c.id) === String(cid) || String(c.contact?.id) === String(cid)
+          )
+          // Aún no hay mensajes con ese contacto: mostramos la tarjeta provisional
+          setExtraConv(
+            found
+              ? null
+              : {
+                  id: String(cid),
+                  contact: {
+                    id: String(cid),
+                    name,
+                    avatar: avatar || `https://i.pravatar.cc/150?img=${(Number(cid) % 70) + 1}`,
+                    specialty: searchParams.get('specialty') || '',
+                    online: false,
+                  },
+                  lastMessage: 'Conversación iniciada',
+                  unread: 0,
+                  updatedAt: new Date().toISOString(),
+                }
+          )
+          await loadMessages(cid)
+        } else {
+          setExtraConv(null)
+          const convs = await getConversations()
+          if (!mounted) return
+          setConversations(convs)
+          if (convs.length > 0 && !selectedId) {
+            setSelectedId(convs[0].id)
+            await loadMessages(convs[0].id)
+          }
         }
+      } finally {
+        if (mounted) setLoadingConvs(false)
       }
-      setLoadingConvs(false)
     }
     init()
     return () => { mounted = false }
@@ -84,8 +124,7 @@ const Chat = () => {
         if (prev[prev.length - 1]?.id !== data[data.length - 1]?.id) return data
         return prev
       })
-      const convs = await getConversations(user?.id)
-      setConversations(convs)
+      await reloadConversations()
     }, 3000)
     return () => clearInterval(pollingRef.current)
   }, [selectedId, user?.id])
@@ -99,21 +138,65 @@ const Chat = () => {
     e.preventDefault()
     const text = inputText.trim()
     if (!text || !selectedId) return
-    await sendMessage(selectedId, text, 'me')
+    try {
+      await sendMessage(selectedId, text)
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || 'No se pudo enviar el mensaje.')
+      return
+    }
     setInputText('')
-    toast.success('Mensaje enviado')
     const data = await getMessages(selectedId)
     setMessages(data)
-    const convs = await getConversations(user?.id)
-    setConversations(convs)
+    const convs = await reloadConversations()
+    // Con el primer mensaje la conversación ya existe en el servidor
+    if (convs.some((c) => String(c.id) === String(selectedId))) setExtraConv(null)
   }
 
-  const conversation = conversations.find((c) => c.id === String(selectedId) || c.contact.id === String(selectedId)) || null
+  // Conversaciones reales + la provisional del contacto abierto sin mensajes
+  const allConversations = extraConv
+    ? [extraConv, ...conversations.filter((c) => String(c.id) !== String(extraConv.id))]
+    : conversations
 
-  const filteredConvs = conversations.filter((c) => {
+  const conversation =
+    allConversations.find(
+      (c) => String(c.id) === String(selectedId) || String(c.contact?.id) === String(selectedId)
+    ) || null
+
+  const filteredConvs = allConversations.filter((c) => {
     if (!search.trim()) return true
-    return c.contact.name.toLowerCase().includes(search.toLowerCase())
+    return (c.contact?.name || '').toLowerCase().includes(search.toLowerCase())
   })
+
+  // Burbujas agrupadas por día, con separador "Hoy / Ayer / 12 de octubre"
+  const renderMessages = () => {
+    let lastDay = null
+    return messages.map((m) => {
+      const key = dayKey(m.timestamp)
+      const showLabel = key !== lastDay
+      lastDay = key
+      const isMe = m.senderId === 'me'
+      return (
+        <Fragment key={m.id}>
+          {showLabel && (
+            <div className="flex justify-center py-1">
+              <span className="rounded-full border border-zinc-800 bg-zinc-900/80 px-3 py-1 text-[11px] font-medium text-zinc-400">
+                {formatDayLabel(m.timestamp)}
+              </span>
+            </div>
+          )}
+          <div className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+            <div className={isMe ? 'ml-auto max-w-md bg-gradient-to-br from-red-600 to-red-700 text-white p-4 rounded-2xl rounded-tr-none shadow-[0_0_15px_rgba(239,68,68,0.2)] text-sm' : 'mr-auto max-w-md bg-zinc-800/80 text-zinc-100 p-4 rounded-2xl rounded-tl-none border border-zinc-700/50 text-sm'}>
+              <p className="whitespace-pre-wrap break-words">{m.text}</p>
+              <div className="mt-2 flex items-center justify-end gap-1">
+                <span className="text-[11px] opacity-70">{formatTime(m.timestamp)}</span>
+                {isMe && <span className={`text-xs ${m.is_read ? 'text-emerald-400' : 'text-red-200'}`}>{m.is_read ? '✓✓' : '✓'}</span>}
+              </div>
+            </div>
+          </div>
+        </Fragment>
+      )
+    })
+  }
 
   return (
     <div className="flex h-[calc(100vh-10rem)] min-h-[480px] bg-[#070709] text-white rounded-3xl overflow-hidden border border-zinc-800/80 shadow-2xl shadow-black/80">
@@ -122,7 +205,7 @@ const Chat = () => {
         <div className="p-4 border-b border-zinc-900">
           <div className="flex items-center justify-between">
             <h2 className="font-display text-lg font-bold text-white">Mensajes</h2>
-            <span className="text-xs text-zinc-500">{conversations.length} chats</span>
+            <span className="text-xs text-zinc-500">{allConversations.length} chats</span>
           </div>
           <div className="mt-3 relative">
             <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -147,7 +230,7 @@ const Chat = () => {
             <p className="p-6 text-sm text-zinc-500 text-center">Sin conversaciones.</p>
           ) : (
             filteredConvs.map((c) => {
-              const isSelected = String(selectedId) === String(c.id) || String(selectedId) === String(c.contact.id)
+              const isSelected = String(selectedId) === String(c.id) || String(selectedId) === String(c.contact?.id)
               return (
                 <div
                   key={c.id}
@@ -162,7 +245,7 @@ const Chat = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <p className="text-sm font-semibold text-white truncate">{c.contact.name}</p>
-                        <span className="text-[11px] text-zinc-500">{new Date(c.updatedAt).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span className="text-[11px] text-zinc-500">{formatShortWhen(c.updatedAt)}</span>
                       </div>
                       <p className="text-xs text-zinc-500 truncate">{c.lastMessage}</p>
                     </div>
@@ -198,7 +281,7 @@ const Chat = () => {
                 <img src={conversation.contact.avatar} alt={conversation.contact.name} className="h-9 w-9 rounded-full object-cover border border-zinc-800" />
                 <div>
                   <p className="text-sm font-semibold text-white">{conversation.contact.name}</p>
-                  <p className="text-xs text-zinc-400">{conversation.contact.specialty} • <span className="text-emerald-400">En línea</span></p>
+                  <p className="text-xs text-zinc-400">{conversation.contact.specialty || 'Usuario LuxArs'}</p>
                 </div>
               </div>
               <button className="rounded-full p-2 text-zinc-400 hover:bg-zinc-900 hover:text-white">
@@ -215,20 +298,7 @@ const Chat = () => {
                   <p className="mt-3 text-sm text-zinc-500">Cargando mensajes...</p>
                 </div>
               ) : (
-                messages.map((m) => {
-                  const isMe = m.senderId === 'me'
-                  return (
-                    <div key={m.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                      <div className={isMe ? 'ml-auto max-w-md bg-gradient-to-br from-red-600 to-red-700 text-white p-4 rounded-2xl rounded-tr-none shadow-[0_0_15px_rgba(239,68,68,0.2)] text-sm' : 'mr-auto max-w-md bg-zinc-800/80 text-zinc-100 p-4 rounded-2xl rounded-tl-none border border-zinc-700/50 text-sm'}>
-                        <p>{m.text}</p>
-                        <div className="mt-2 flex items-center justify-end gap-1">
-                          <span className="text-[11px] opacity-70">{new Date(m.timestamp).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}</span>
-                          {isMe && <span className={`text-xs ${m.is_read ? 'text-emerald-400' : 'text-red-200'}`}>{m.is_read ? '✓✓' : '✓'}</span>}
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })
+                renderMessages()
               )}
               <div ref={messagesEndRef} />
             </div>

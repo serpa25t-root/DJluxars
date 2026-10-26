@@ -1,12 +1,19 @@
+from django.db.models import Avg, Count, Q
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Booking
+from .mail import send_booking_created, send_booking_status_update
+from .models import Booking, Review
 from .serializers import BookingSerializer
 
 class BookingViewSet(viewsets.ModelViewSet):
     serializer_class = BookingSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_permissions(self):
+        if self.action == 'stats':
+            return [permissions.AllowAny()]
+        return super().get_permissions()
 
     def get_queryset(self):
         user = self.request.user
@@ -29,7 +36,7 @@ class BookingViewSet(viewsets.ModelViewSet):
             price = 0
         platform_fee = round(price * 0.10)
         artist_payout = price - platform_fee
-        serializer.save(
+        booking = serializer.save(
             client=self.request.user,
             price=price,
             base_price=price,
@@ -37,6 +44,9 @@ class BookingViewSet(viewsets.ModelViewSet):
             artist_payout=artist_payout,
             status='pending'
         )
+        send_booking_created(booking)
+        from notifications.services import notify_booking_created
+        notify_booking_created(booking)
 
     @action(detail=False, methods=['get'], url_path='as-client')
     def as_client(self, request):
@@ -58,6 +68,9 @@ class BookingViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'No autorizado.'}, status=status.HTTP_403_FORBIDDEN)
         booking.status = 'accepted'
         booking.save()
+        send_booking_status_update(booking)
+        from notifications.services import notify_booking_status
+        notify_booking_status(booking)
         serializer = self.get_serializer(booking)
         return Response(serializer.data)
 
@@ -68,5 +81,50 @@ class BookingViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'No autorizado.'}, status=status.HTTP_403_FORBIDDEN)
         booking.status = 'rejected'
         booking.save()
+        send_booking_status_update(booking)
+        from notifications.services import notify_booking_status
+        notify_booking_status(booking)
         serializer = self.get_serializer(booking)
         return Response(serializer.data)
+
+    @action(detail=True, methods=['patch'], url_path='complete')
+    def complete(self, request, pk=None):
+        booking = self.get_object()
+        if booking.photographer != request.user:
+            return Response({'detail': 'No autorizado.'}, status=status.HTTP_403_FORBIDDEN)
+        booking.status = 'completed'
+        booking.save(update_fields=['status', 'updated_at'])
+        return Response(self.get_serializer(booking).data)
+
+    @action(detail=True, methods=['post'], url_path='review')
+    def review(self, request, pk=None):
+        booking = self.get_object()
+        if booking.client != request.user:
+            return Response({'detail': 'Solo el cliente puede calificar.'}, status=status.HTTP_403_FORBIDDEN)
+        if booking.status != 'completed':
+            return Response({'detail': 'La sesión aún no ha finalizado.'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            rating = int(request.data.get('rating'))
+        except (TypeError, ValueError):
+            return Response({'detail': 'La calificación debe ser un número entero.'}, status=status.HTTP_400_BAD_REQUEST)
+        if rating < 1 or rating > 5:
+            return Response({'detail': 'La calificación debe estar entre 1 y 5.'}, status=status.HTTP_400_BAD_REQUEST)
+        review, _ = Review.objects.update_or_create(
+            booking=booking,
+            defaults={'client': request.user, 'photographer': booking.photographer, 'rating': rating},
+        )
+        return Response({'id': review.id, 'rating': review.rating})
+
+    @action(detail=False, methods=['get'], url_path='stats')
+    def stats(self, request):
+        completed = Booking.objects.filter(status='completed').count()
+        reviews = Review.objects.all()
+        aggregate = reviews.aggregate(average=Avg('rating'), total=Count('id'))
+        total_reviews = aggregate['total'] or 0
+        satisfied = reviews.filter(rating__gte=4).count()
+        return Response({
+            'sessions': completed,
+            'rating': round(aggregate['average'] or 0, 1),
+            'satisfaction': round((satisfied / total_reviews) * 100) if total_reviews else 0,
+            'support_hours': 0,
+        })

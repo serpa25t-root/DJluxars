@@ -32,6 +32,15 @@ class LuxUser(AbstractUser):
         help_text='Rol del usuario dentro de la plataforma LuxArts'
     )
 
+    # Suspensión "suave": el usuario puede iniciar sesión, pero su perfil y
+    # portafolio público muestran "Cuenta suspendida".
+    is_suspended = models.BooleanField(
+        default=False,
+        verbose_name='cuenta suspendida',
+        help_text='Si está activo, el usuario puede iniciar sesión pero su perfil '
+                  'público muestra "Cuenta suspendida" y no se lista.'
+    )
+
     phone_number = models.CharField(
         max_length=20,
         blank=True,
@@ -78,6 +87,20 @@ class LuxUser(AbstractUser):
         blank=True,
         verbose_name='sitio web',
         help_text='Enlace externo (portafolio, redes, etc.)'
+    )
+
+    # Información comercial del fotógrafo (visible en su perfil público)
+    specialty = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name='especialidad',
+        help_text='Ej: Retrato, Moda, Eventos (separadas por coma)'
+    )
+
+    price = models.PositiveIntegerField(
+        default=0,
+        verbose_name='tarifa base (COP)',
+        help_text='Precio base por sesión, fijado por el fotógrafo'
     )
 
     class Meta:

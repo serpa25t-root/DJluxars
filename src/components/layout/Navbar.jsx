@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { ChevronDown, Bell, User, LogOut } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import { useNotifications } from '../../context/NotificationsContext'
+import { formatWhen } from '../../utils/datetime'
 
 const publicLinks = [
   { label: 'Explorar', to: '/explorar', type: 'route' },
@@ -41,12 +43,9 @@ const Header = () => {
   const location = useLocation()
   const profileRef = useRef(null)
   const notifRef = useRef(null)
-  const isLanding = location.pathname === '/' || location.pathname === '/login'
-
-  const [notifications] = useState([
-    { id: 1, title: 'Nueva reserva recibida', body: 'Elena Mora solicitó una sesión para el 12 Jun.' },
-    { id: 2, title: 'Mensaje nuevo', body: 'Tienes un mensaje de Marc Dubois en el chat.' },
-  ])
+  const notifCtx = useNotifications()
+  const notifications = notifCtx?.items || []
+  const unread = notifCtx?.unread || 0
 
   const email = user?.email ? user.email.split('@')[0] : ''
   const displayName = user?.username || email || user?.name || user?.first_name || email || 'Usuario'
@@ -66,6 +65,12 @@ const Header = () => {
     logout()
     setShowLogoutModal(false)
     setIsOpen(false)
+  }
+
+  const openNotification = async (n) => {
+    if (!n.is_read) await notifCtx?.markRead?.([n.id])
+    setIsNotifOpen(false)
+    if (n.link) navigate(n.link)
   }
 
   useEffect(() => { setIsOpen(false); setIsProfileOpen(false); setIsNotifOpen(false) }, [location.pathname])
@@ -95,13 +100,13 @@ const Header = () => {
             </svg>
           </div>
           <div className="leading-none">
-            <span className="font-display text-xl font-bold tracking-tight text-white">LuxArts</span>
+            <span className="font-display text-xl font-bold tracking-tight text-white">LuxArs</span>
             <span className="block text-[9px] font-semibold tracking-[0.35em] text-red-500/80 uppercase">Photography</span>
           </div>
         </Link>
 
         <div className="hidden md:flex items-center gap-1">
-          {isAuthenticated && !isLanding ? (
+          {isAuthenticated ? (
             navLinks.map((link) => (
               <NavLink
                 key={link.label}
@@ -147,13 +152,13 @@ const Header = () => {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
-          {isAuthenticated && !isLanding ? (
+          {isAuthenticated ? (
             <>
               <div className="relative" ref={notifRef}>
                 <button onClick={() => setIsNotifOpen(!isNotifOpen)} className="relative rounded-full p-2 text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors">
                   <div className="relative">
                     <Bell className="w-5 h-5 text-zinc-300 hover:text-white transition-colors" />
-                    {notifications.length > 0 && (
+                    {unread > 0 && (
                       <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600"></span>
@@ -163,19 +168,29 @@ const Header = () => {
                 </button>
                 {isNotifOpen && (
                   <div className="absolute right-0 top-12 w-80 bg-zinc-900/90 backdrop-blur-xl border border-zinc-700/50 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] overflow-hidden z-50">
-                    <div className="p-4">
+                    <div className="p-4 border-b border-zinc-800/70 flex items-center justify-between">
                       <p className="text-sm font-semibold text-white">Notificaciones</p>
+                      {unread > 0 && (
+                        <button onClick={() => notifCtx?.markAllRead?.()} className="text-xs text-red-400 hover:text-red-300">
+                          Marcar leídas
+                        </button>
+                      )}
+                    </div>
+                    <div className="max-h-80 overflow-y-auto">
                       {notifications.length === 0 ? (
-                        <p className="mt-3 text-sm text-zinc-400">No tienes notificaciones nuevas.</p>
+                        <p className="p-4 text-sm text-zinc-400">No tienes notificaciones.</p>
                       ) : (
-                        <div className="mt-3 space-y-3">
-                          {notifications.map((n) => (
-                            <div key={n.id} className="rounded-xl bg-zinc-800/50 p-3 border border-zinc-800">
-                              <p className="text-sm font-medium text-white">{n.title}</p>
-                              <p className="text-xs text-zinc-400">{n.body}</p>
-                            </div>
-                          ))}
-                        </div>
+                        notifications.map((n) => (
+                          <button
+                            key={n.id}
+                            onClick={() => openNotification(n)}
+                            className={`w-full text-left p-3 border-b border-zinc-800/60 hover:bg-zinc-800/60 transition-colors ${n.is_read ? 'opacity-70' : 'bg-red-600/5'}`}
+                          >
+                            <p className={`text-sm ${n.is_read ? 'text-zinc-300' : 'font-medium text-white'}`}>{n.title}</p>
+                            {n.body && <p className="text-xs text-zinc-400 line-clamp-2">{n.body}</p>}
+                            <p className="mt-1 text-[11px] text-zinc-600">{formatWhen(n.created_at)}</p>
+                          </button>
+                        ))
                       )}
                     </div>
                   </div>
@@ -264,7 +279,7 @@ const Header = () => {
       {isOpen && (
         <div className="md:hidden border-t border-red-900/20 bg-zinc-950 shadow-2xl shadow-black/50 animate-[fadeIn_200ms_ease-out]">
           <div className="px-4 py-4 sm:px-6">
-            {isAuthenticated && !isLanding && (
+            {isAuthenticated && (
               <div className="mb-4 flex items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5">
                 <div className="relative">
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-red-600/80 to-red-900 border-2 border-red-600/40 text-white text-sm font-bold">
@@ -280,7 +295,7 @@ const Header = () => {
             )}
 
             <div className="flex flex-col gap-1">
-              {isAuthenticated && !isLanding ? (
+              {isAuthenticated ? (
                 navLinks.map((link) => (
                   <NavLink
                     key={link.label}
@@ -321,7 +336,7 @@ const Header = () => {
             </div>
 
             <div className="mt-3 flex flex-col gap-1">
-              {isAuthenticated && !isLanding && profileMenu.map((item) => {
+              {isAuthenticated && profileMenu.map((item) => {
                 const Icon = item.icon
                 return (
                   <Link
@@ -337,7 +352,7 @@ const Header = () => {
             </div>
 
             <div className="mt-4 flex flex-col gap-3 pt-4 border-t border-zinc-900">
-              {isAuthenticated && !isLanding ? (
+              {isAuthenticated ? (
                 <button
                   onClick={handleLogout}
                   className="w-full px-4 py-2.5 rounded-full border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-900 hover:border-zinc-700 transition-all text-sm font-medium text-center"

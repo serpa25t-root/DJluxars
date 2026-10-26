@@ -116,17 +116,15 @@ export const AuthProvider = ({ children }) => {
 
     setLoading(true)
     try {
-      // SimpleJWT real: POST token/ con username/email
+      // SimpleJWT acepta correo mediante LuxTokenObtainPairSerializer y es la ruta
+      // compartida con instalaciones que no incluyen el endpoint propio.
       let res
       try {
         res = await apiClient.post('token/', { username, password })
       } catch (e) {
-        if (e.response?.status === 400 || e.response?.status === 401) {
-          // Fallback a users/login/ si token/ no acepta email
+        if (e.response?.status === 400 || e.response?.status === 401 || e.response?.status === 404 || e.response?.status === 405) {
+          // Fallback a users/login/ si token/ no acepta email (compatibilidad con instalaciones antiguas)
           res = await apiClient.post('users/login/', { email, username, password })
-        } else {
-          throw e
-        }
       }
       const data = res.data
       const access = data.access || data.token
@@ -137,9 +135,9 @@ export const AuthProvider = ({ children }) => {
       persistAuthSession(access, refresh, null)
       const profile = await fetchCurrentUserProfile()
       const finalUser = profile || data.user || { email, username }
-      if (!profile && data.user) {
-        setUser(data.user)
-        localStorage.setItem('user', JSON.stringify(data.user))
+      if (!profile) {
+        setUser(finalUser)
+        localStorage.setItem('user', JSON.stringify(finalUser))
       }
       return { token: access, user: finalUser, raw: data }
     } catch (err) {

@@ -5,12 +5,49 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#050505" />
-    <title>LuxArts — Portafolios Cinematográficos</title>
+    <meta name="description" content="LuxArs — Plataforma de fotografía profesional. Conectamos tu visión con fotógrafos excepcionales. Reserva sesiones, explora portafolios y crea arte." />
+    <meta name="keywords" content="fotografía, fotógrafos, sesiones, bodas, retratos, moda, eventos, producto, portafolio" />
+    <meta property="og:title" content="LuxArs — Estudio de Fotografía Profesional" />
+    <meta property="og:description" content="Capturamos tu esencia, creamos arte. Reserva sesiones con fotógrafos excepcionales." />
+    <meta property="og:type" content="website" />
+    <title>LuxArs — Estudio de Fotografía Profesional</title>
+
+    <!-- Preconexión anticipada a fuentes y a Unsplash para acelerar la carga de imágenes LCP -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://images.unsplash.com" />
+    <link rel="dns-prefetch" href="https://images.unsplash.com" />
+
+    <!-- NUEVO: Fuerza la descarga inmediata de la imagen principal (LCP) -->
+    <link
+      rel="preload"
+      as="image"
+      href="https://images.unsplash.com/photo-1519741497674-611481863552?w=1280&q=65&fm=webp&fit=crop"
+      imagesrcset="https://images.unsplash.com/photo-1519741497674-611481863552?w=640&q=65&fm=webp&fit=crop 640w, https://images.unsplash.com/photo-1519741497674-611481863552?w=1280&q=65&fm=webp&fit=crop 1280w"
+      imagesizes="100vw"
+      fetchpriority="high"
+    />
+
+    <!-- Carga de fuentes asíncrona y no bloqueante + reducción de pesos innecesarios -->
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"
+      />
+    </noscript>
   </head>
-  <body>
+  <body style="background-color: #050505; color: #ffffff;">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

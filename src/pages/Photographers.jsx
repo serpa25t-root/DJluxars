@@ -62,7 +62,7 @@ const Photographers = () => {
         const res = await apiClient.get('users/?role=artist')
         const data = res.data.results || res.data
         if (Array.isArray(data) && data.length > 0) {
-          setPhotographers(data)
+          setPhotographers(data.filter((p) => !p.is_suspended))
         } else {
           setPhotographers(mockPhotographers)
         }
@@ -229,7 +229,7 @@ const Photographers = () => {
                 {filtered.map((p) => {
                   const name = p.name || `${p.first_name || ''} ${p.last_name || ''}`.trim() || p.username
                   const avatar = p.profile_picture || p.avatar || `https://i.pravatar.cc/150?img=${(p.id % 70) + 1}`
-                  const cat = p.category || p.specialty || 'General'
+                  const cat = (p.specialty || p.category || 'General').split(',')[0].trim()
                   const price = p.price || 350000
                   const rating = p.rating || 4.8
                   const reviews = p.reviews || 0

@@ -27,6 +27,8 @@ const EditProfileModal = ({ isOpen, onClose, profile, onSaved }) => {
     website: '',
     departamento: '',
     ciudad: '',
+    specialty: '',
+    price: '',
   })
   const [avatarFile, setAvatarFile] = useState(null)
   const [avatarPreview, setAvatarPreview] = useState('')
@@ -49,6 +51,8 @@ const EditProfileModal = ({ isOpen, onClose, profile, onSaved }) => {
       website: profile.website || '',
       departamento: profile.departamento || '',
       ciudad: profile.ciudad || '',
+      specialty: profile.specialty || '',
+      price: profile.price != null ? String(profile.price) : '',
     })
     setAvatarFile(null)
     setAvatarPreview(profile.avatar_url || '')
@@ -123,6 +127,8 @@ const EditProfileModal = ({ isOpen, onClose, profile, onSaved }) => {
       fd.append('website', form.website)
       fd.append('departamento', form.departamento)
       fd.append('ciudad', form.ciudad)
+      fd.append('specialty', form.specialty)
+      fd.append('price', form.price || 0)
       if (avatarFile) fd.append('avatar', avatarFile)
       if (coverFile) fd.append('cover', coverFile)
       if (removeAvatarFlag) fd.append('avatar', '')
@@ -222,6 +228,10 @@ const EditProfileModal = ({ isOpen, onClose, profile, onSaved }) => {
           <Input label="Nombre de usuario" id="username" value={form.username} onChange={handleChange} placeholder="elena.mora" />
           <Input label="Teléfono" id="phone_number" value={form.phone_number} onChange={handleChange} placeholder="+57 300 000 0000" />
           <Input label="Sitio web" id="website" value={form.website} onChange={handleChange} placeholder="https://tu-portafolio.com" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input label="Especialidad" id="specialty" value={form.specialty} onChange={handleChange} placeholder="Retrato, Moda, Eventos" />
+            <Input label="Tarifa base (COP)" id="price" type="number" value={form.price} onChange={handleChange} placeholder="350000" />
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
