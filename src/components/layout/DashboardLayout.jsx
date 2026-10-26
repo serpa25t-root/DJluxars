@@ -96,20 +96,20 @@ const DashboardLayout = () => {
   // Role-specific top navigation links for desktop
   const topNavLinks = isClient
     ? [
-        { label: 'Inicio', to: '/dashboard', noActive: true },
+        { label: 'Inicio', to: '/dashboard' },
         { label: 'Explorar', to: '/explorar' },
-        { label: 'Reservaciones', to: '/my-bookings', pill: true },
+        { label: 'Reservaciones', to: '/my-bookings' },
         { label: 'Mensajes', to: '/dashboard/mensajes' },
       ]
     : [
-        { label: 'Inicio', to: '/dashboard', noActive: true },
+        { label: 'Inicio', to: '/dashboard' },
         { label: 'Portafolio', to: '/dashboard/portfolio' },
-        { label: 'Reservas', to: '/dashboard/bookings', pill: true },
+        { label: 'Reservas', to: '/dashboard/bookings' },
         { label: 'Servicios', to: '/dashboard/services' },
         { label: 'Mensajes', to: '/dashboard/mensajes' },
       ]
 
-  const isLinkActive = (to) => location.pathname === to || location.pathname.startsWith(to + '/')
+  const isLinkActive = (to) => location.pathname === to
 
   return (
     <div className="flex h-screen bg-[#070709] text-white overflow-hidden">
@@ -257,7 +257,7 @@ const DashboardLayout = () => {
                 <Link
                   key={link.label}
                   to={link.to}
-                  className={`px-3 py-2 rounded-full transition-colors ${isActive ? 'text-white font-semibold' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}
+                  className={`px-3 py-2 rounded-full border-b-2 transition-colors ${isActive ? 'text-white font-semibold border-red-600' : 'border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900'}`}
                 >
                   {label}
                 </Link>

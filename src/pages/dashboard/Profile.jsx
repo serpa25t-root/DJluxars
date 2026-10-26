@@ -221,7 +221,6 @@ const Profile = () => {
         ) : (
           <div className="h-full w-full bg-gradient-to-r from-zinc-900 via-zinc-950 to-black" />
         )}
-<div className="absolute inset-0 bg-gradient-to-t from-[#0b0b0d] via-black/10 to-transparent" />
       </div>
 
       {/* Cabecera de perfil estilo Instagram */}

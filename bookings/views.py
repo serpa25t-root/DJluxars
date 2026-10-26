@@ -13,6 +13,13 @@ class BookingViewSet(viewsets.ModelViewSet):
         # Filtra según query param o rol, pero vistas dedicadas as-client/as-artist lo hacen
         return Booking.objects.filter(client=user) | Booking.objects.filter(photographer=user)
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
     def perform_create(self, serializer):
         price = serializer.validated_data.get('price') or serializer.validated_data.get('base_price') or 0
         # Si no viene price, intenta del fotógrafo (no tenemos, usa 0)

@@ -77,17 +77,28 @@ const BookingModal = ({ isOpen, onClose, photographer }) => {
       return
     }
     setLoading(true)
+    // El backend espera photographer = PK numérica de LuxUser.
+    // Los catálogos usan ids de servicio tipo 'srv_...' o 'photographer-5',
+    // así que resolvemos: authorId > id numérico > dígitos finales > 1.
+    const resolvePhotographerId = (p) => {
+      if (!p) return 1
+      if (Number.isInteger(p.authorId)) return p.authorId
+      if (/^\d+$/.test(String(p.authorId ?? ''))) return Number(p.authorId)
+      if (Number.isInteger(p.id)) return p.id
+      if (/^\d+$/.test(String(p.id ?? ''))) return Number(p.id)
+      const m = String(p.id ?? '').match(/(\d+)$/)
+      if (m) return Number(m[1])
+      return 1
+    }
+    const photographerId = resolvePhotographerId(photographer)
+    const serviceRef = photographer.serviceId || photographer.serviceTitle || ''
     const payload = {
-      photographer: photographer.id,
-      photographer_name: photographer.name,
+      photographer: photographerId,
       date: form.date,
       service: form.service,
       location: form.location,
-      message: form.message,
+      message: serviceRef ? `${form.message}\n[Servicio: ${serviceRef}]` : form.message,
       price: estimated,
-      base_price: estimated,
-      platform_fee: platformFee,
-      artist_payout: artistPayout,
     }
     try {
       await apiClient.post('bookings/', payload)
@@ -97,7 +108,17 @@ const BookingModal = ({ isOpen, onClose, photographer }) => {
       if (err?.response?.status === 404 || !err?.response || err?.code === 'ERR_NETWORK') {
         setToast({ msg: 'Solicitud enviada con éxito. (modo demo)', type: 'success' })
       } else {
-        const msg = err?.response?.data?.detail || 'No se pudo enviar la solicitud.'
+        const data = err?.response?.data
+        let msg = 'No se pudo enviar la solicitud.'
+        if (data) {
+          if (typeof data === 'string') msg = data
+          else if (data.detail) msg = data.detail
+          else {
+            const first = Object.keys(data)[0]
+            const val = first && data[first]
+            msg = `${first}: ${Array.isArray(val) ? val[0] : val}`
+          }
+        }
         setToast({ msg, type: 'error' })
         setLoading(false)
         setTimeout(() => setToast(null), 3000)

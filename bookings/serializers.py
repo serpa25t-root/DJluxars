@@ -13,7 +13,7 @@ class BookingSerializer(serializers.ModelSerializer):
             'id', 'photographer', 'photographer_name', 'photographerId', 'client', 'client_name', 'clientEmail',
             'date', 'service', 'location', 'message', 'price', 'base_price', 'platform_fee', 'artist_payout', 'status', 'created_at'
         ]
-        read_only_fields = ['id', 'platform_fee', 'artist_payout', 'base_price', 'status', 'created_at']
+        read_only_fields = ['id', 'client', 'platform_fee', 'artist_payout', 'base_price', 'status', 'created_at']
         extra_kwargs = {
             'photographer': {'required': True},
         }

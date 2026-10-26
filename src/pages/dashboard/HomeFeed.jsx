@@ -206,7 +206,14 @@ const HomeFeed = () => {
             >
               {/* Autor */}
               <header className="flex items-center gap-3 px-4 py-3">
-                <img src={post.authorAvatar || `https://i.pravatar.cc/150`} alt={post.authorName} className="h-10 w-10 rounded-full object-cover ring-2 ring-white/10" />
+                <img
+                  src={post.authorAvatar || `https://i.pravatar.cc/150`}
+                  alt={post.authorName}
+                  className="h-10 w-10 rounded-full object-cover ring-2 ring-white/10"
+                  onError={(e) => {
+                    e.currentTarget.src = 'https://i.pravatar.cc/150?img=11'
+                  }}
+                />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-white">
                     {post.authorName}
@@ -218,7 +225,15 @@ const HomeFeed = () => {
 
               {/* Imagen */}
               <div className="aspect-square w-full overflow-hidden bg-zinc-950">
-                <img src={post.image} alt={post.caption || 'Publicación'} className="h-full w-full object-cover" loading="lazy" />
+                <img
+                  src={post.image}
+                  alt={post.caption || 'Publicación'}
+                  className="h-full w-full object-cover"
+                  loading="eager"
+                  onError={(e) => {
+                    e.currentTarget.src = 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&h=800&fit=crop'
+                  }}
+                />
               </div>
 
               {/* Acciones */}

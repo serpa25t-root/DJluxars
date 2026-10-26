@@ -419,7 +419,7 @@ const Explore = () => {
                     </button>
                   </div>
                   <button
-                    onClick={() => handleBooking({ id: s.id, name: s.title || s.name, avatar: cover, specialty: category, price: s.price })}
+                    onClick={() => handleBooking({ id: s.authorId || Number(String(s.id).match(/(\d+)$/)?.[1]) || 1, authorId: s.authorId, serviceId: s.id, serviceTitle: s.title || s.name, name: authorName, avatar: cover, specialty: category, price: s.price })}
                     className="mt-2 w-full rounded-full bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 shadow-md shadow-red-600/20 transition-colors"
                   >
                     Reservar Servicio

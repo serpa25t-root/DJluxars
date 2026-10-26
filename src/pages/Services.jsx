@@ -59,7 +59,7 @@ const Services = () => {
       navigate('/login')
       return
     }
-    setBookingPhotographer({ id: pkg.id, name: pkg.title, avatar: pkg.image, specialty: pkg.title, price: pkg.price })
+    setBookingPhotographer({ id: 1, authorId: 1, serviceId: pkg.id, serviceTitle: pkg.title, name: pkg.title, avatar: pkg.image, specialty: pkg.title, price: pkg.price })
   }
   const handleChat = (pkgId) => {
     if (!isAuthenticated) {
