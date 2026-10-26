@@ -1,5 +1,5 @@
-import api from './api'
-import { getBookings } from './bookings'
+import apiClient from './apiClient'
+import { getBookings } from './bookingsStore'
 
 const getLocalStats = () => {
   const bookings = getBookings()
@@ -19,7 +19,7 @@ const getLocalStats = () => {
 
 export const getPlatformStats = async () => {
   try {
-    const response = await api.get('bookings/stats/')
+    const response = await apiClient.get('bookings/stats/')
     return {
       sessions: Number(response.data.sessions) || 0,
       rating: Number(response.data.rating) || 0,

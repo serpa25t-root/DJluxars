@@ -97,6 +97,7 @@ const UploadModal = ({ isOpen, onClose, onPublished, onLimitReached }) => {
       } catch (err) {
         if (err?.response?.status === 404) {
           await apiClient.post('works/', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+        }
       }
 
       setToast({ msg: 'Obra publicada con éxito.', type: 'success' })

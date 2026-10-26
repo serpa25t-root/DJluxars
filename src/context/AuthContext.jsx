@@ -125,6 +125,7 @@ export const AuthProvider = ({ children }) => {
         if (e.response?.status === 400 || e.response?.status === 401 || e.response?.status === 404 || e.response?.status === 405) {
           // Fallback a users/login/ si token/ no acepta email (compatibilidad con instalaciones antiguas)
           res = await apiClient.post('users/login/', { email, username, password })
+        }
       }
       const data = res.data
       const access = data.access || data.token
@@ -200,7 +201,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const refresh = localStorage.getItem('refresh')
       if (refresh && token) {
-        await api.post('users/logout/', { refresh }).catch(() => {})
+        await apiClient.post('users/logout/', { refresh }).catch(() => {})
       }
     } catch {
       // Logout best-effort — limpiar estado local siempre
