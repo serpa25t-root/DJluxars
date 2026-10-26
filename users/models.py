@@ -13,8 +13,9 @@ class LuxUser(AbstractUser):
 
     class Role(models.TextChoices):
         CLIENT = 'client', 'Cliente'
-        ARTIST = 'artist', 'Artista'
+        ARTIST = 'artist', 'Fotógrafo'
         ADMIN = 'admin', 'Administrador'
+        BOTH = 'both', 'Cliente y Fotógrafo'
 
     # Email único y obligatorio para LuxArts
     email = models.EmailField(
@@ -89,8 +90,8 @@ class LuxUser(AbstractUser):
 
     @property
     def is_artist(self):
-        return self.role == self.Role.ARTIST
+        return self.role in (self.Role.ARTIST, self.Role.BOTH)
 
     @property
     def is_client(self):
-        return self.role == self.Role.CLIENT
+        return self.role in (self.Role.CLIENT, self.Role.BOTH)

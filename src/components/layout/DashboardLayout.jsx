@@ -77,8 +77,9 @@ const DashboardLayout = () => {
   const email = user?.email ? user.email.split('@')[0] : ''
   const displayName = user?.first_name || user?.username || email || 'Ana'
   const initials = displayName.slice(0, 1).toUpperCase()
-  const isClient = user?.role === 'client'
-  const sidebarLinks = isClient ? clientSidebarLinks : artistSidebarLinks
+  const isClient = user?.role === 'client' || user?.role === 'both'
+  const isArtist = user?.role === 'artist' || user?.role === 'both'
+  const sidebarLinks = (isClient ? clientSidebarLinks : []).concat(isArtist ? artistSidebarLinks : [])
 
   const avatarSrc = user?.avatar_url || user?.avatar || ''
   const isProfileActive = location.pathname.startsWith('/dashboard/perfil')
@@ -94,20 +95,26 @@ const DashboardLayout = () => {
       ]
 
   // Role-specific top navigation links for desktop
-  const topNavLinks = isClient
-    ? [
-        { label: 'Inicio', to: '/dashboard' },
-        { label: 'Explorar', to: '/explorar' },
-        { label: 'Reservaciones', to: '/my-bookings' },
-        { label: 'Mensajes', to: '/dashboard/mensajes' },
-      ]
-    : [
-        { label: 'Inicio', to: '/dashboard' },
-        { label: 'Portafolio', to: '/dashboard/portfolio' },
-        { label: 'Reservas', to: '/dashboard/bookings' },
-        { label: 'Servicios', to: '/dashboard/services' },
-        { label: 'Mensajes', to: '/dashboard/mensajes' },
-      ]
+  const clientTopNav = [
+    { label: 'Inicio', to: '/dashboard' },
+    { label: 'Explorar', to: '/explorar' },
+    { label: 'Reservaciones', to: '/my-bookings' },
+    { label: 'Mensajes', to: '/dashboard/mensajes' },
+  ]
+
+  const artistTopNav = [
+    { label: 'Inicio', to: '/dashboard' },
+    { label: 'Portafolio', to: '/dashboard/portfolio' },
+    { label: 'Reservas', to: '/dashboard/bookings' },
+    { label: 'Servicios', to: '/dashboard/services' },
+    { label: 'Mensajes', to: '/dashboard/mensajes' },
+  ]
+
+  const topNavLinks = isClient && isArtist
+    ? [...clientTopNav, ...artistTopNav.filter(l => !clientTopNav.some(c => c.label === l.label))]
+    : isClient
+      ? clientTopNav
+      : artistTopNav
 
   const isLinkActive = (to) => location.pathname === to
 

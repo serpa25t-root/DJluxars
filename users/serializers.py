@@ -45,6 +45,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'email': {'required': True},
             'username': {'required': True},
+            'role': {'required': False, 'default': 'client'},
         }
 
     def validate_email(self, value):
@@ -59,6 +60,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         password = validated_data.pop('password')
+        validated_data.setdefault('role', 'client')
         user = LuxUser(**validated_data)
         user.set_password(password)
         user.save()
@@ -104,7 +106,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             'phone_number', 'bio', 'departamento', 'ciudad', 'website',
             'avatar', 'cover', 'avatar_url', 'cover_url', 'date_joined',
         ]
-        read_only_fields = ['id', 'email', 'role', 'date_joined']
+        read_only_fields = ['id', 'email', 'date_joined']
         extra_kwargs = {
             'avatar': {'required': False, 'allow_null': True},
             'cover': {'required': False, 'allow_null': True},

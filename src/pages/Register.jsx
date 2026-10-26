@@ -6,36 +6,11 @@ import Input from '../components/common/Input'
 import Button from '../components/common/Button'
 import useColombiaApi from '../services/colombiaData'
 
-const roles = [
-  {
-    id: 'client',
-    label: 'Cliente',
-    desc: 'Busco contratar fotógrafos para mis eventos o proyectos',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-      </svg>
-    ),
-  },
-  {
-    id: 'artist',
-    label: 'Fotógrafo',
-    desc: 'Quiero publicar mi portafolio y ofrecer mis servicios',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    ),
-  },
-]
-
 const roleLabelEs = { client: 'Cliente', artist: 'Fotógrafo' }
 
 const Register = () => {
   const { register } = useAuth()
   const navigate = useNavigate()
-  const [role, setRole] = useState('client')
   const [form, setForm] = useState({ name: '', email: '', phone: '', departamento: '', ciudad: '', password: '' })
   const [errorMsg, setErrorMsg] = useState(null)
   const [successMsg, setSuccessMsg] = useState(null)
@@ -92,7 +67,7 @@ const Register = () => {
     setSuccessMsg(null)
     setLoading(true)
     try {
-      await register({ name: name.trim(), email: email.trim(), phone: phone.trim(), departamento: departamento.trim(), ciudad: ciudad.trim(), password, role })
+      await register({ name: name.trim(), email: email.trim(), phone: phone.trim(), departamento: departamento.trim(), ciudad: ciudad.trim(), password })
       navigate('/login', { replace: true, state: { registered: true, message: '¡Cuenta creada con éxito! Por favor inicia sesión.' } })
       return
     } catch (err) {
@@ -126,41 +101,6 @@ const Register = () => {
       }
     >
       <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-        <div>
-          <p className="block text-xs font-medium tracking-wide text-zinc-300 mb-2">Quiero registrarme como:</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {roles.map((r) => {
-              const active = role === r.id
-              return (
-                <button
-                  key={r.id}
-                  type="button"
-                  onClick={() => setRole(r.id)}
-                  className={`relative text-left rounded-xl border p-4 transition-all duration-200 will-change-transform active:scale-[0.98] ${
-                    active
-                      ? 'border-red-600/50 bg-red-600/10 shadow-md shadow-red-600/15'
-                      : 'border-zinc-800 bg-zinc-900/40 hover:border-zinc-700 hover:bg-zinc-900/60'
-                  }`}
-                  aria-pressed={active}
-                >
-                  {active && <div className="absolute top-0 left-0 h-0.5 w-full bg-red-600 rounded-t-xl" />}
-                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-colors duration-200 ${active ? 'bg-red-600 text-white border-red-600 shadow-sm shadow-red-600/20' : 'bg-zinc-800 text-zinc-400 border-zinc-700'}`}>
-                    {r.icon}
-                  </div>
-                  <p className={`mt-3 text-sm font-semibold leading-none ${active ? 'text-white' : 'text-zinc-200'}`}>{r.label}</p>
-                  <p className="mt-1 text-xs leading-relaxed text-zinc-400">{r.desc}</p>
-                  {active && (
-                    <span className="absolute top-3 right-3 h-2 w-2 rounded-full bg-red-500 shadow-sm shadow-red-500/50 animate-pulse" />
-                  )}
-                </button>
-              )
-            })}
-          </div>
-          <p className="mt-2 text-center text-xs text-zinc-500">
-            Seleccionado: <span className="font-semibold text-red-400">{roleLabelEs[role]}</span>
-          </p>
-        </div>
-
         {errorMsg && (
           <div className="rounded-xl border border-red-600/30 bg-red-600/10 px-4 py-3 flex gap-3 animate-[fadeIn_200ms_ease-out]" role="alert">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

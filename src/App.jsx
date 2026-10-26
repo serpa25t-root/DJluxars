@@ -97,7 +97,8 @@ const ProtectedRoute = ({ children, roles }) => {
     )
   }
   if (!isAuthenticated) return <Navigate to="/login" replace />
-  if (roles && !roles.includes(user?.role)) return <Navigate to="/" replace />
+  const userRoles = user?.role === 'both' ? ['client', 'artist', 'admin'] : [user?.role]
+  if (roles && !roles.some(r => userRoles.includes(r))) return <Navigate to="/" replace />
   return children
 }
 
