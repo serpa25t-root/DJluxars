@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { ChevronDown, Bell, User, LogOut } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import { hasRole } from '../../utils/roles'
 
 const publicLinks = [
   { label: 'Explorar', to: '/explorar', type: 'route' },
@@ -41,7 +42,7 @@ const { user, isAuthenticated, logout } = useAuth()
   const displayName = user?.username || email || user?.name || user?.first_name || email || 'Usuario'
   const initials = displayName.slice(0, 2).toUpperCase()
   const isOnline = isAuthenticated
-  const isArtist = user?.role === 'artist'
+  const isArtist = hasRole(user, 'artist')
 
   const navLinks = isAuthenticated ? authLinks(isArtist) : publicLinks
 

@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { hasRole } from '../utils/roles'
 import ArtistDashboard from './dashboard/ArtistDashboard'
 import ClientDashboard from './dashboard/ClientDashboard'
 
@@ -30,7 +31,7 @@ const Dashboard = () => {
     return <Navigate to="/login" replace />
   }
 
-  const isArtist = user?.role === 'artist' || user?.user_type === 'artist' || user?.is_artist === true
+  const isArtist = hasRole(user, 'artist') || user?.is_artist === true
 
   return isArtist ? <ArtistDashboard /> : <ClientDashboard />
 }

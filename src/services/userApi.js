@@ -33,6 +33,16 @@ export const removeAvatar = async () => {
 }
 
 /**
+ * Activa el rol de fotógrafo en la sesión actual (client -> both).
+ * No cierra sesión: devuelve el perfil actualizado.
+ * (Sin skipAuthRefresh: si el access expiró, el interceptor lo refresca y reintenta)
+ */
+export const becomeArtist = async ({ specialty, price, ciudad }) => {
+  const res = await apiClient.post('users/me/become-artist/', { specialty, price, ciudad })
+  return res.data
+}
+
+/**
  * Perfil público de cualquier usuario + stats (works, likes, views)
  */
 export const getPublicProfile = async (id) => {

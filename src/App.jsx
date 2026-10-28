@@ -1,10 +1,11 @@
-import { BrowserRouter, Routes, Route, Navigate, Suspense, lazy } from 'react-router-dom'
-import { Component } from 'react'
+import { lazy, Component, Suspense } from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { AppPreferencesProvider } from './context/AppPreferencesContext'
 import ScrollToTop from './components/common/ScrollToTop'
 import BackToTop from './components/common/BackToTop'
 import ToastProvider from './components/common/ToastProvider'
+import { hasRole } from './utils/roles'
 import DashboardLayout from './components/layout/DashboardLayout'
 import Dashboard from './pages/Dashboard'
 import ArtistDashboard from './pages/dashboard/ArtistDashboard'
@@ -102,8 +103,7 @@ const ProtectedRoute = ({ children, roles }) => {
   const { isAuthenticated, loading, user } = useAuth()
   if (loading) return <PageLoader />
   if (!isAuthenticated) return <Navigate to="/login" replace />
-  const userRoles = user?.role === 'both' ? ['client', 'artist', 'admin'] : [user?.role]
-  if (roles && !roles.some(r => userRoles.includes(r))) return <Navigate to="/" replace />
+  if (roles && !roles.some((r) => hasRole(user, r))) return <Navigate to="/" replace />
   return children
 }
 

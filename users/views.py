@@ -100,6 +100,67 @@ class LoginView(APIView):
         )
 
 
+class BecomeArtistView(APIView):
+    """
+    Activa el rol de fotógrafo en la cuenta actual SIN cerrar la sesión
+    (patrón MercadoLibre: una cuenta, múltiples capacidades).
+
+    - client -> both (conserva capacidades de cliente para poder reservar)
+    - artist/both -> idempotente
+    - admin  -> 403 (perdería su rol de administración)
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def post(self, request):
+        user = request.user
+
+        if getattr(user, 'is_suspended', False):
+            return Response(
+                {'detail': 'Tu cuenta está suspendida y no puede activar el rol de fotógrafo.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        if user.role == LuxUser.Role.ADMIN:
+            return Response(
+                {'detail': 'Las cuentas de administrador no pueden convertirse en fotógrafos.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        specialty = str(request.data.get('specialty') or '').strip()
+        ciudad = str(request.data.get('ciudad') or '').strip()
+
+        raw_price = request.data.get('price')
+        try:
+            price = int(str(raw_price).replace('.', '').replace(',', ''))
+        except (TypeError, ValueError):
+            price = None
+
+        errors = {}
+        if not specialty:
+            errors['specialty'] = ['Indica tu especialidad (ej: Retrato, Moda, Eventos).']
+        elif len(specialty) > 100:
+            errors['specialty'] = ['Máximo 100 caracteres.']
+        if price is None or price <= 0:
+            errors['price'] = ['Establece una tarifa base mayor a 0 (COP por sesión).']
+        if errors:
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+        user.specialty = specialty
+        user.price = price
+        if ciudad:
+            user.ciudad = ciudad
+        if user.role == LuxUser.Role.CLIENT:
+            user.role = LuxUser.Role.BOTH
+        user.save()
+
+        return Response(
+            ProfileSerializer(user, context={'request': request}).data,
+            status=status.HTTP_200_OK,
+        )
+
+
 class MeView(APIView):
     """
     Perfil del usuario autenticado.
@@ -170,8 +231,8 @@ class UserPortfolioView(APIView):
     def get(self, request, pk):
         from portfolio.serializers import PortfolioItemSerializer
         try:
-            user = User.objects.get(pk=pk)
-        except User.DoesNotExist:
+            user = LuxUser.objects.get(pk=pk)
+        except LuxUser.DoesNotExist:
             return Response({'detail': 'Perfil no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
         if getattr(user, 'is_suspended', False):
             return Response([])

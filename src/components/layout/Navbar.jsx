@@ -4,6 +4,7 @@ import { ChevronDown, Bell, User, LogOut } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useNotifications } from '../../context/NotificationsContext'
 import { formatWhen } from '../../utils/datetime'
+import { hasRole } from '../../utils/roles'
 
 const publicLinks = [
   { label: 'Explorar', to: '/explorar', type: 'route' },
@@ -26,7 +27,7 @@ const authLinks = (isArtist) =>
       ]
 
 const profileItems = (user) => {
-  const isArtist = user?.role === 'artist'
+  const isArtist = hasRole(user, 'artist')
   return [
     { label: isArtist ? 'Ver Perfil Público' : 'Mi Cuenta', to: isArtist ? `/fotografos/${user?.id}` : '/dashboard/perfil', icon: User },
     { label: 'Configuración', to: '/dashboard/settings', icon: User },
@@ -51,7 +52,7 @@ const Header = () => {
   const displayName = user?.username || email || user?.name || user?.first_name || email || 'Usuario'
   const initials = displayName.slice(0, 2).toUpperCase()
   const isOnline = isAuthenticated
-  const isArtist = user?.role === 'artist'
+  const isArtist = hasRole(user, 'artist')
 
   const navLinks = isAuthenticated ? authLinks(isArtist) : publicLinks
   const profileMenu = profileItems(user)

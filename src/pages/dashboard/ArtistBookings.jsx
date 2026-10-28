@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import Button from '../../components/common/Button'
 import UpgradeModal from '../../components/subscription/UpgradeModal'
 import { fetchArtistBookings, acceptBooking, rejectBooking, seedIfEmpty } from '../../services/bookingsStore'
+import { getMyPayments } from '../../services/payments'
 import { useAuth } from '../../context/AuthContext'
 import { checkCanAcceptBooking, getUsage, setUsage, upgradeToPro } from '../../services/subscriptionStore'
 

@@ -1,3 +1,5 @@
+import { hasRole } from '../utils/roles'
+
 const POSTS_KEY = 'luxarts_feed_posts'
 
 const seedPosts = [
@@ -68,7 +70,7 @@ export const addPost = ({ image, caption, author }) => {
     authorId: author?.id || 0,
     authorName: author?.first_name || author?.username || 'Fotógrafo',
     authorAvatar: author?.avatar_url || author?.avatar || `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 60)}`,
-    verified: author?.role === 'artist',
+    verified: hasRole(author, 'artist'),
     image,
     caption,
     likes: [],

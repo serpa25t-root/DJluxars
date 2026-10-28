@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import AuthLayout from '../components/common/AuthLayout'
 import Input from '../components/common/Input'
@@ -11,6 +11,8 @@ const roleLabelEs = { client: 'Cliente', artist: 'Fotógrafo' }
 const Register = () => {
   const { register } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const startAsArtist = searchParams.get('role') === 'artist'
   const [form, setForm] = useState({ name: '', email: '', phone: '', departamento: '', ciudad: '', password: '' })
   const [errorMsg, setErrorMsg] = useState(null)
   const [successMsg, setSuccessMsg] = useState(null)
@@ -62,12 +64,16 @@ const Register = () => {
       setErrorMsg('Por favor completa todos los campos requeridos.')
       return
     }
+    if (password.length < 8) {
+      setErrorMsg('La contraseña debe tener al menos 8 caracteres.')
+      return
+    }
 
     setErrorMsg(null)
     setSuccessMsg(null)
     setLoading(true)
     try {
-      await register({ name: name.trim(), email: email.trim(), phone: phone.trim(), departamento: departamento.trim(), ciudad: ciudad.trim(), password })
+      await register({ name: name.trim(), email: email.trim(), phone: phone.trim(), departamento: departamento.trim(), ciudad: ciudad.trim(), password, role: startAsArtist ? 'both' : undefined })
       navigate('/login', { replace: true, state: { registered: true, message: '¡Cuenta creada con éxito! Por favor inicia sesión.' } })
       return
     } catch (err) {
@@ -89,8 +95,10 @@ const Register = () => {
 
   return (
     <AuthLayout
-      title="Crea tu cuenta"
-      subtitle="Crea tu cuenta para comenzar a explorar o publicar servicios."
+      title={startAsArtist ? 'Crea tu cuenta de fotógrafo' : 'Crea tu cuenta'}
+      subtitle={startAsArtist
+        ? 'Publica tu portafolio y recibe reservas. Tu cuenta también sirve para reservar sesiones como cliente.'
+        : 'Crea tu cuenta para comenzar a explorar o publicar servicios.'}
       footer={
         <>
           ¿Ya tienes cuenta?{' '}

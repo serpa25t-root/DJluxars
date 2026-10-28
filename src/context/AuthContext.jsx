@@ -116,18 +116,25 @@ export const AuthProvider = ({ children }) => {
 
     setLoading(true)
     try {
-      // SimpleJWT acepta correo mediante LuxTokenObtainPairSerializer y es la ruta
-      // compartida con instalaciones que no incluyen el endpoint propio.
+      // Endpoint propio: acepta email o username, devuelve user + tokens en un
+      // solo request (sin consumir cuota extra del throttle con un fallback).
       let res
       try {
-        res = await apiClient.post('token/', { username, password })
-      } catch (e) {
-        if (e.response?.status === 400 || e.response?.status === 401 || e.response?.status === 404 || e.response?.status === 405) {
-          // Fallback a users/login/ si token/ no acepta email (compatibilidad con instalaciones antiguas)
-          res = await apiClient.post('users/login/', { email, username, password })
+        res = await apiClient.post('users/login/', { email, username, password }, { skipAuthRefresh: true })
+      } catch (err) {
+        const status = err?.response?.status
+        // Fallback a token/ solo si el endpoint propio no existe (404/405),
+        // p.ej. instalaciones antiguas que solo montan SimpleJWT.
+        if (status === 404 || status === 405) {
+          res = await apiClient.post('token/', { username, password }, { skipAuthRefresh: true })
+        } else {
+          throw err
         }
       }
-      const data = res.data
+      const data = res?.data
+      if (!data || typeof data !== 'object') {
+        throw new Error('El servidor no devolvió una respuesta válida al iniciar sesión.')
+      }
       const access = data.access || data.token
       const refresh = data.refresh
       if (!access) throw new Error('Credenciales incorrectas.')
@@ -157,32 +164,52 @@ export const AuthProvider = ({ children }) => {
     const departamento = userData.departamento?.trim() || ''
     const ciudad = userData.ciudad?.trim() || ''
     const rawName = userData.name || userData.first_name || ''
-    const usernameRaw = userData.username || email?.split('@')[0] || rawName.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') || 'user'
-    const username = usernameRaw.slice(0, 30)
     const firstName = rawName.split(' ')[0] || ''
     const lastName = rawName.split(' ').slice(1).join(' ') || ''
 
-    const payload = {
-      username,
-      email,
-      password,
-      password2: password,
-      role,
-      phone_number: phone,
-      first_name: firstName,
-      last_name: lastName,
-      departamento,
-      ciudad,
+    // Username base derivado del email; si ya existe (ej: ana@gmail.com y
+    // ana@hotmail.com), se reintenta con un sufijo corto hasta que el backend
+    // lo acepta — así el registro nunca falla por colisión del prefijo.
+    const base = (
+      userData.username ||
+      email?.split('@')[0] ||
+      rawName.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') ||
+      'user'
+    ).replace(/[^a-zA-Z0-9_.+-]/g, '').slice(0, 24) || 'user'
+
+    const isUsernameTaken = (err) => {
+      const data = err?.response?.data
+      if (!data) return false
+      if (data.username) return true
+      return /usuario.*(uso|en uso|use)/i.test(String(data.detail || data.message || ''))
     }
 
-    try {
-      const res = await apiClient.post('users/register/', payload)
-      return res.data
-    } catch (err) {
-      const msg = mapSpanishError(extractApiErrorMessage(err, 'No se pudo crear la cuenta. Verifica los datos.'))
-      if (msg.toLowerCase().includes('email') && msg.toLowerCase().includes('exist')) throw new Error('Este correo electrónico ya se encuentra registrado. Inicia sesión o utiliza otro.')
-      throw new Error(msg)
+    let lastError = null
+    for (let attempt = 0; attempt < 6; attempt++) {
+      const suffix = attempt === 0 ? '' : `${attempt}${Date.now().toString(36).slice(-3)}`
+      const username = (base + suffix).slice(0, 30)
+      const payload = {
+        username,
+        email,
+        password,
+        role,
+        phone_number: phone,
+        first_name: firstName,
+        last_name: lastName,
+        departamento,
+        ciudad,
+      }
+      try {
+        const res = await apiClient.post('users/register/', payload, { skipAuthRefresh: true })
+        return res.data
+      } catch (err) {
+        lastError = err
+        if (!isUsernameTaken(err)) break
+      }
     }
+    const msg = mapSpanishError(extractApiErrorMessage(lastError, 'No se pudo crear la cuenta. Verifica los datos.'))
+    if (msg.toLowerCase().includes('email') && msg.toLowerCase().includes('exist')) throw new Error('Este correo electrónico ya se encuentra registrado. Inicia sesión o utiliza otro.')
+    throw new Error(msg)
   }, [])
 
   // Fusiona cambios de perfil (avatar, nombre, bio...) en estado + localStorage

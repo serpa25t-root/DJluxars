@@ -22,9 +22,6 @@ export const deletePortfolioItem = async (id) => {
 }
 
 export const updatePortfolioItem = async (id, payload) => {
-  const isFormData = typeof FormData !== 'undefined' && payload instanceof FormData
-  const res = isFormData
-    ? await api.patch(`portfolio/${id}/`, payload)
-    : await api.patch(`portfolio/${id}/`, payload)
+  const res = await apiClient.patch(`portfolio/${id}/`, payload)
   return res.data
 }

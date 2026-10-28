@@ -104,6 +104,7 @@ class LuxUser(AbstractUser):
     )
 
     class Meta:
+        db_table = 'users_user'
         verbose_name = 'usuario'
         verbose_name_plural = 'usuarios'
         ordering = ['-date_joined']

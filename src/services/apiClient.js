@@ -43,7 +43,9 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Login/registro: un 401 significa credenciales inválidas, no token
+    // expirado — no intentar refresh (evita bucles y gasto del throttle).
+    if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.skipAuthRefresh) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject })

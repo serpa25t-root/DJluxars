@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import Button from '../common/Button'
 import Input from '../common/Input'
-import api from '../../services/api'
-import { updatePortfolioItem } from '../../services/portfolio'
+import apiClient from '../../services/apiClient'
+import { updatePortfolioItem } from '../../services/portfolioApi'
 
 const categories = ['Retrato', 'Editorial', 'Eventos', 'Moda', 'Arquitectura']
 

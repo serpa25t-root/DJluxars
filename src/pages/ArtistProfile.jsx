@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import Button from '../components/common/Button'
 import BookingModal from '../components/booking/BookingModal'
 import { useAuth } from '../context/AuthContext'
-import { getPublicProfile, getUserPortfolio } from '../services/users'
+import { getPublicProfile, getUserPortfolio } from '../services/userApi'
 
 const defaults = { name: 'Artista LuxArs', specialty: 'Editorial', avatar: 'https://i.pravatar.cc/150?img=12', banner: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=1200&h=400&fit=crop', rating: 4.8, price: 350000, delivery: '4 días', bio: 'Creador visual verificado en LuxArs. Portafolio curado con acabado cinematográfico.', equipment: 'Canon EOS R6, 35mm f/1.4', photos: [] }
 

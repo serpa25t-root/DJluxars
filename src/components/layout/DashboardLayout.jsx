@@ -5,6 +5,8 @@ import { useAuth } from '../../context/AuthContext'
 import { usePreferences } from '../../context/AppPreferencesContext'
 import NotificationBell from './NotificationBell'
 import { getBookings } from '../../services/bookingsStore'
+import { hasRole } from '../../utils/roles'
+import BecomeArtistModal from '../artist/BecomeArtistModal'
 
 const userIcon = 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'
 
@@ -32,12 +34,13 @@ const adminSidebarLinks = [
 ]
 
 const DashboardLayout = () => {
-  const { user, logout } = useAuth()
+  const { user, logout, updateUser } = useAuth()
   const { t } = usePreferences()
   const location = useLocation()
   const navigate = useNavigate()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
+  const [showBecomeArtist, setShowBecomeArtist] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [pendingBookings, setPendingBookings] = useState(0)
   const userMenuRef = useRef(null)
@@ -83,9 +86,9 @@ const DashboardLayout = () => {
   const email = user?.email ? user.email.split('@')[0] : ''
   const displayName = user?.first_name || user?.username || email || 'Ana'
   const initials = displayName.slice(0, 1).toUpperCase()
-  const isClient = user?.role === 'client' || user?.role === 'both'
-  const isArtist = user?.role === 'artist' || user?.role === 'both'
-  const isAdmin = user?.role === 'admin'
+  const isClient = hasRole(user, 'client')
+  const isArtist = hasRole(user, 'artist')
+  const isAdmin = hasRole(user, 'admin')
   const sidebarLinks = isAdmin ? adminSidebarLinks : (isClient ? clientSidebarLinks : []).concat(isArtist ? artistSidebarLinks : [])
 
   const avatarSrc = user?.avatar_url || user?.avatar || ''
@@ -187,13 +190,17 @@ const DashboardLayout = () => {
         </div>
 
         <div className="space-y-4">
-              {isClient ? (
+              {isClient && !isArtist ? (
             <div className="rounded-xl border border-red-900/30 bg-gradient-to-t from-red-900/20 to-transparent p-4">
               <h3 className="text-sm font-bold text-white">{t('sidebar_client_cta')}</h3>
               <p className="mt-1 text-xs leading-relaxed text-zinc-400">{t('sidebar_client_desc')}</p>
-              <Link to="/register" onClick={() => setIsSidebarOpen(false)} className="mt-4 block w-full rounded-full border border-red-900/30 bg-transparent py-2.5 text-center text-sm font-semibold text-white hover:bg-red-600 hover:border-red-600 hover:text-white transition-colors">
+              <button
+                type="button"
+                onClick={() => { setIsSidebarOpen(false); setShowBecomeArtist(true) }}
+                className="mt-4 block w-full rounded-full border border-red-900/30 bg-transparent py-2.5 text-center text-sm font-semibold text-white hover:bg-red-600 hover:border-red-600 hover:text-white transition-colors"
+              >
                 {t('sidebar_client_btn')}
-              </Link>
+              </button>
             </div>
           ) : (
             <div className="rounded-xl border border-red-900/30 bg-gradient-to-t from-red-900/20 to-transparent p-4">
@@ -369,6 +376,19 @@ const DashboardLayout = () => {
           <Outlet />
         </div>
       </main>
+
+      {showBecomeArtist && (
+        <BecomeArtistModal
+          isOpen={showBecomeArtist}
+          user={user}
+          onClose={() => setShowBecomeArtist(false)}
+          onSuccess={(profile) => {
+            updateUser(profile)
+            setShowBecomeArtist(false)
+            navigate('/dashboard/portfolio')
+          }}
+        />
+      )}
 
       {showLogoutModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">

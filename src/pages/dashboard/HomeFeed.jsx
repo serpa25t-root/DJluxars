@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../../context/AuthContext'
+import { hasRole } from '../../utils/roles'
 import { getFeedPosts, addPost, toggleLike, addComment } from '../../services/feedStore'
 import { Heart, MessageCircle, Send, Camera, Plus, X } from 'lucide-react'
 import Button from '../../components/common/Button'
@@ -114,7 +115,7 @@ const CommentInput = ({ onSubmit }) => {
 
 const HomeFeed = () => {
   const { user } = useAuth()
-  const isArtist = user?.role === 'artist'
+  const isArtist = hasRole(user, 'artist')
   const userId = String(user?.id || user?.email || 'me')
   const displayName = user?.first_name || user?.username || user?.email?.split('@')[0] || ''
   const avatarSrc = user?.avatar_url || user?.avatar || ''
